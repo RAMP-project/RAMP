@@ -20,9 +20,6 @@ E-mail: sylvain.quoilin@kuleuven.be  <br/>
 Politecnico di Milano, Italy <br/>
 E-mail: francesco.lombardi@polimi.it <br/>
 
-
-__F. Lombardi, S. Balderrama, S. Quoilin and E. Colombo__
-
 Please cite the original Journal publication if you use RAMP in your research:
 *F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo, Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model, Energy (2019), (in press)*
 
