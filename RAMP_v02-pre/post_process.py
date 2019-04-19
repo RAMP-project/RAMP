@@ -36,30 +36,10 @@ for n in Profile:
     plt.margins(y=0)
 plt.plot(np.arange(1440),Profile_avg,'#4169e1')
 plt.xticks([0,240,480,(60*12),(60*16),(60*20),(60*24)],[0,4,8,12,16,20,24])
-#plt.savefig('D:/OneDrive/Research/My Articles/Articolo MultiEnergyLoads/shower.eps', format='eps', dpi=1000)
+#plt.savefig('profiles.eps', format='eps', dpi=1000)
 plt.show()
 
-'''
-x = np.arange(0,1440,5)
-plt.figure(figsize=(10,5))
-for n in Profile:
-    plt.plot(np.arange(1440),n,'#b0c4de')
-    plt.xlabel('Time (hours)')
-    plt.ylabel('Power (W)')
-    plt.ylim(ymin=0)
-    plt.ylim(ymax=200000)
-    plt.margins(x=0)
-    plt.margins(y=0)
-#plt.plot(np.arange(1440),(Nov_minute),'r', label='Measured')
-#plt.plot(np.arange(1440),(January_minute*1000),'g')
-plt.plot(np.arange(1440),Profile_avg,'#4169e1',label='Coliseum+Cooking scenario')
-#plt.boxplot(Nov_days[0:1440:5], positions = x)
-plt.xticks([0,240,480,(60*12),(60*16),(60*20),(60*24)],[0,4,8,12,16,20,24])
-plt.legend(loc=2)
-plt.savefig('Coliseum+Cooking.svg', format='svg', dpi=1000)
 
-plt.show()
-'''
 #%% Export individual profiles
 '''
 for i in range (len(Profile)):
