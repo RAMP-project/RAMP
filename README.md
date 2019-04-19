@@ -32,7 +32,7 @@ The source-code is currently released as v.0.2-pre. This should be regarded as a
 
 Please consider that a newer, fully commented and more user friendly version is under development and should be released soon.
 
-The repository also hosts all the input files used to generate the profiles appearing in the abovementioned study, which may be also used as a reference example.
+The repository also hosts all the input files used to generate the profiles appearing in the abovementioned study, which may be also used as a reference example. To access the code version used for the Journal publication, select the tag "v.0.1-pre".
 
 ## License
 Copyright 2019 RAMP, contributors listed in **Authors**
