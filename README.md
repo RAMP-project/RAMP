@@ -1,5 +1,7 @@
-# RAMP
-This the repository of the open-source RAMP model for generating multi-energy loads profiles.
+<img src="https://github.com/SESAM-Polimi/RAMP/blob/master/RAMP%20logo.png" width="200">
+An open-source bottom-up stochastic model for generating multi-energy load profiles.
+
+---
 
 ## Authors
 The model has been developed by:
