@@ -26,7 +26,7 @@ Please cite the original Journal publication if you use RAMP in your research:
 ## Overview
 RAMP is a bottom-up stochastic model for the generation of high-resolution multi-energy profiles, conceived for application in contexts where only rough information about users' behaviour are obtainable.
 
-![Image of example load](https://github.com/SESAM-Polimi/RAMP/blob/master/Example%20output.png)
+<img src="https://github.com/SESAM-Polimi/RAMP/blob/master/Example%20output.png" width="300">
 
 The source-code is currently released as v.0.1-pre, the version adopted for the publication. The current v.0.1-pre should be regarded as a pre-release: it is not yeat accompained by a detailed documentation, but the Python code is fully commented in each line to allow a complete understanding of it.
 
