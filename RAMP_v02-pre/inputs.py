@@ -2,7 +2,7 @@
 
 #%% Definition of the inputs
 '''
-Input data definition (this is planned to be externalised in a separate script)
+Input data definition (this is planned to be externalised in a yaml or similar file)
 '''
 
 from core import User
