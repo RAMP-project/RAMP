@@ -34,6 +34,13 @@ Please consider that a newer, fully commented and more user friendly version is 
 
 The repository also hosts all the input files used to generate the profiles appearing in the abovementioned study, which may be also used as a reference example. To access the code version used for the Journal publication, select the tag "v.0.1-pre".
 
+## Requirements
+The model is developed in Python 3.6, and requires the following libraries:
+* numpy
+* matplotlib
+* math
+* random
+
 ## License
 Copyright 2019 RAMP, contributors listed in **Authors**
 
