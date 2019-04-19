@@ -28,7 +28,7 @@ RAMP is a bottom-up stochastic model for the generation of high-resolution multi
 
 <img src="https://github.com/SESAM-Polimi/RAMP/blob/master/Example%20output.png" width="300">
 
-The source-code is currently released as v.0.1-pre, the version adopted for the publication. The current v.0.1-pre should be regarded as a pre-release: it is not yeat accompained by a detailed documentation, but the Python code is fully commented in each line to allow a complete understanding of it.
+The source-code is currently released as v.0.2-pre. This should be regarded as a pre-release: it is not yeat accompained by a detailed documentation, but the Python code is fully commented in each line to allow a complete understanding of it.
 
 Please consider that a newer, fully commented and more user friendly version is under development and should be released soon.
 
