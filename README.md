@@ -1,4 +1,4 @@
-<img src="https://github.com/SESAM-Polimi/RAMP/blob/master/RAMP_logo_red.png" width="300">
+<img src="https://github.com/SESAM-Polimi/RAMP/blob/master/RAMP_logo_basic.png" width="300">
 
 *An open-source bottom-up stochastic model for generating multi-energy load profiles.*
 
