@@ -5,35 +5,34 @@
 Input data definition (this is planned to be externalised in a yaml or similar file)
 '''
 
-from core import User
+from core import User, np
 from initialise import User_list
 
-#%%User classes definition
+#%% Inputs definition
 
-HI = User("high income",11)
-User_list.append(HI)
+#Yearly behaviour pattern
+Year_behaviour = np.zeros(365)
+Year_behaviour[0:7] = [0,0,0,0,0,1,1]
+
+#User classes definition
+MONOU1 = User("Single-family house, User 1",1)
+User_list.append(MONOU1)
 
 #Appliances definition
 
-#High-Income
-HI_indoor_bulb = HI.Appliance(HI,6,7,2,120,0.2,10)
-HI_indoor_bulb.windows([1107,1440],[0,30],0.35)
+#Single Family House, User 1
+MONOU1_shower_P = np.ones(365)
+#MONOU1_shower_P[0:7] = [11300,10000,5000,2000,20000,11300,3000]
+MONOU1_shower_P = MONOU1_shower_P*11300
 
-HI_outdoor_bulb = HI.Appliance(HI,2,13,2,600,0.2,10)
-HI_outdoor_bulb.windows([0,330],[1107,1440],0.35)
+MONOU1_shower1 = MONOU1.Appliance(MONOU1,1,MONOU1_shower_P,2,10,0.5,2, wd_we_type = 0)
+MONOU1_shower1.windows([7*60,10*60],[18*60,21*60],0.33)
 
-HI_TV = HI.Appliance(HI,2,60,3,180,0.1,5)
-HI_TV.windows([720,900],[1107,1440],0.35,[0,60])
+MONOU1_shower2 = MONOU1.Appliance(MONOU1,1,MONOU1_shower_P,2,10,0.5,2, wd_we_type = 1)
+MONOU1_shower2.windows([12*60,16*60],[0,0],0.33)
 
-HI_Phone_charger = HI.Appliance(HI,5,2,2,300,0.2,5)
-HI_Phone_charger.windows([1110,1440],[0,30],0.35)
-
-HI_Freezer = HI.Appliance(HI,1,200,1,1440,0,30,'yes',3)
-HI_Freezer.windows([0,1440],[0,0])
-HI_Freezer.specific_cycle_1(200,20,5,10)
-HI_Freezer.specific_cycle_2(200,15,5,15)
-HI_Freezer.specific_cycle_3(200,10,5,20)
-HI_Freezer.cycle_behaviour([480,1200],[0,0],[300,479],[0,0],[0,299],[1201,1440])
-
-HI_Mixer = HI.Appliance(HI,1,50,3,30,0.1,1,occasional_use = 0.33)
-HI_Mixer.windows([420,480],[660,750],0.35,[1140,1200])
+#MONOU1_bathbasin = MONOU1.Appliance(MONOU1,1,np.ones(365)*2750,1,6,0.5,1)
+#MONOU1_bathbasin.windows([7*60,23*60],[0,0],0.05)
+#
+#MONOU1_kitchenbasin = MONOU1.Appliance(MONOU1,1,np.ones(365)*2750,1,6.5,0.5,1)
+#MONOU1_kitchenbasin.windows([7*60,23*60],[0,0],0.05)
