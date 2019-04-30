@@ -15,7 +15,7 @@ Year_behaviour = np.zeros(365)
 Year_behaviour[0:7] = [0,0,0,0,0,1,1]
 
 #User classes definition
-MONOU1 = User("Single-family house, User 1",1)
+MONOU1 = User("Single-family house, User 1",100)
 User_list.append(MONOU1)
 
 #Appliances definition
