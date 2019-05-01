@@ -9,7 +9,7 @@ RAMP is a bottom-up stochastic model for the generation of high-resolution multi
 
 <img src="https://github.com/SESAM-Polimi/RAMP/blob/master/Example%20output.png" width="300">
 
-The source-code is currently released as v.0.2-pre. This should be regarded as a pre-release: it is not yeat accompained by a detailed documentation, but the Python code is fully commented in each line to allow a complete understanding of it. Further details about the conceptual and mathematical model formulation are provided in the related Journal publication (https://doi.org/10.1016/j.energy.2019.04.097).
+The source-code is currently released as v.0.2-pre. This should be regarded as a pre-release: it is not yeat accompained by a detailed documentation, but the Python code is fully commented in each line to allow a complete understanding of it. Further details about the conceptual and mathematical model formulation are provided in the related Journal publication (https://doi.org/10.1016/j.energy.2019.04.097). 
 
 Please consider that a newer, fully commented and more user friendly version is under development and should be released soon.
 
@@ -21,6 +21,9 @@ The model is developed in Python 3.6, and requires the following libraries:
 * matplotlib
 * math
 * random
+
+## Quick start
+To get started, download the repository and simply run the "RAMP_run.py" script. The console will ask how many profiles (i.e. independent days) need to be simulated, and will provide the results based on the default inputs defined in "inputs.py". To change the inputs, just modify the latter file. Some guidance about the meaning of each input parameter is available in the "core.py" file, where the *User* and *Appliance* Python classes are defined and fully commented. 
 
 ## Authors
 The model has been developed by:
