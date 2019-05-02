@@ -23,4 +23,12 @@ under the License.
 
 #%% Import required libraries
 
+# Calls the stochastic process and saves the result ina list of stochastic profiles
+from stochastic_process import Stochastic_Process
+Profiles_list = Stochastic_Process()
+
+# Post-processes the results and generates plots
 from post_process import*
+Profiles_avg, Profiles_list_kW, Profiles_series = Profile_formatting(Profiles_list)
+Profile_series_plot(Profiles_series)
+
