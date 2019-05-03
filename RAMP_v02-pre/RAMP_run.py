@@ -2,7 +2,7 @@
 """
 Created on Fri Apr 19 14:35:00 2019
 This is the code for the open-source stochastic model for the generation of 
-multi-energy load profiles in off-grid areas, called RAMP, v.0.2-pre.
+multi-energy load profiles in off-grid areas, called RAMP, v.0.2.1-pre.
 
 @authors:
 - Francesco Lombardi, Politecnico di Milano
