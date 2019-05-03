@@ -12,7 +12,6 @@ at the inner level all the available appliances within each user class, with
 their own characteristics. Within the Appliance class, some other functions are
 created to define windows of use and, if needed, specific duty cycles
 '''
-User_list = []
 
 #Define the outer python class that represents 'User classes'
 class User():

@@ -10,8 +10,8 @@ from initialise import Initialise_model, Initialise_inputs
 #%% Core model stochastic script
 
 def Stochastic_Process():
-    Profile, num_profiles, User_list = Initialise_model()
-    peak_enlarg, mu_peak, s_peak, Year_behaviour = Initialise_inputs()
+    Profile, num_profiles = Initialise_model()
+    peak_enlarg, mu_peak, s_peak, Year_behaviour, User_list = Initialise_inputs()
     '''
     Calculation of the peak time range, which is used to discriminate between off-peak and on-peak coincident switch-on probability
     Calculates first the overall Peak Window (taking into account all User classes). 
