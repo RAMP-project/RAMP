@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 
 #%% Initialisation of a model instance
-from inputs import yearly_pattern, user_defined_inputs, User_list
+
+from inputs import yearly_pattern, user_defined_inputs
 
 def Initialise_model():
     '''
     The model is ready to be initialised
     '''
-    user_list = User_list
-    #User_list = [] #creates an empty list to store all the needed User classes
     num_profiles = int(input("please indicate the number of profiles to be generated: ")) #asks the user how many profiles (i.e. code runs) he wants
     print('Please wait...') 
     Profile = [] #creates an empty list to store the results of each code run, i.e. each stochastically generated profile
     
-    return (Profile, num_profiles, user_list)
+    return (Profile, num_profiles)
     
 def Initialise_inputs():
     Year_behaviour = yearly_pattern()
     user_defined_inputs()
+    user_list = user_defined_inputs()
     
     # Calibration parameters
     '''
@@ -28,5 +28,5 @@ def Initialise_inputs():
     mu_peak = 0.5 #median value of gaussian distribution [0,1] by which the number of coincident switch_ons is randomly selected
     s_peak = 1 #standard deviation (as percentage of the median value) of the gaussian distribution [0,1] above mentioned
 
-    return (peak_enlarg, mu_peak, s_peak, Year_behaviour)
+    return (peak_enlarg, mu_peak, s_peak, Year_behaviour, user_list)
 
