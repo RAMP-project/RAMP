@@ -12,6 +12,7 @@ at the inner level all the available appliances within each user class, with
 their own characteristics. Within the Appliance class, some other functions are
 created to define windows of use and, if needed, specific duty cycles
 '''
+User_list = []
 
 #Define the outer python class that represents 'User classes'
 class User():
@@ -25,10 +26,9 @@ class User():
 #Define the inner class for modelling user's appliances within the correspoding user class
     class Appliance():
     
-        def __init__(self,user, n = 1, P = 0, w = 1, t = 0, r_t = 0, c = 0, fixed = 'no', fixed_cycle = 0, occasional_use = 1, flat = 'no', thermal_P_var = 0, pref_index = 0):
+        def __init__(self,user, n = 1, P = 0, w = 1, t = 0, r_t = 0, c = 0, fixed = 'no', fixed_cycle = 0, occasional_use = 1, flat = 'no', thermal_P_var = 0, pref_index = 0, wd_we_type = 0, P_series = False):
             self.user = user #user to which the appliance is bounded
             self.number = n #number of appliances of the specified kind
-            self.POWER = P #nominal power of appliances of the specified kind
             self.num_windows = w #number of functioning windows to be considered
             self.func_time = t #total time the appliance is on during the day
             self.r_t = r_t #percentage of total time of use that is subject to random variability
@@ -38,8 +38,13 @@ class User():
             self.occasional_use = occasional_use #probability that the appliance is always (i.e. everyday) included in the mix of appliances that the user actually switches-on during the day
             self.flat = flat #allows to model appliances that are not subject to any kind of random variability, such as public lighting
             self.Thermal_P_var = thermal_P_var #allows to randomly variate the App power within a range
-            self.Pref_index = pref_index
-        
+            self.Pref_index = pref_index #defines preference index for association with random User daily preference behaviour
+            self.wd_we = wd_we_type #defines if the App is associated with weekdays or weekends
+            if P_series == False and isinstance(P, np.ndarray) == False: #checks if the user defined a timeseries for P
+                self.POWER = np.ones(365)*P #if no timeseries is given, the nominal power of appliances of the specified kind is kept for each day
+            else:
+                self.POWER = P #if a timeseries is given, the P will vary in each day accordingly
+           
         def windows(self, w1 = np.array([0,0]), w2 = np.array([0,0]),r_w = 0, w3 = np.array([0,0])):    
             self.window_1 = w1 #array of start and ending time for window of use #1
             self.window_2 = w2 #array of start and ending time for window of use #2
