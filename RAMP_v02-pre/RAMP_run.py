@@ -21,12 +21,15 @@ See the License for the specific language governing permissions and limitations
 under the License.
 """
 
-#%% Import required libraries
+#%% Import required modules
 
-# Calls the stochastic process and saves the result ina list of stochastic profiles
 from stochastic_process import Stochastic_Process
 from post_process import*
 
+# Calls the stochastic process and saves the result in a list of stochastic profiles
+# By default, the process runs for only 1 input file ("input_file_1"), but multiple files
+# can be run in sequence enlarging the iteration range and naming further input files with
+# progressive numbering
 for j in range(1,2):
     Profiles_list = Stochastic_Process(j)
 
