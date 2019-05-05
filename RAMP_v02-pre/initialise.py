@@ -2,7 +2,29 @@
 
 #%% Initialisation of a model instance
 
-from inputs import yearly_pattern, user_defined_inputs
+from core import np
+import importlib
+
+
+def yearly_pattern():
+    '''
+    Definition of a yearly pattern of weekends and weekdays, in case some appliances have specific wd/we behaviour
+    '''
+    #Yearly behaviour pattern
+    Year_behaviour = np.zeros(365)
+    Year_behaviour[5:365:7] = 1
+    Year_behaviour[6:365:7] = 1
+    
+    return(Year_behaviour)
+
+
+def user_defined_inputs(j):
+    '''
+    Imports an input file and returns a processed User_list
+    '''
+    User_list = getattr((importlib.import_module('input_file_%d' %j)), 'User_list')
+    return(User_list)
+
 
 def Initialise_model():
     '''
@@ -14,10 +36,10 @@ def Initialise_model():
     
     return (Profile, num_profiles)
     
-def Initialise_inputs():
+def Initialise_inputs(j):
     Year_behaviour = yearly_pattern()
-    user_defined_inputs()
-    user_list = user_defined_inputs()
+    user_defined_inputs(j)
+    user_list = user_defined_inputs(j)
     
     # Calibration parameters
     '''
