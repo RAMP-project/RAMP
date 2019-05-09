@@ -18,11 +18,13 @@ def yearly_pattern():
     return(Year_behaviour)
 
 
-def user_defined_inputs(j):
+def user_defined_inputs(j,k):
     '''
     Imports an input file and returns a processed User_list
     '''
-    User_list = getattr((importlib.import_module('input_file_%d' %j)), 'User_list')
+    input_file = getattr((importlib.import_module('input_file_%d' %j)), 'input_file')
+    User_list = input_file(k)
+    #User_list = getattr((importlib.import_module('input_file_%d' %j)), 'User_list')
     return(User_list)
 
 
@@ -30,16 +32,16 @@ def Initialise_model():
     '''
     The model is ready to be initialised
     '''
-    num_profiles = int(input("please indicate the number of profiles to be generated: ")) #asks the user how many profiles (i.e. code runs) he wants
+    num_profiles = 1 #int(input("please indicate the number of profiles to be generated: ")) #asks the user how many profiles (i.e. code runs) he wants
     print('Please wait...') 
     Profile = [] #creates an empty list to store the results of each code run, i.e. each stochastically generated profile
-    
+        
     return (Profile, num_profiles)
     
-def Initialise_inputs(j):
+def Initialise_inputs(j,k):
     Year_behaviour = yearly_pattern()
-    user_defined_inputs(j)
-    user_list = user_defined_inputs(j)
+    user_defined_inputs(j,k)
+    user_list = user_defined_inputs(j,k)
     
     # Calibration parameters
     '''

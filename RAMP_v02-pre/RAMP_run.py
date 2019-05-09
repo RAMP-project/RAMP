@@ -30,10 +30,11 @@ from post_process import*
 # By default, the process runs for only 1 input file ("input_file_1"), but multiple files
 # can be run in sequence enlarging the iteration range and naming further input files with
 # progressive numbering
-for j in range(1,2):
-    Profiles_list = Stochastic_Process(j)
-
+for j in range(1,3):
+    for k in range(1,3):
+        Profiles_list = Stochastic_Process(j,k)
+        Profiles_avg, Profiles_list_kW, Profiles_series = Profile_formatting(Profiles_list)    
+        export_series(Profiles_series,j,k)
 # Post-processes the results and generates plots
-    Profiles_avg, Profiles_list_kW, Profiles_series = Profile_formatting(Profiles_list)
     Profile_series_plot(Profiles_series)
 
