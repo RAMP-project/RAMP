@@ -9,6 +9,13 @@ Input data definition
 from core import User, np
 User_list = []
 
+'''
+This example input file represents an whole village-scale community,
+adapted from the data used for the Journal publication. It should provide a 
+complete guidance to most of the possibilities ensured by RAMP for inputs definition,
+including specific modular duty cycles and cooking cycles. 
+For examples related to "thermal loads", see the "input_file_2".
+'''
 
 #Create new user classes
 HI = User("high income",11,3)
@@ -35,9 +42,6 @@ User_list.append(Public_lighting)
 Church = User("church",3)
 User_list.append(Church)
 
-Coliseum = User("coliseum",1)
-User_list.append(Coliseum)
-
 #Create new appliances
 
 #Church
@@ -56,11 +60,6 @@ Pub_lights.windows([0,336],[1110,1440],0.2)
 
 Pub_lights_2 = Public_lighting.Appliance(Public_lighting,25,150,2,310,0.1,300, 'yes', flat = 'yes')
 Pub_lights_2.windows([0,336],[1110,1440],0.2)
-
-
-#Coliseum
-Col_lights = Coliseum.Appliance(Coliseum,12,400,1,140,0.1,100, 'yes', occasional_use = 0.25)
-Col_lights.windows([19*60,1440],[0,0],0.1)
 
 
 #High-Income
