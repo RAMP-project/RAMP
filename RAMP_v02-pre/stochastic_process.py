@@ -97,9 +97,9 @@ def Stochastic_Process(j):
                         App.daily_use[rand_window_3[0]:rand_window_3[1]] = np.full(np.diff(rand_window_3),0.001)
                     App.daily_use_masked = np.zeros_like(ma.masked_not_equal(App.daily_use,0.001))
                   
-                    App.power = App.POWER*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                                        
-                    #random variability is also applied to the total functioning time and to the duration of the duty cycles, if they have been specified
+                    App.power = App.POWER
+                    
+                    #random variability is applied to the total functioning time and to the duration of the duty cycles, if they have been specified
                     random_var_t = random.uniform((1-App.r_t),(1+App.r_t))
                     if App.activate == 1:
                         App.p_11 = App.P_11*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
@@ -228,8 +228,8 @@ def Stochastic_Process(j):
                                             np.put(App.daily_use,indexes_adj,(random_cycle3*coincidence))
                                             np.put(App.daily_use_masked,indexes_adj,(random_cycle3*coincidence),mode='clip')
                                     else: #if no duty cycles are specififed, a regular switch_on event is modelled
-                                        np.put(App.daily_use,indexes_adj,(App.power*coincidence))
-                                        np.put(App.daily_use_masked,indexes_adj,(App.power*coincidence),mode='clip')
+                                        np.put(App.daily_use,indexes_adj,(App.power*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var)))*coincidence)) #randomises also the App Power if Thermal_P_var is on
+                                        np.put(App.daily_use_masked,indexes_adj,(App.power*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var)))*coincidence),mode='clip')
                                     App.daily_use_masked = np.zeros_like(ma.masked_greater_equal(App.daily_use_masked,0.001)) #updates the mask excluding the current switch_on event to identify the free_spots for the next iteration
                                     tot_time = (tot_time - indexes.size) + indexes_adj.size #updates the total time correcting the previous value
                                     break #exit cycle and go to next App
@@ -261,8 +261,8 @@ def Stochastic_Process(j):
                                             np.put(App.daily_use,indexes,(random_cycle3*coincidence))
                                             np.put(App.daily_use_masked,indexes,(random_cycle3*coincidence),mode='clip')
                                     else:
-                                        np.put(App.daily_use,indexes,(App.power*coincidence))
-                                        np.put(App.daily_use_masked,indexes,(App.power*coincidence),mode='clip')
+                                        np.put(App.daily_use,indexes,(App.power*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var)))*coincidence))
+                                        np.put(App.daily_use_masked,indexes,(App.power*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var)))*coincidence),mode='clip')
                                     App.daily_use_masked = np.zeros_like(ma.masked_greater_equal(App.daily_use_masked,0.001))
                                     tot_time = tot_time #no correction applied to previously calculated value
                                                     

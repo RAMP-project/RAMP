@@ -25,7 +25,7 @@ class User():
 #Define the inner class for modelling user's appliances within the correspoding user class
     class Appliance():
     
-        def __init__(self,user, n = 1, P = 0, w = 1, t = 0, r_t = 0, c = 0, fixed = 'no', fixed_cycle = 0, occasional_use = 1, flat = 'no', thermal_P_var = 0, pref_index = 0, wd_we_type = 0):
+        def __init__(self,user, n = 1, P = 0, w = 1, t = 0, r_t = 0, c = 1, fixed = 'no', fixed_cycle = 0, occasional_use = 1, flat = 'no', thermal_P_var = 0, pref_index = 0, wd_we_type = 0):
             self.user = user #user to which the appliance is bounded
             self.number = n #number of appliances of the specified kind
             self.POWER = P #nominal Power of the appliance
