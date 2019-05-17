@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Oct 26 14:59:08 2018
-
-@author: stevo
-"""
 
 #%% Definition of the inputs
 '''
-Input data definition (this is planned to be externalised in a separate script)
+Input data definition 
 '''
 
 
