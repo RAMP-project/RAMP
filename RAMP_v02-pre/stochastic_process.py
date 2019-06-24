@@ -60,10 +60,14 @@ def Stochastic_Process(j):
                     if App.Pref_index == 0:
                         pass
                     else:
-                        if rand_daily_pref == App.Pref_index: #evaluates if occasional use happens or not
+                        if rand_daily_pref == App.Pref_index: #evaluates if daily preference coincides with the randomised daily preference number
                             pass
                         else:
                             continue
+                    if App.wd_we == Year_behaviour[prof_i]: #checks if the app is allowed in the given yearly behaviour pattern
+                        pass
+                    else:
+                        continue
 
                     #recalculate windows start and ending times randomly, based on the inputs
                     rand_window_1 = np.array([int(random.uniform((App.window_1[0]-App.random_var_1),(App.window_1[0]+App.random_var_1))),int(random.uniform((App.window_1[1]-App.random_var_1),(App.window_1[1]+App.random_var_1)))])
@@ -97,7 +101,7 @@ def Stochastic_Process(j):
                         App.daily_use[rand_window_3[0]:rand_window_3[1]] = np.full(np.diff(rand_window_3),0.001)
                     App.daily_use_masked = np.zeros_like(ma.masked_not_equal(App.daily_use,0.001))
                   
-                    App.power = App.POWER
+                    App.power = App.POWER[prof_i]
                     
                     #random variability is applied to the total functioning time and to the duration of the duty cycles, if they have been specified
                     random_var_t = random.uniform((1-App.r_t),(1+App.r_t))
@@ -118,7 +122,7 @@ def Stochastic_Process(j):
                     elif App.activate == 3:
                         App.p_11 = App.P_11*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
                         App.p_12 = App.P_12*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                        App.p_21 = App.P_21*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                        App.p_21 = App.P_12*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
                         App.p_22 = App.P_22*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
                         App.p_31 = App.P_31*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
                         App.p_32 = App.P_32*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
