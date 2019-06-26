@@ -32,6 +32,7 @@ from post_process import*
 # and naming further input files with progressive numbering
 for j in range(2,3):
     Profiles_list = Stochastic_Process(j)
+    export_series(Profiles_series,j)
 
 # Post-processes the results and generates plots
     Profiles_avg, Profiles_list_kW, Profiles_series = Profile_formatting(Profiles_list)
