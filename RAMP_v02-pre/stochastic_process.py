@@ -64,7 +64,7 @@ def Stochastic_Process(j):
                             pass
                         else:
                             continue
-                    if App.wd_we == Year_behaviour[prof_i]: #checks if the app is allowed in the given yearly behaviour pattern
+                    if App.wd_we == Year_behaviour[prof_i] or App.wd_we == 2 : #checks if the app is allowed in the given yearly behaviour pattern
                         pass
                     else:
                         continue
