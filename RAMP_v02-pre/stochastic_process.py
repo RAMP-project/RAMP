@@ -90,9 +90,9 @@ def Stochastic_Process(j):
     
                     #redefines functioning windows based on the previous randomisation of the boundaries
                     if App.flat == 'yes': #if the app is "flat" the code stops right after filling the newly created windows without applying any further stochasticity
-                        App.daily_use[rand_window_1[0]:rand_window_1[1]] = np.full(np.diff(rand_window_1),App.POWER*App.number)
-                        App.daily_use[rand_window_2[0]:rand_window_2[1]] = np.full(np.diff(rand_window_2),App.POWER*App.number)
-                        App.daily_use[rand_window_3[0]:rand_window_3[1]] = np.full(np.diff(rand_window_3),App.POWER*App.number)
+                        App.daily_use[rand_window_1[0]:rand_window_1[1]] = np.full(np.diff(rand_window_1),App.POWER[prof_i]*App.number)
+                        App.daily_use[rand_window_2[0]:rand_window_2[1]] = np.full(np.diff(rand_window_2),App.POWER[prof_i]*App.number)
+                        App.daily_use[rand_window_3[0]:rand_window_3[1]] = np.full(np.diff(rand_window_3),App.POWER[prof_i]*App.number)
                         Us.load = Us.load + App.daily_use
                         continue
                     else: #otherwise, for "non-flat" apps it puts a mask on the newly defined windows and continues    
