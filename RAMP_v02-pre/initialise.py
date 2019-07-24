@@ -14,7 +14,7 @@ def yearly_pattern():
     Year_behaviour = np.zeros(365)
     Year_behaviour[5:365:7] = 1
     Year_behaviour[6:365:7] = 1
-    
+
     return(Year_behaviour)
 
 
@@ -30,17 +30,21 @@ def Initialise_model():
     '''
     The model is ready to be initialised
     '''
-    num_profiles = int(input("please indicate the number of profiles to be generated: ")) #asks the user how many profiles (i.e. code runs) he wants
-    print('Please wait...') 
-    Profile = [] #creates an empty list to store the results of each code run, i.e. each stochastically generated profile
-    
-    return (Profile, num_profiles)
-    
+    num_years = int(input("please indicate the number of years to be considered: ")) #asks the user how many years of daily profiles (s)he wants
+    if num_years == 1:
+        num_profiles = int(input("please indicate the number of profiles to be generated: ")) #asks the user how many profiles (i.e. code runs) (s)he wants
+        Profile = [] #creates an empty list to store the results of each code run, i.e. each stochastically generated profile
+    else:
+        num_profiles = 365
+        Profile = [] #creates an empty list to store the results of each yearly run of 365 daily profiles
+    print('Please wait...')
+    return (Profile, num_profiles, num_years)
+
 def Initialise_inputs(j):
     Year_behaviour = yearly_pattern()
     user_defined_inputs(j)
     user_list = user_defined_inputs(j)
-    
+
     # Calibration parameters
     '''
     Calibration parameters. These can be changed in case the user has some real data against which the model can be calibrated

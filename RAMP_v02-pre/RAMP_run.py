@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Apr 19 14:35:00 2019
-This is the code for the open-source stochastic model for the generation of 
+This is the code for the open-source stochastic model for the generation of
 multi-energy load profiles in off-grid areas, called RAMP, v.0.2.1-pre.
 
 @authors:
@@ -28,17 +28,17 @@ from post_process import*
 
 # Calls the stochastic process and saves the result in a list of stochastic profiles
 # In this default example, the model runs for 2 input files ("input_file_1", "input_file_2"),
-# but single or multiple files can be run restricting or enlarging the iteration range 
+# but single or multiple files can be run restricting or enlarging the iteration range
 # and naming further input files with progressive numbering
-for j in range(2,3):
+for j in range(3,4):
     Profiles_list = Stochastic_Process(j)
-    
+
 # Post-processes the results and generates plots
     Profiles_avg, Profiles_list_kW, Profiles_series = Profile_formatting(Profiles_list)
     Profile_series_plot(Profiles_series) #by default, profiles are plotted as a series
-    
+
     export_series(Profiles_series,j)
 
-    if len(Profiles_list) > 1: #if more than one daily profile is generated, also cloud plots are shown
-        Profile_cloud_plot(Profiles_list, Profiles_avg)
+#    if len(Profiles_list) > 1: #if more than one daily profile is generated, also cloud plots are shown
+#        Profile_cloud_plot(Profiles_list, Profiles_avg)
 
