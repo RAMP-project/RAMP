@@ -3,6 +3,7 @@
 #%% Import required libraries
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 #%% Post-processing
 '''
@@ -60,3 +61,9 @@ def Profile_series_plot(stoch_profiles_series):
 for i in range (len(Profile)):
     np.save('p0%d.npy' % (i), Profile[i])
 '''
+
+# Export Profiles
+
+def export_series(stoch_profiles_series, j):
+    series_frame = pd.DataFrame(stoch_profiles_series)
+    series_frame.to_csv('results/output_file_%d.csv' % (j))
