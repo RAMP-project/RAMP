@@ -5,7 +5,7 @@
 ---
 
 ## Overview
-RAMP is a bottom-up stochastic model for the generation of high-resolution multi-energy profiles, conceived for application in contexts where only rough information about users' behaviour are obtainable.
+RAMP is a bottom-up stochastic model for the generation of high-resolution multi-energy profiles, conceived for application in contexts where only rough information about users' behaviour are obtainable. Those may range from remote villages to whole countries.
 
 <img src="https://github.com/SESAM-Polimi/RAMP/blob/master/Example%20output.png" width="300">
 
