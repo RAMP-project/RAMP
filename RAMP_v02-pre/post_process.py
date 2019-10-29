@@ -64,6 +64,6 @@ for i in range (len(Profile)):
 
 # Export Profiles
 
-def export_series(stoch_profiles_series, j):
+def export_series(stoch_profiles_series, j, arch):
     series_frame = pd.DataFrame(stoch_profiles_series)
-    series_frame.to_csv('results/output_file_%d.csv' % (j))
+    series_frame.to_csv('results/output_file_%d_U%d.csv' % (j,arch))

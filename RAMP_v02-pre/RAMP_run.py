@@ -25,20 +25,35 @@ under the License.
 
 from stochastic_process import Stochastic_Process
 from post_process import*
+import time
 
-# Calls the stochastic process and saves the result in a list of stochastic profiles
-# In this default example, the model runs for 2 input files ("input_file_1", "input_file_2"),
-# but single or multiple files can be run restricting or enlarging the iteration range 
-# and naming further input files with progressive numbering
-for j in range(2,3):
-    Profiles_list = Stochastic_Process(j)
-    
-# Post-processes the results and generates plots
-    Profiles_avg, Profiles_list_kW, Profiles_series = Profile_formatting(Profiles_list)
-    Profile_series_plot(Profiles_series) #by default, profiles are plotted as a series
-    
-    export_series(Profiles_series,j)
+provinces = pd.read_csv('time_series/gw_temp_province.csv', sep=';', index_col=0).columns.to_list()
+archetypes = pd.read_csv('time_series/building_archetypes.csv', sep=';', index_col=0)
+archetypes_ratio = {'single_family': 1, 'double_family': 1.2 , 'multi_family': 1.6 , 'apartment_block': 2.1 }
+n_dict = {'U1': 0.253, 'U2': 0.263, 'U3': 0.484}
+        
+profiles_dict = {}
 
-    if len(Profiles_list) > 1: #if more than one daily profile is generated, also cloud plots are shown
-        Profile_cloud_plot(Profiles_list, Profiles_avg)
+for prov in [provinces[0]]:
+    profiles_dict[prov] = {}
+    for arch in [archetypes[prov].index[0]]:
+        profiles_dict[prov][arch] = {}
+        n = archetypes[prov].loc[arch]/1e3
+        for us in n_dict.keys():
+            profiles_dict[prov][arch][us] = {}
+            for k in range(int(round(n_dict[us]*n))):
+                for j in range(1,2):
+                        seconds = time.time()
+                        Profiles_list = Stochastic_Process(j,archetypes_ratio[arch],prov)
+                        Profiles_avg, Profiles_list_kW, Profiles_series = Profile_formatting(Profiles_list)
+                        profiles_dict[prov][arch][us]['%d' %k] = Profiles_series
+                        seconds = time.time() -seconds
+        # Post-processes the results and generates plots
+        
+#        Profile_series_plot(Profiles_series) #by default, profiles are plotted as a series
+        
+#        export_series(Profiles_series,j,arch)
+
+#    if len(Profiles_list) > 1: #if more than one daily profile is generated, also cloud plots are shown
+#        Profile_cloud_plot(Profiles_list, Profiles_avg)
 
