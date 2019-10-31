@@ -38,7 +38,7 @@ for prov in [provinces[0]]:
     profiles_dict[prov] = {}
     for arch in [archetypes[prov].index[0]]:
         profiles_dict[prov][arch] = {}
-        n = archetypes[prov].loc[arch]/1e3
+        n = archetypes[prov].loc[arch]/1e2
         for us in n_dict.keys():
             profiles_dict[prov][arch][us] = {}
             for k in range(int(round(n_dict[us]*n))):
