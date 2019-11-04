@@ -31,14 +31,16 @@ provinces = pd.read_csv('time_series/gw_temp_province.csv', sep=';', index_col=0
 archetypes = pd.read_csv('time_series/building_archetypes.csv', sep=';', index_col=0)
 archetypes_ratio = {'single_family': 1, 'double_family': 1.2 , 'multi_family': 1.6 , 'apartment_block': 2.1 }
 n_dict = {'U1': 0.253, 'U2': 0.263, 'U3': 0.484}
+
+#provinces_lomb = 
         
 profiles_dict = {}
 
-for prov in [provinces[0]]:
+for prov in provinces:
     profiles_dict[prov] = {}
-    for arch in [archetypes[prov].index[0]]:
+    for arch in archetypes[prov].index:
         profiles_dict[prov][arch] = {}
-        n = archetypes[prov].loc[arch]/1e2
+        n = archetypes[prov].loc[arch]/1e3
         for us in n_dict.keys():
             profiles_dict[prov][arch][us] = {}
             for k in range(int(round(n_dict[us]*n))):
