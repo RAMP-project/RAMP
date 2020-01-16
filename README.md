@@ -14,6 +14,7 @@ The source-code is currently released as v.0.2.1-pre. This should be regarded as
 Please consider that a newer, fully commented and more user friendly version is under development and should be released soon.
 
 The repository also hosts all the input files used to generate the profiles appearing in the abovementioned study, which may be also used as a reference example. To access the code version used for the Journal publication, select the tag "v.0.1-pre".
+An up-to-date list of all publications featuring RAMP, for a variety of applications, is available here.
 
 ## Requirements
 The model is developed in Python 3.6, and requires the following libraries:
