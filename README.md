@@ -7,14 +7,14 @@
 ## Overview
 RAMP is a bottom-up stochastic model for the generation of high-resolution multi-energy profiles, conceived for application in contexts where only rough information about users' behaviour are obtainable. Those may range from remote villages to whole countries.
 
-<img src="https://github.com/SESAM-Polimi/RAMP/blob/master/Example%20output.png" width="300">
+<img src="https://github.com/SESAM-Polimi/RAMP/blob/master/Example_output.jpg" width="700">
 
 The source-code is currently released as v.0.2.1-pre. This should be regarded as a pre-release: it is not yeat accompained by a detailed documentation, but the Python code is fully commented in each line to allow a complete understanding of it. Further details about the conceptual and mathematical model formulation are provided in the related Journal publication (https://doi.org/10.1016/j.energy.2019.04.097). 
 
 Please consider that a newer, fully commented and more user friendly version is under development and should be released soon.
 
 The repository also hosts all the input files used to generate the profiles appearing in the abovementioned study, which may be also used as a reference example. To access the code version used for the Journal publication, select the tag "v.0.1-pre".
-An up-to-date list of all publications featuring RAMP, for a variety of applications, is available here.
+An up-to-date list of all publications featuring RAMP, for a variety of applications, is available [here](https://github.com/SESAM-Polimi/RAMP/blob/master/pubs_list.md).
 
 ## Requirements
 The model is developed in Python 3.6, and requires the following libraries:
