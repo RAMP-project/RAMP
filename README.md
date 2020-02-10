@@ -13,7 +13,7 @@ The source-code is currently released as v.0.2.1-pre. This should be regarded as
 
 Please consider that a newer, fully commented and more user friendly version is under development and should be released soon.
 
-The repository also hosts all the input files used to generate the profiles appearing in the abovementioned study, which may be also used as a reference example. To access the code version used for the Journal publication, select the tag "v.0.1-pre".
+The "dhw_national" repository hosts all the input files used to generate the profiles appearing in the conference paper "*Francesco Lombardi, Sylvain Quoilin, Emanuela Colombo, Modelling distributed Power-to-Heat technologies as a flexibility option for smart heat-electricity integration, ECOS Conference 2020"*. 
 
 ## Requirements
 The model is developed in Python 3.6, and requires the following libraries:
@@ -21,9 +21,6 @@ The model is developed in Python 3.6, and requires the following libraries:
 * matplotlib
 * math
 * random
-
-## Quick start
-To get started, download the repository and simply run the "RAMP_run.py" script. The console will ask how many profiles (i.e. independent days) need to be simulated, and will provide the results based on the default inputs defined in "input_file_1.py" and "input_file_2". To change the inputs, just modify the latter files. Some guidance about the meaning of each input parameter is available in the "core.py" file, where the *User* and *Appliance* Python classes are defined and fully commented. 
 
 ## Authors
 The model has been developed by:
