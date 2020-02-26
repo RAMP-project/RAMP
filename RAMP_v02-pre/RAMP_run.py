@@ -23,22 +23,47 @@ under the License.
 
 #%% Import required modules
 
+import pandas as pd
 from stochastic_process import Stochastic_Process
+from stochastic_process_mobility import Stochastic_Process_Mobility
+
 from post_process import*
 
 # Calls the stochastic process and saves the result in a list of stochastic profiles
 # In this default example, the model runs for 2 input files ("input_file_1", "input_file_2"),
 # but single or multiple files can be run restricting or enlarging the iteration range 
 # and naming further input files with progressive numbering
-for j in range(2,3):
-    Profiles_list = Stochastic_Process(j)
-    
+
+mobility = 'True' # 'True' or 'False' to select the mobility version of the stochastic process
+
+# Define country and year to be considered when generating profiles
+country = 'IT'
+#NOTE: for the time being only 2016 can be 
+# simulated with temperature correction
+year = 2016
+
+#inputfile for the temperature profile: 
+inputfile = r"TimeSeries\temp.csv"
+
+# if mobility == 'False':
+#     Profiles_list = Stochastic_Process(j)
+if mobility == 'True':
+    Profiles_list = Stochastic_Process_Mobility(country, year)
+
 # Post-processes the results and generates plots
     Profiles_avg, Profiles_list_kW, Profiles_series = Profile_formatting(Profiles_list)
     Profile_series_plot(Profiles_series) #by default, profiles are plotted as a series
     
-    export_series(Profiles_series,j)
+    export_series(Profiles_series, country)
+    
+    Profiles_df = Profile_dataframe(Profiles_series, year) #Create a dataframe with the profile
+    
+    temp_profile = temp_import(country, year, inputfile = inputfile) #Import temperature profiles, change the default path to the custom one
+    
+    Profiles_temp = Profile_temp(Profiles_df, year = year, temp_profile = temp_profile)
 
+    Profiles_utc = Time_correction(Profiles_temp, country) 
+    
     if len(Profiles_list) > 1: #if more than one daily profile is generated, also cloud plots are shown
         Profile_cloud_plot(Profiles_list, Profiles_avg)
-
+        

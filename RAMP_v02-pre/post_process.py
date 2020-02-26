@@ -4,6 +4,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pytz
 
 #%% Post-processing
 '''
@@ -41,7 +42,6 @@ def Profile_cloud_plot(stoch_profiles,stoch_profiles_avg):
     #plt.savefig('profiles.eps', format='eps', dpi=1000)
     plt.show()
 
-
 def Profile_series_plot(stoch_profiles_series):
     #x = np.arange(0,1440,5)
     plt.figure(figsize=(10,5))
@@ -56,6 +56,69 @@ def Profile_series_plot(stoch_profiles_series):
     #plt.savefig('profiles.eps', format='eps', dpi=1000)
     plt.show()
 
+def Profile_dataframe(Profiles_series, year):
+    
+    minutes = pd.DataFrame(pd.date_range(start=str(year) + '-01-01', periods = len(Profiles_series), freq='min'))
+    
+    Profiles_df = pd.DataFrame(Profiles_series, columns = ['Load Profile'])
+    Profiles_df.set_index(minutes.iloc[:,0], inplace = True)
+   
+    return Profiles_df
+
+def temp_import(country, year, inputfile = r"TimeSeries\temp.csv"):
+      
+    temp_profile = pd.read_csv(inputfile, index_col = 0)
+    temp_profile = pd.DataFrame(temp_profile[country]) 
+    temp_profile = temp_profile.loc[temp_profile.index.str.contains(str(year))]
+
+    return temp_profile
+
+def Profile_temp(Profiles_df, temp_profile,  year = 2016):
+    
+    hours = pd.DataFrame(pd.date_range(start=str(year) + '-01-01', end=str(year) + '-12-31 23:00:00', freq='h'))
+    temp_profile.set_index(hours.iloc[:,0], inplace = True)
+
+    Profiles_df_hour = Profiles_df.resample('H').sum()
+    
+    temp_profile = temp_profile.loc[Profiles_df_hour.index]
+    
+    temp_coeff = pd.DataFrame(1, index = Profiles_df_hour.index, columns = temp_profile.columns)
+    
+    temp_coeff[temp_profile < 15] = 1.12 - 0.01*temp_profile[temp_profile < 15]
+    temp_coeff[temp_profile > 20] = 0.63 + 0.02*temp_profile[temp_profile > 20]
+    
+    Profiles_temp = Profiles_df_hour * temp_coeff.values
+    
+    return Profiles_temp
+
+# Code from when2heat for localize country in timezone
+    
+def localize(df, country, ambiguous=None):
+
+    # The exceptions below correct for daylight saving time
+    try:
+        df.index = df.index.tz_localize(pytz.country_timezones[country][0], ambiguous=ambiguous)
+        return df
+
+    # Delete values that do not exist because of daylight saving time
+    except pytz.NonExistentTimeError as err:
+        return localize(df.loc[df.index != err.args[0], ], country)
+
+    # Duplicate values that exist twice because of daylight saving time
+    except pytz.AmbiguousTimeError as err:
+        idx = pd.Timestamp(err.args[0].split("'")[1])
+        unambiguous_df = localize(df.loc[df.index != idx, ], country)
+        ambiguous_df = localize(df.loc[[idx, idx], ], country, ambiguous=[True, False])
+        return unambiguous_df.append(ambiguous_df).sort_index()
+
+def Time_correction(df, country):
+    
+    df_country = localize(df, country, ambiguous=None)
+    
+    Profiles_utc = df_country.tz_convert('utc')
+    
+    return Profiles_utc
+
 #%% Export individual profiles
 '''
 for i in range (len(Profile)):
@@ -64,6 +127,6 @@ for i in range (len(Profile)):
 
 # Export Profiles
 
-def export_series(stoch_profiles_series, j):
+def export_series(stoch_profiles_series, country):
     series_frame = pd.DataFrame(stoch_profiles_series)
-    series_frame.to_csv('results/output_file_%d.csv' % (j))
+    series_frame.to_csv('results/%s.csv' % (country))

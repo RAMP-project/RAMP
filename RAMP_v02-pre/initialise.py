@@ -4,25 +4,56 @@
 
 from core import np
 import importlib
+import datetime
 
+import pandas as pd
 
-def yearly_pattern():
+# Import holidays package including Latvia and Romania (edited version)
+import sys,os
+sys.path.append(os.path.abspath(r'C:\Users\Andrea\GitHub\python-holidays'))
+import holidays 
+
+def yearly_pattern(country, year, vacation = False):
     '''
     Definition of a yearly pattern of weekends and weekdays, in case some appliances have specific wd/we behaviour
     '''
     #Yearly behaviour pattern
+    first_day = datetime.date(year, 1, 1).strftime("%A")
     Year_behaviour = np.zeros(365)
-    Year_behaviour[5:365:7] = 1
-    Year_behaviour[6:365:7] = 1
     
+    dict_year = {'Monday'   : [5, 6], 
+                 'Tuesday'  : [4, 5], 
+                 'Wednesday': [3, 4],
+                 'Thursday' : [2, 3], 
+                 'Friday'   : [1, 2], 
+                 'Saturday' : [0, 1], 
+                 'Sunday'   : [0, 6]}
+      
+    for d in dict_year.keys():
+        if first_day == d:
+            Year_behaviour[dict_year[d][0]:365:7] = 1
+            Year_behaviour[dict_year[d][1]:365:7] = 1
+    
+        # Adding Vacation days to the Yearly pattern
+            
+    if country == 'EL': 
+        country = 'GR'
+    elif country == 'FR':
+        country = 'FRA'
+        
+    holidays_country = list(holidays.CountryHoliday(country, years = year).keys())
+    
+    for i in range(len(holidays_country)):
+        day_of_year = list(holidays.IT(years = 2014).keys())[i].timetuple().tm_yday
+        Year_behaviour[day_of_year-1] = 1
+        
     return(Year_behaviour)
 
-
-def user_defined_inputs(j):
+def user_defined_inputs(country):
     '''
     Imports an input file and returns a processed User_list
     '''
-    User_list = getattr((importlib.import_module('input_file_%d' %j)), 'User_list')
+    User_list = getattr((importlib.import_module('%s' %country)), 'User_list')
     return(User_list)
 
 
@@ -36,10 +67,10 @@ def Initialise_model():
     
     return (Profile, num_profiles)
     
-def Initialise_inputs(j):
-    Year_behaviour = yearly_pattern()
-    user_defined_inputs(j)
-    user_list = user_defined_inputs(j)
+def Initialise_inputs(country, year):
+    Year_behaviour = yearly_pattern(country, year)
+    user_defined_inputs(country)
+    user_list = user_defined_inputs(country)
     
     # Calibration parameters
     '''
@@ -49,6 +80,6 @@ def Initialise_inputs(j):
     peak_enlarg = 0 #percentage random enlargement or reduction of peak time range length
     mu_peak = 0.5 #median value of gaussian distribution [0,1] by which the number of coincident switch_ons is randomly selected
     s_peak = 1 #standard deviation (as percentage of the median value) of the gaussian distribution [0,1] above mentioned
-
+    
     return (peak_enlarg, mu_peak, s_peak, Year_behaviour, user_list)
 
