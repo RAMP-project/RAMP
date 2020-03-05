@@ -26,6 +26,18 @@ def Profile_formatting(stoch_profiles):
     
     return (Profile_avg, Profile_kW, Profile_series)
 
+def Usage_formatting(stoch_profiles):
+    Usage_avg = np.zeros(1440)
+    for pr in stoch_profiles:
+        Usage_avg = Usage_avg + pr
+    Usage_avg = Usage_avg/len(stoch_profiles)
+      
+    Usage_series = np.array([])
+    for iii in stoch_profiles:
+        Usage_series = np.append(Usage_series,iii)
+    
+    return (Usage_avg, Usage_series)
+
 def Profile_cloud_plot(stoch_profiles,stoch_profiles_avg):
     #x = np.arange(0,1440,5)
     plt.figure(figsize=(10,5))
@@ -45,9 +57,21 @@ def Profile_cloud_plot(stoch_profiles,stoch_profiles_avg):
 def Profile_series_plot(stoch_profiles_series):
     #x = np.arange(0,1440,5)
     plt.figure(figsize=(10,5))
-    plt.plot(np.arange(len(stoch_profiles_series)),stoch_profiles_series,'#4169e1')
-    #plt.xlabel('Time (hours)')
+    plt.plot(np.arange(len(stoch_profiles_series)),stoch_profiles_series, '#4169e1')    #plt.xlabel('Time (hours)')
     plt.ylabel('Power (W)')
+    plt.ylim(ymin=0)
+    #plt.ylim(ymax=5000)
+    plt.margins(x=0)
+    plt.margins(y=0)
+    #plt.xticks([0,240,480,(60*12),(60*16),(60*20),(60*24)],[0,4,8,12,16,20,24])
+    #plt.savefig('profiles.eps', format='eps', dpi=1000)
+    plt.show()
+
+def Profile_usage_plot(stoch_profiles_series):
+    #x = np.arange(0,1440,5)
+    plt.figure(figsize=(10,5))
+    plt.plot(np.arange(len(stoch_profiles_series)),stoch_profiles_series)    #plt.xlabel('Time (hours)')
+    plt.ylabel('Usage')
     plt.ylim(ymin=0)
     #plt.ylim(ymax=5000)
     plt.margins(x=0)
@@ -61,6 +85,15 @@ def Profile_dataframe(Profiles_series, year):
     minutes = pd.DataFrame(pd.date_range(start=str(year) + '-01-01', periods = len(Profiles_series), freq='min'))
     
     Profiles_df = pd.DataFrame(Profiles_series, columns = ['Load Profile'])
+    Profiles_df.set_index(minutes.iloc[:,0], inplace = True)
+   
+    return Profiles_df
+
+def Usage_dataframe(Profiles_series, year):
+    
+    minutes = pd.DataFrame(pd.date_range(start=str(year) + '-01-01', periods = len(Profiles_series), freq='min'))
+    
+    Profiles_df = pd.DataFrame(Profiles_series, columns = ['Usage'])
     Profiles_df.set_index(minutes.iloc[:,0], inplace = True)
    
     return Profiles_df
@@ -127,6 +160,5 @@ for i in range (len(Profile)):
 
 # Export Profiles
 
-def export_series(stoch_profiles_series, country):
-    series_frame = pd.DataFrame(stoch_profiles_series)
-    series_frame.to_csv('results/%s.csv' % (country))
+def export_series(filename, variable, country):
+    variable.to_csv('results/%s_%s.csv' % (filename, country))

@@ -1,0 +1,15 @@
+﻿,,,Standard,Standard,IT,IT
+User,Activity type,Window number,Start,End,Start,End
+Working,Main,1,6,10,6,10
+Working,Main,2,16,20,16,20
+Working,Free time,1,0,5,0,5
+Working,Free time,2,10,16,10,16
+Working,Free time,3,21,24,21,24
+Student,Main,1,7,10,7,10
+Student,Main,2,12,15,12,15
+Student,Main,3,16,20,16,20
+Student,Free time,1,0,6,0,6
+Student,Free time,2,21,24,21,24
+Inactive,Main,1,7,20,7,20
+Inactive,Free time,1,0,6,0,6
+Inactive,Free time,2,21,24,21,24

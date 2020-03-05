@@ -10,7 +10,7 @@ from initialise import Initialise_model, Initialise_inputs
 #%% Core model stochastic script
 
 def Stochastic_Process_Mobility(country, year):
-    Profile, num_profiles = Initialise_model()
+    Profile, Usage, num_profiles = Initialise_model()
     peak_enlarg, mu_peak, s_peak, Year_behaviour, User_list = Initialise_inputs(country, year)
     '''
     Calculation of the peak time range, which is used to discriminate between off-peak and on-peak coincident switch-on probability
@@ -44,8 +44,10 @@ def Stochastic_Process_Mobility(country, year):
     '''
     for prof_i in range(num_profiles): #the whole code is repeated for each profile that needs to be generated
         Tot_Classes = np.zeros(1440) #initialise an empty daily profile that will be filled with the sum of the hourly profiles of each User instance
+        Tot_Usage = np.zeros(1440) #initialise an empty daily usage profile that will be filled with the sum of the hourly usage of each User instance
         for Us in User_list: #iterates for each User instance (i.e. for each user class)
             Us.load = np.zeros(1440) #initialise empty load for User instance
+            Us.usage = np.zeros(1440) #initialise empty usage profile for User instance
             for i in range(Us.num_users): #iterates for every single user within a User class. Each single user has its own separate randomisation
                 if Us.user_preference == 0:
                     rand_daily_pref = 0
@@ -56,6 +58,7 @@ def Stochastic_Process_Mobility(country, year):
                     #initialises variables for the cycle
                     tot_time = 0
                     App.daily_use = np.zeros(1440)
+                    App.usage = np.zeros(1440)
                     if random.uniform(0,1) > App.occasional_use: #evaluates if occasional use happens or not
                         continue
                     else:
@@ -103,7 +106,7 @@ def Stochastic_Process_Mobility(country, year):
                     
                     rand_vel = round(random.uniform(App.vel,int(App.vel*random_var_v)))
                     
-                    rand_time = round(rand_dist/rand_vel * 60)  #Function to calculate the total time based on total distance and average velocity 
+                    rand_time = int(round(rand_dist/rand_vel * 60))  #Function to calculate the total time based on total distance and average velocity 
                                                            
                     App.power = (c1 * rand_vel**2 + c2 * rand_vel + cost) * App.POWER
                     
@@ -296,8 +299,13 @@ def Stochastic_Process_Mobility(country, year):
     
                             else:
                                 continue #if the random switch_on falls somewhere where the App has been already turned on, tries again from beginning of the while cycle
+                    App.usage = App.daily_use
+                    App.usage = np.where(App.usage > 1, 10, App.usage)
                     Us.load = Us.load + App.daily_use #adds the App profile to the User load
+                    Us.usage = Us.usage + App.usage
             Tot_Classes = Tot_Classes + Us.load #adds the User load to the total load of all User classes
+            Tot_Usage = Tot_Usage + Us.usage
         Profile.append(Tot_Classes) #appends the total load to the list that will contain all the generated profiles
+        Usage.append(Tot_Usage)#appends the total usage to the list that will contain all the generated profiles
         print('Profile',prof_i+1,'/',num_profiles,'completed') #screen update about progress of computation
-    return(Profile)
+    return(Profile, Usage)

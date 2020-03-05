@@ -4,6 +4,7 @@
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
+import copy
 #%% Definition of Python classes that constitute the model architecture
 '''
 The code is based on two concatenated python classes, namely 'User' and
@@ -42,7 +43,7 @@ class User():
             self.flat = flat #allows to model appliances that are not subject to any kind of random variability, such as public lighting
             self.P_var = P_var #allows to randomly variate the mobility App power within a precentage range
             self.Pref_index = pref_index #defines preference index for association with random User daily preference behaviour
-            self.wd_we = wd_we_type #defines if the App is associated with weekdays, weekends or holidays | 0 is wd, 1 is we, 2 is holiday, 3 all week
+            self.wd_we = wd_we_type #defines if the App is associated with weekdays, saturday or sunday | 0 is wd, 1 is saturday, 2 is sunday, 3 all week
             self.POWER = P_max*np.ones(365) #Maximum Power of the EV to scale the power curve [kW]
             # if P_series == False and isinstance(P_max, pd.DataFrame) == False: #check if the user defined P as timeseries
             #     self.POWER = P_max*np.ones(365) #treat the power as single value for the entire year

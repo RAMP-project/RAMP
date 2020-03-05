@@ -32,7 +32,7 @@ def yearly_pattern(country, year, vacation = False):
     for d in dict_year.keys():
         if first_day == d:
             Year_behaviour[dict_year[d][0]:365:7] = 1
-            Year_behaviour[dict_year[d][1]:365:7] = 1
+            Year_behaviour[dict_year[d][1]:365:7] = 2
     
         # Adding Vacation days to the Yearly pattern
             
@@ -45,7 +45,7 @@ def yearly_pattern(country, year, vacation = False):
     
     for i in range(len(holidays_country)):
         day_of_year = list(holidays.IT(years = 2014).keys())[i].timetuple().tm_yday
-        Year_behaviour[day_of_year-1] = 1
+        Year_behaviour[day_of_year-1] = 2
         
     return(Year_behaviour)
 
@@ -62,10 +62,14 @@ def Initialise_model():
     The model is ready to be initialised
     '''
     num_profiles = int(input("please indicate the number of profiles to be generated: ")) #asks the user how many profiles (i.e. code runs) he wants
+    if num_profiles > 366:
+        print('[CRITICAL] Number of profiles higher than days in the year, please provide a number <= 366') 
+        sys.exit()
     print('Please wait...') 
     Profile = [] #creates an empty list to store the results of each code run, i.e. each stochastically generated profile
+    Usage = []
     
-    return (Profile, num_profiles)
+    return (Profile, Usage, num_profiles)
     
 def Initialise_inputs(country, year):
     Year_behaviour = yearly_pattern(country, year)
