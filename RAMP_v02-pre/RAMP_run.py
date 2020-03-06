@@ -43,8 +43,6 @@ mobility = 'True' # 'True' or 'False' to select the mobility version of the stoc
 
 # Define country and year to be considered when generating profiles
 country = 'IT'
-#NOTE: for the time being only 2016 can be 
-# simulated with temperature correction
 year = 2016
 
 #inputfile for the temperature profile: 
@@ -72,11 +70,9 @@ if mobility == 'True':
     
     Profiles_temp = Profile_temp(Profiles_df, year = year, temp_profile = temp_profile)
 
-    Profiles_utc = Time_correction(Profiles_temp, country) 
+    Profiles_utc = Time_correction(Profiles_temp, country, year) 
     
     if len(Profiles_list) > 1: #if more than one daily profile is generated, also cloud plots are shown
         Profile_cloud_plot(Profiles_list, Profiles_avg)
         
-# Profiles_df['2014-01-04':'2014-01-10'].plot()
-
 print('\nExecution Time:', datetime.now() - startTime)

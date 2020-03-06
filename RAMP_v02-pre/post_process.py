@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytz
+import copy
 
 #%% Post-processing
 '''
@@ -108,10 +109,12 @@ def temp_import(country, year, inputfile = r"TimeSeries\temp.csv"):
 
 def Profile_temp(Profiles_df, temp_profile,  year = 2016):
     
-    hours = pd.DataFrame(pd.date_range(start=str(year) + '-01-01', end=str(year) + '-12-31 23:00:00', freq='h'))
-    temp_profile.set_index(hours.iloc[:,0], inplace = True)
-
-    Profiles_df_hour = Profiles_df.resample('H').sum()
+    hours = pd.date_range(start=str(year) + '-01-01', end=str(year) + '-12-31 23:00:00', freq='H')
+    temp_profile.set_index(hours, inplace = True)
+    
+    Profiles_df_c = copy.deepcopy(Profiles_df)
+    
+    Profiles_df_hour = Profiles_df_c.resample('H').sum()
     
     temp_profile = temp_profile.loc[Profiles_df_hour.index]
     
@@ -124,33 +127,51 @@ def Profile_temp(Profiles_df, temp_profile,  year = 2016):
     
     return Profiles_temp
 
-# Code from when2heat for localize country in timezone
-    
-def localize(df, country, ambiguous=None):
+# def localize(df, country, ambiguous=None):
 
-    # The exceptions below correct for daylight saving time
-    try:
-        df.index = df.index.tz_localize(pytz.country_timezones[country][0], ambiguous=ambiguous)
-        return df
+#     # The exceptions below correct for daylight saving time
+#     try:
+#         df.index = df.index.tz_localize(pytz.country_timezones[country][0], ambiguous=ambiguous)
+#         return df
 
-    # Delete values that do not exist because of daylight saving time
-    except pytz.NonExistentTimeError as err:
-        return localize(df.loc[df.index != err.args[0], ], country)
+#     # Delete values that do not exist because of daylight saving time
+#     except pytz.NonExistentTimeError as err:
+#         return localize(df.loc[df.index != err.args[0], ], country)
 
-    # Duplicate values that exist twice because of daylight saving time
-    except pytz.AmbiguousTimeError as err:
-        idx = pd.Timestamp(err.args[0].split("'")[1])
-        unambiguous_df = localize(df.loc[df.index != idx, ], country)
-        ambiguous_df = localize(df.loc[[idx, idx], ], country, ambiguous=[True, False])
-        return unambiguous_df.append(ambiguous_df).sort_index()
+#     # Duplicate values that exist twice because of daylight saving time
+#     except pytz.AmbiguousTimeError as err:
+#         b = err
+#         return b
+#         # idx = pd.Timestamp(err.args[0].split("'")[1])
+#         # unambiguous_df = localize(df.loc[df.index != idx, ], country)
+#         # ambiguous_df = localize(df.loc[[idx, idx], ], country, ambiguous=[True, False])
+#         # return unambiguous_df.append(ambiguous_df).sort_index()
 
-def Time_correction(df, country):
+def Time_correction(df, country, year):
+
+    df_c = copy.deepcopy(df)   
     
-    df_country = localize(df, country, ambiguous=None)
+    ind = df_c.index.tz_localize(pytz.country_timezones[country][0], nonexistent = 'NaT', ambiguous='NaT')
+    ind_filter = ind[~ ind.isnull()]
+        
+    idx = pd.date_range(start=min(ind_filter), end=max(ind_filter), freq='H')
+    df_c = df_c.set_index(idx)
     
-    Profiles_utc = df_country.tz_convert('utc')
+    ind_utc = ind.tz_convert('utc')
+    temp_utc = df_c.set_index(ind_utc)
     
-    return Profiles_utc
+    ind_year = pd.date_range(start=str(year) + '-01-01', end=str(max(temp_utc.index).date()) + ' 23:00:00', freq='H', tz = 'utc')
+    temp_year = pd.DataFrame([np.nan] * len(ind_year), index = ind_year)
+    
+    df_utc_final = pd.concat([temp_utc, temp_year], axis=1, sort=False)
+    df_utc_final = df_utc_final.iloc[:,0]
+    df_utc_final = df_utc_final.loc[df_utc_final.index.notnull()]
+    df_utc_final = df_utc_final.ffill()
+    df_utc_final = df_utc_final[df_utc_final.index >= str(year) + '-01-01']
+    
+    df_utc_final = pd.DataFrame(df_utc_final)
+    
+    return df_utc_final
 
 #%% Export individual profiles
 '''

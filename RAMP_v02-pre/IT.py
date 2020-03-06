@@ -14,7 +14,7 @@ User_list = []
 country = 'IT'
 
 #Total number of users to be simulated
-tot_users = 10000
+tot_users = 50
 
 #Variabilities 
 r_w = {}
@@ -179,15 +179,15 @@ for key in wind_temp.keys():
 #If the windows are modified, also the perentages should be modified accordingly
 perc_usage = {}
 
-perc_usage['weekday']  = {'working' :{'main': trips['weekday'].iloc[pd.np.r_[wind_temp['working']['main'][0]:wind_temp['working']['main'][1], wind_temp['working']['main'][2]:wind_temp['working']['main'][3]]].sum()},
-                          'student' :{'main': trips['weekday'].iloc[pd.np.r_[wind_temp['student']['main'][0]:wind_temp['student']['main'][1], wind_temp['student']['main'][2]:wind_temp['student']['main'][3], wind_temp['student']['main'][4]:wind_temp['student']['main'][5]]].sum()}, 
-                          'inactive':{'main': trips['weekday'].iloc[pd.np.r_[wind_temp['inactive']['main'][0]:wind_temp['inactive']['main'][1]]].sum()}}
-perc_usage['saturday'] = {'working' :{'main': trips['saturday'].iloc[pd.np.r_[wind_temp['working']['main'][0]:wind_temp['working']['main'][1], wind_temp['working']['main'][2]:wind_temp['working']['main'][3]]].sum()},
-                          'student' :{'main': trips['saturday'].iloc[pd.np.r_[wind_temp['student']['main'][0]:wind_temp['student']['main'][1], wind_temp['student']['main'][2]:wind_temp['student']['main'][3], wind_temp['student']['main'][4]:wind_temp['student']['main'][5]]].sum()}, 
-                          'inactive':{'main': trips['saturday'].iloc[pd.np.r_[wind_temp['inactive']['main'][0]:wind_temp['inactive']['main'][1]]].sum()}}
-perc_usage['sunday']   = {'working' :{'main': trips['saturday'].iloc[pd.np.r_[wind_temp['working']['main'][0]:wind_temp['working']['main'][1], wind_temp['working']['main'][2]:wind_temp['working']['main'][3]]].sum()},
-                          'student' :{'main': trips['saturday'].iloc[pd.np.r_[wind_temp['student']['main'][0]:wind_temp['student']['main'][1], wind_temp['student']['main'][2]:wind_temp['student']['main'][3], wind_temp['student']['main'][4]:wind_temp['student']['main'][5]]].sum()}, 
-                          'inactive':{'main': trips['saturday'].iloc[pd.np.r_[wind_temp['inactive']['main'][0]:wind_temp['inactive']['main'][1]]].sum()}}
+perc_usage['weekday']  = {'working' :{'main': trips['weekday'].iloc[np.r_[wind_temp['working']['main'][0]:wind_temp['working']['main'][1], wind_temp['working']['main'][2]:wind_temp['working']['main'][3]]].sum()},
+                          'student' :{'main': trips['weekday'].iloc[np.r_[wind_temp['student']['main'][0]:wind_temp['student']['main'][1], wind_temp['student']['main'][2]:wind_temp['student']['main'][3], wind_temp['student']['main'][4]:wind_temp['student']['main'][5]]].sum()}, 
+                          'inactive':{'main': trips['weekday'].iloc[np.r_[wind_temp['inactive']['main'][0]:wind_temp['inactive']['main'][1]]].sum()}}
+perc_usage['saturday'] = {'working' :{'main': trips['saturday'].iloc[np.r_[wind_temp['working']['main'][0]:wind_temp['working']['main'][1], wind_temp['working']['main'][2]:wind_temp['working']['main'][3]]].sum()},
+                          'student' :{'main': trips['saturday'].iloc[np.r_[wind_temp['student']['main'][0]:wind_temp['student']['main'][1], wind_temp['student']['main'][2]:wind_temp['student']['main'][3], wind_temp['student']['main'][4]:wind_temp['student']['main'][5]]].sum()}, 
+                          'inactive':{'main': trips['saturday'].iloc[np.r_[wind_temp['inactive']['main'][0]:wind_temp['inactive']['main'][1]]].sum()}}
+perc_usage['sunday']   = {'working' :{'main': trips['saturday'].iloc[np.r_[wind_temp['working']['main'][0]:wind_temp['working']['main'][1], wind_temp['working']['main'][2]:wind_temp['working']['main'][3]]].sum()},
+                          'student' :{'main': trips['saturday'].iloc[np.r_[wind_temp['student']['main'][0]:wind_temp['student']['main'][1], wind_temp['student']['main'][2]:wind_temp['student']['main'][3], wind_temp['student']['main'][4]:wind_temp['student']['main'][5]]].sum()}, 
+                          'inactive':{'main': trips['saturday'].iloc[np.r_[wind_temp['inactive']['main'][0]:wind_temp['inactive']['main'][1]]].sum()}}
 
 #Calulate the Percentage of travels in functioning windows for free time
 #as complementary to the main time 
