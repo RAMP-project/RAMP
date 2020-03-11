@@ -2,11 +2,9 @@
 
 #%% Initialisation of a model instance
 
-from core import np
+from core import np, pd
 import importlib
 import datetime
-
-import pandas as pd
 
 # Import holidays package including Latvia and Romania (edited version)
 import sys,os
@@ -63,13 +61,14 @@ def Initialise_model():
     '''
     num_profiles = int(input("please indicate the number of profiles to be generated: ")) #asks the user how many profiles (i.e. code runs) he wants
     if num_profiles > 366:
-        print('[CRITICAL] Number of profiles higher than days in the year, please provide a number <= 366') 
+        print('[CRITICAL] Number of profiles higher than days in the year, please provide a number lower than 366') 
         sys.exit()
     print('Please wait...') 
-    Profile = [] #creates an empty list to store the results of each code run, i.e. each stochastically generated profile
+    Profile = [] #creates empty lists to store the results of each code run, i.e. each stochastically generated profile
     Usage = []
+    Profile_user = [] #creates empty list to store the user-detailed results of each code run, i.e. each stochastically generated profile
     
-    return (Profile, Usage, num_profiles)
+    return (Profile, Usage, Profile_user, num_profiles)
     
 def Initialise_inputs(country, year):
     Year_behaviour = yearly_pattern(country, year)

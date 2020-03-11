@@ -10,7 +10,7 @@ from initialise import Initialise_model, Initialise_inputs
 #%% Core model stochastic script
 
 def Stochastic_Process_Mobility(country, year):
-    Profile, Usage, num_profiles = Initialise_model()
+    Profile, Usage, Profile_user, num_profiles = Initialise_model()
     peak_enlarg, mu_peak, s_peak, Year_behaviour, User_list = Initialise_inputs(country, year)
     '''
     Calculation of the peak time range, which is used to discriminate between off-peak and on-peak coincident switch-on probability
@@ -20,7 +20,7 @@ def Stochastic_Process_Mobility(country, year):
     '''
     windows_curve = np.zeros(1440) #creates an empty daily profile
     Tot_curve = np.zeros(1440) #creates another empty daily profile
-    #Defining parameters for the EV power curve
+    #Defining calibartion parameters for the EV power curve
     c1 = 0.0363
     c2 = 2.9961
     cost = 38.708           
@@ -45,9 +45,11 @@ def Stochastic_Process_Mobility(country, year):
     for prof_i in range(num_profiles): #the whole code is repeated for each profile that needs to be generated
         Tot_Classes = np.zeros(1440) #initialise an empty daily profile that will be filled with the sum of the hourly profiles of each User instance
         Tot_Usage = np.zeros(1440) #initialise an empty daily usage profile that will be filled with the sum of the hourly usage of each User instance
+        Profile_dict = {}
         for Us in User_list: #iterates for each User instance (i.e. for each user class)
             Us.load = np.zeros(1440) #initialise empty load for User instance
             Us.usage = np.zeros(1440) #initialise empty usage profile for User instance
+            Profile_dict[Us.user_name] = np.zeros((1440,Us.num_users)) #initialise empty user-detailed usage profile for User instance
             for i in range(Us.num_users): #iterates for every single user within a User class. Each single user has its own separate randomisation
                 if Us.user_preference == 0:
                     rand_daily_pref = 0
@@ -299,13 +301,15 @@ def Stochastic_Process_Mobility(country, year):
     
                             else:
                                 continue #if the random switch_on falls somewhere where the App has been already turned on, tries again from beginning of the while cycle
-                    App.usage = App.daily_use
+                    App.usage = App.daily_use   #Save the daily use to calculate the usage profile, i.e. without considering the power of the appliance. 
                     App.usage = np.where(App.usage > 1, 10, App.usage)
                     Us.load = Us.load + App.daily_use #adds the App profile to the User load
-                    Us.usage = Us.usage + App.usage
+                    Us.usage = Us.usage + App.usage   #adds the App usage to the User usage profile
+                    Profile_dict[Us.user_name][:,i] = Profile_dict[Us.user_name][:,i] + App.daily_use
             Tot_Classes = Tot_Classes + Us.load #adds the User load to the total load of all User classes
             Tot_Usage = Tot_Usage + Us.usage
         Profile.append(Tot_Classes) #appends the total load to the list that will contain all the generated profiles
         Usage.append(Tot_Usage)#appends the total usage to the list that will contain all the generated profiles
+        Profile_user.append(Profile_dict) #appends the user-detailed load to the list that will contain all the generated profiles
         print('Profile',prof_i+1,'/',num_profiles,'completed') #screen update about progress of computation
-    return(Profile, Usage)
+    return(Profile, Usage, User_list, Profile_user)

@@ -11,7 +11,7 @@ User_list = []
 '''Common values used in the input data definition'''
 
 #Define Country
-country = 'IT'
+country = 'DE'
 
 #Total number of users to be simulated
 tot_users = 1000
@@ -151,21 +151,21 @@ else:
     print('\n[WARNING] There are no specific functioning windows defined for the selected country, standard windows will be used. \nEdit the "windows.csv" file to add specific functioning windows.\n')
     
     window = {}
-    window_type = 'Standard'
+    w_type = 'Standard'
     
-    window['working']   = {'main':      [[window_data[window_type]['Start']['Working']['Main'][1],       window_data[window_type]['End']['Working']['Main'][1]],  
-                                         [window_data[window_type]['Start']['Working']['Main'][2],       window_data[window_type]['End']['Working']['Main'][2]]], 
-                           'free time': [[window_data[window_type]['Start']['Working']['Free time'][1],  window_data[window_type]['End']['Working']['Free time'][1]],   
-                                         [window_data[window_type]['Start']['Working']['Free time'][2],  window_data[window_type]['End']['Working']['Free time'][2]], 
-                                         [window_data[window_type]['Start']['Working']['Free time'][3],  window_data[window_type]['End']['Working']['Free time'][3]]]}
-    window['student']   = {'main':      [[window_data[window_type]['Start']['Student']['Main'][1],       window_data[window_type]['End']['Student']['Main'][1]],  
-                                         [window_data[window_type]['Start']['Student']['Main'][2],       window_data[window_type]['End']['Student']['Main'][2]], 
-                                         [window_data[window_type]['Start']['Student']['Main'][3],       window_data[window_type]['End']['Student']['Main'][3]]], 
-                           'free time': [[window_data[window_type]['Start']['Student']['Free time'][1],  window_data[window_type]['End']['Student']['Free time'][1]],    
-                                         [window_data[window_type]['Start']['Student']['Free time'][2],  window_data[window_type]['End']['Student']['Free time'][2]]]}
-    window['inactive']  = {'main':      [[window_data[window_type]['Start']['Inactive']['Main'][1],      window_data[window_type]['End']['Inactive']['Main'][1]]], 
-                           'free time': [[window_data[window_type]['Start']['Inactive']['Free time'][1], window_data[window_type]['End']['Inactive']['Free time'][1]],   
-                                         [window_data[window_type]['Start']['Inactive']['Free time'][2], window_data[window_type]['End']['Inactive']['Free time'][2]]]}
+    window['working']   = {'main':      [[window_data[w_type]['Start']['Working']['Main'][1],       window_data[w_type]['End']['Working']['Main'][1]],  
+                                         [window_data[w_type]['Start']['Working']['Main'][2],       window_data[w_type]['End']['Working']['Main'][2]]], 
+                           'free time': [[window_data[w_type]['Start']['Working']['Free time'][1],  window_data[w_type]['End']['Working']['Free time'][1]],   
+                                         [window_data[w_type]['Start']['Working']['Free time'][2],  window_data[w_type]['End']['Working']['Free time'][2]], 
+                                         [window_data[w_type]['Start']['Working']['Free time'][3],  window_data[w_type]['End']['Working']['Free time'][3]]]}
+    window['student']   = {'main':      [[window_data[w_type]['Start']['Student']['Main'][1],       window_data[w_type]['End']['Student']['Main'][1]],  
+                                         [window_data[w_type]['Start']['Student']['Main'][2],       window_data[w_type]['End']['Student']['Main'][2]], 
+                                         [window_data[w_type]['Start']['Student']['Main'][3],       window_data[w_type]['End']['Student']['Main'][3]]], 
+                           'free time': [[window_data[w_type]['Start']['Student']['Free time'][1],  window_data[w_type]['End']['Student']['Free time'][1]],    
+                                         [window_data[w_type]['Start']['Student']['Free time'][2],  window_data[w_type]['End']['Student']['Free time'][2]]]}
+    window['inactive']  = {'main':      [[window_data[w_type]['Start']['Inactive']['Main'][1],      window_data[w_type]['End']['Inactive']['Main'][1]]], 
+                           'free time': [[window_data[w_type]['Start']['Inactive']['Free time'][1], window_data[w_type]['End']['Inactive']['Free time'][1]],   
+                                         [window_data[w_type]['Start']['Inactive']['Free time'][2], window_data[w_type]['End']['Inactive']['Free time'][2]]]}
 
 #Re-format functioning windows to calculare the Percentage of travels in functioning windows 
 wind_temp = copy.deepcopy(window)
