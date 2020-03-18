@@ -26,7 +26,7 @@ class User():
 #Define the inner class for modelling user's appliances within the correspoding user class
     class Appliance():
     
-        def __init__(self,user, n = 1, P_max = 0, P_var = 0, w = 1, t_func = 0, d_tot = 0, r_d = 0, r_v = 0, d_min = 1, fixed = 'no', fixed_cycle = 0, occasional_use = 1, flat = 'no',  pref_index = 0, wd_we_type = 2, P_series = False):
+        def __init__(self,user, n = 1, Par_power = [0, 0, 0], Battery_cap = 0, P_var = 0, w = 1, t_func = 0, d_tot = 0, r_d = 0, r_v = 0, d_min = 1, fixed = 'no', fixed_cycle = 0, occasional_use = 1, flat = 'no',  pref_index = 0, wd_we_type = 2, P_series = False):
             self.user = user #user to which the appliance is bounded
             self.number = n #number of appliances of the specified kind
             self.num_windows = w #number of functioning windows to be considered
@@ -44,7 +44,9 @@ class User():
             self.P_var = P_var #allows to randomly variate the mobility App power within a precentage range
             self.Pref_index = pref_index #defines preference index for association with random User daily preference behaviour
             self.wd_we = wd_we_type #defines if the App is associated with weekdays, saturday or sunday | 0 is wd, 1 is saturday, 2 is sunday, 3 all week
-            self.POWER = P_max*np.ones(365) #Maximum Power of the EV to scale the power curve [kW]
+            self.Par_power = Par_power # List of 3 parameters to define the quadratic power-velocity relation
+            self.POWER = ((Par_power[0] * 130**2 + Par_power[1] * 130 + Par_power[2]) * 12) * np.ones(365) #Maximum Power of the EV to scale the power curve [kW]
+            self.Battery_cap = Battery_cap #Nominal Battery capacity of the EV [kWh]
             # if P_series == False and isinstance(P_max, pd.DataFrame) == False: #check if the user defined P as timeseries
             #     self.POWER = P_max*np.ones(365) #treat the power as single value for the entire year
             # else:

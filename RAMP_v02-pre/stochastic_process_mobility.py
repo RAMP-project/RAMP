@@ -10,7 +10,8 @@ from initialise import Initialise_model, Initialise_inputs
 #%% Core model stochastic script
 
 def Stochastic_Process_Mobility(country, year):
-    Profile, Usage, Profile_user, num_profiles = Initialise_model()
+    Profile, Usage, num_profiles, Profiles_user = Initialise_model()
+
     peak_enlarg, mu_peak, s_peak, Year_behaviour, User_list = Initialise_inputs(country, year)
     '''
     Calculation of the peak time range, which is used to discriminate between off-peak and on-peak coincident switch-on probability
@@ -49,8 +50,12 @@ def Stochastic_Process_Mobility(country, year):
         for Us in User_list: #iterates for each User instance (i.e. for each user class)
             Us.load = np.zeros(1440) #initialise empty load for User instance
             Us.usage = np.zeros(1440) #initialise empty usage profile for User instance
-            Profile_dict[Us.user_name] = np.zeros((1440,Us.num_users)) #initialise empty user-detailed usage profile for User instance
+            # Profile_dict[Us.user_name] = np.zeros((1440 * (prof_i + 1),Us.num_users)) #initialise empty user-detailed usage profile for User instance
+            # Profile_dict[Us.user_name] = np.zeros((1440,Us.num_users)) #initialise empty user-detailed usage profile for User instance
+            # daily_use_tot = np.zeros((1440,Us.num_users))
+            Profile_dict[Us.user_name] = []
             for i in range(Us.num_users): #iterates for every single user within a User class. Each single user has its own separate randomisation
+                daily_use_tot = np.zeros(1440)
                 if Us.user_preference == 0:
                     rand_daily_pref = 0
                     pass
@@ -106,11 +111,11 @@ def Stochastic_Process_Mobility(country, year):
                     
                     App.vel = App.func_dist/App.func_cycle * 60 
                     
-                    rand_vel = round(random.uniform(App.vel,int(App.vel*random_var_v)))
+                    rand_vel = np.maximum(20, round(random.uniform(App.vel,int(App.vel*random_var_v)))) #average velocity of the trip, minimum value is 20 km/h to get reasonable values from the power curve
                     
                     rand_time = int(round(rand_dist/rand_vel * 60))  #Function to calculate the total time based on total distance and average velocity 
                                                            
-                    App.power = (c1 * rand_vel**2 + c2 * rand_vel + cost) * App.POWER
+                    App.power = (App.Par_power[0] * rand_vel**2 + App.Par_power[1] * rand_vel + App.Par_power[2]) * 12
                     
                     #redefines functioning windows based on the previous randomisation of the boundaries
                     if App.flat == 'yes': #if the app is "flat" the code stops right after filling the newly created windows without applying any further stochasticity
@@ -304,12 +309,142 @@ def Stochastic_Process_Mobility(country, year):
                     App.usage = App.daily_use   #Save the daily use to calculate the usage profile, i.e. without considering the power of the appliance. 
                     App.usage = np.where(App.usage > 1, 10, App.usage)
                     Us.load = Us.load + App.daily_use #adds the App profile to the User load
-                    Us.usage = Us.usage + App.usage   #adds the App usage to the User usage profile
-                    Profile_dict[Us.user_name][:,i] = Profile_dict[Us.user_name][:,i] + App.daily_use
+                    Us.usage = Us.usage + App.usage #adds the App usage to the User usage profile
+                    daily_use_tot = daily_use_tot + App.daily_use
+                Profile_dict[Us.user_name].append(daily_use_tot)
             Tot_Classes = Tot_Classes + Us.load #adds the User load to the total load of all User classes
             Tot_Usage = Tot_Usage + Us.usage
         Profile.append(Tot_Classes) #appends the total load to the list that will contain all the generated profiles
         Usage.append(Tot_Usage)#appends the total usage to the list that will contain all the generated profiles
-        Profile_user.append(Profile_dict) #appends the user-detailed load to the list that will contain all the generated profiles
+        Profiles_user.append(Profile_dict)
         print('Profile',prof_i+1,'/',num_profiles,'completed') #screen update about progress of computation
-    return(Profile, Usage, User_list, Profile_user)
+    return(Profile, Usage, User_list, Profiles_user)
+
+def charge_prob(SOC):
+    
+    k = 15
+    per_SOC = 0.5
+    
+    p = 1-1/(1+np.exp(-k*(SOC-per_SOC)))
+    
+    return p
+
+def Charging_Process(Profiles_user, User_list, simple = True):
+    
+    SOC_max = 0.8
+    SOC_min = 0.2
+    
+    eff = 0.95  # Charging/discharging efficiency
+    P_ch_station = 11 # Nominal power of the charging station [kW]
+        
+    Charging_profile_user = {}
+    Charging_profile = np.zeros(int(len(Profiles_user['Working - Large car'])))
+    SOC_user = {}
+       
+    for us_num, Us in enumerate(User_list):
+        
+        Charging_profile_user[Us.user_name] = []
+        SOC_user[Us.user_name] = []
+        
+        for i in range(Us.num_users):
+            
+            Profiles_user[Us.user_name] = np.where(Profiles_user[Us.user_name] < 0.1, 0, Profiles_user[Us.user_name]) # Brings tha values put to 0.001 for the mask to 0
+            
+            power = Profiles_user[Us.user_name][:,i]
+            power = np.where(power > 0, -power, 0) #Sets to power consumed by the car to negative values
+            power = power / 1000 #kW
+            
+            if power.sum() == 0: # users who never take the car in the considered period are skipped
+                continue
+            else:
+                travel_ind = np.where(power < 0)[0] 
+                travel_ind = np.split(travel_ind, np.where(np.diff(travel_ind) != 1)[0]+1)
+                travel_ind = [np.array([ind[0],ind[-1]]) for ind in travel_ind] #list of array of index of when there is a mobility travel
+                
+                park_ind = np.where(power == 0)[0]
+                park_ind = np.split(park_ind, np.where(np.diff(park_ind) != 1)[0]+1)
+                park_ind = [np.array([ind[0],ind[-1]]) for ind in park_ind] #list of array of index of when there is a mobility travel
+            
+            en_to_charge = 0
+            
+            delta_soc = power / (Us.App_list[0].Battery_cap * 60) # To evaluate the capacity in kW - min
+            SOC = delta_soc
+            # SOC[0] = SOC_max
+            SOC_init = np.random.rand()*(SOC_max-SOC_min) + SOC_min
+            SOC[0] = SOC_init
+            SOC = np.cumsum(SOC)
+            
+            if simple is False: #part of code with the travel based recharge energy calculation     
+
+                for park in range(1, len(park_ind)): #iterates over all parkings (park = 0 corresponds to the period where no travel was made yet, so is not evaluated)
+                                       
+                    travel_ind_range = np.arange(park_ind[park-1][1]+1, park_ind[park][0])
+                    en_travel = abs(np.sum(power[travel_ind_range])) 
+                    en_charge_tot = en_travel + en_to_charge
+                    
+                    if charge_prob(SOC[park_ind[park][0]]) > np.random.rand(): #if the probability of charging realted to the SOC is high enough, the charging process happens regularly
+                        
+                        t_ch = int(round(en_charge_tot/P_ch_station)) 
+                        t_park = int(park_ind[park][1] - park_ind[park][0])
+                        
+                        if t_park >= t_ch: #if the parking time is higher than the time to fully charge, the car is fully charged
+                            charge_ind_range = np.arange(park_ind[park][0], park_ind[park][0] + t_ch)
+                            np.put(power, charge_ind_range, P_ch_station)
+                            en_to_charge = 0
+                        else: # otherwise it will charge only what is possible, the rest is kept to be charged during next parking
+                            charge_ind_range = np.arange(park_ind[park][0], park_ind[park][0] + t_park + 1)
+                            np.put(power, charge_ind_range, P_ch_station)
+                            en_to_charge = en_charge_tot - (t_park * P_ch_station)
+                            
+                        delta_soc = power / (Us.App_list[0].Battery_cap * 60) # To evaluate the capacity in kW - min
+                        SOC = delta_soc
+                        # SOC[0] = SOC_max
+                        SOC[0] = SOC_init
+                        SOC = np.cumsum(SOC)
+                    
+                    else: # if the user does not want to charge, then the energy consumed will be charged in a following parking                        
+                        
+                        en_to_charge = en_charge_tot                        
+                        continue
+ 
+            if simple is True: #part of code where the user always tries to recharge until the maximum possible SOC
+
+                for park in range(1, len(park_ind)):
+                    
+                    travel_ind_range = np.arange(park_ind[park-1][1]+1, park_ind[park][0])
+                    en_charge_tot = (Us.App_list[0].Battery_cap * 60) * (SOC_max - SOC[park_ind[park][0]])
+                    
+                    if charge_prob(SOC[park_ind[park][0]]) > np.random.rand(): #if the probability of charging realted to the SOC is high enough, the charging process happens regularly
+
+                        t_ch_tot = int(round(en_charge_tot/P_ch_station)) 
+                        t_park = int(park_ind[park][1] - park_ind[park][0])
+                        
+                        t_ch = int(np.where(t_ch_tot <= t_park, t_ch_tot, t_park +1))
+                        
+                        charge_ind_range = np.arange(park_ind[park][0], park_ind[park][0] + t_ch)
+                        np.put(power, charge_ind_range, P_ch_station)
+                    
+                        delta_soc = power / (Us.App_list[0].Battery_cap * 60) # To evaluate the capacity in kW - min
+                        SOC = delta_soc
+                        # SOC[0] = SOC_max
+                        SOC[0] = SOC_init
+                        SOC = np.cumsum(SOC)
+                    
+                    else: # if the user does not want to charge, then the energy consumed will be charged in a following parking                        
+                        continue
+           
+            power_pos = np.where(power<0, 0, power)
+            
+            SOC_user[Us.user_name].append(SOC)
+            Charging_profile_user[Us.user_name].append(power_pos)
+            Charging_profile = Charging_profile + power_pos
+            
+            # if (power.sum()/60) < 1: #Check that the car was not overcherged (limit set to 1 kWh)
+            #     continue
+            # else: 
+            #     print('[WARNING: Charging process User %s (%s) not properly constructed, exceeding charging by %f kWh]' % (i + 1, Us.user_name, power.sum()/60) )
+        
+        print('Charging Profile', us_num + 1 , '/', len(User_list),'completed') #screen update about progress of computation
+    
+    return (Charging_profile_user, Charging_profile, SOC_user)
+

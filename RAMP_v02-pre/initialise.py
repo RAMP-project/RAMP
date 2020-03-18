@@ -59,16 +59,17 @@ def Initialise_model():
     '''
     The model is ready to be initialised
     '''
-    num_profiles = int(input("please indicate the number of profiles to be generated: ")) #asks the user how many profiles (i.e. code runs) he wants
+    num_profiles = int(input("Please indicate the number of profiles to be generated: ")) #asks the user how many profiles (i.e. code runs) he wants
     if num_profiles > 366:
         print('[CRITICAL] Number of profiles higher than days in the year, please provide a number lower than 366') 
         sys.exit()
     print('Please wait...') 
+    
     Profile = [] #creates empty lists to store the results of each code run, i.e. each stochastically generated profile
     Usage = []
-    Profile_user = [] #creates empty list to store the user-detailed results of each code run, i.e. each stochastically generated profile
-    
-    return (Profile, Usage, Profile_user, num_profiles)
+    Profile_user = []
+
+    return (Profile, Usage, num_profiles, Profile_user)
     
 def Initialise_inputs(country, year):
     Year_behaviour = yearly_pattern(country, year)
