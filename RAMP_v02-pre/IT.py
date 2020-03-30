@@ -35,7 +35,7 @@ occasional_use = {}
 occasional_use['weekday'] = 1
 occasional_use['saturday'] = 0.6
 occasional_use['sunday'] = 0.5
-occasional_use['free time'] = {'weekday': 0.1, 'weekend': 0.4}
+occasional_use['free time'] = {'weekday': 0.15, 'weekend': 0.15} #1/7, meaning taking car for free time once a week
 
 #Calibartion parameters for the Velocity - Power Curve [kW]
 Par_P_EV = {}
@@ -51,30 +51,47 @@ Battery_cap['small']  = 37
 Battery_cap['medium'] = 60
 Battery_cap['large']  = 100
 
+# For the data coming from the JRC Survey, a dictionary is defined to assign each country to the neighbouring one
+# these data are: d_tot, d_min, t_func, trips distribution by time
+country_dict = {'AT':'DE', 'CH':'DE', 'CZ':'DE', 'DK':'DE', 'FI':'DE', 'NL':'DE', 'NO':'DE','SE':'DE', 'SK':'DE',
+                'PT':'ES',
+                'BE':'FR', 'LU':'FR',
+                'EL':'IT', 'HR':'IT', 'MT':'IT', 'SI':'IT',
+                'IE':'UK',
+                'BG':'PL', 'CY':'PL', 'EE':'PL', 'LT':'PL', 'LV':'PL', 'RO':'PL'}
+
 #%% Files with the inputs to be loaded 
 
+inputfolder = r"Input_data/"
+
+# Selection of the equivalent country from the dictionary defined above
+if country in set(country_dict.values()):
+    country_equivalent = country 
+else:
+    country_equivalent = country_dict[country]
+
 #Composition of the population by percentage share
-pop_file =  r"TimeSeries\pop_share.csv" 
+pop_file =  inputfolder + "pop_share.csv" 
 pop_data = pd.read_csv(pop_file, header = 0, index_col = 0)
 
 #Share of the type of vehicles in the country
-vehicle_file =  r"TimeSeries\vehicle_share.csv" 
+vehicle_file =  inputfolder + "vehicle_share.csv" 
 vehicle_data = pd.read_csv(vehicle_file, header = 0, index_col = 0)
 
-# Total daily distance 
-d_tot_file =  r"TimeSeries\d_tot.csv" 
+# Total daily distance [km]
+d_tot_file =  inputfolder + "d_tot.csv" 
 d_tot_data = pd.read_csv(d_tot_file, header = 0, index_col = 0)
 
-# Distance by trip
-d_min_file =  r"TimeSeries\d_min.csv" 
+# Distance by trip [km]
+d_min_file =  inputfolder + "d_min.csv" 
 d_min_data = pd.read_csv(d_min_file, header = 0, index_col = [0,1])
 
 # Functioning time by trip [min]
-t_func_file =  r"TimeSeries\t_func.csv" 
+t_func_file =  inputfolder + "t_func.csv" 
 t_func_data = pd.read_csv(t_func_file, header = 0, index_col = [0,1])
 
 # Functioning windows 
-window_file =  r"TimeSeries\windows.csv" 
+window_file =  inputfolder + "windows.csv" 
 window_data = pd.read_csv(window_file, header = [0,1], index_col = [0,1,2])
 window_data = window_data*60
 window_data = window_data.astype(int)
@@ -82,97 +99,71 @@ window_data = window_data.astype(int)
 #Trips distribution by time 
 trips = {}
 for day in ['weekday', 'saturday', 'sunday']:    
-    file =  r"TimeSeries\Trips by time_%s.csv" %day
+    file =  inputfolder + f"Trips by time_{day}.csv" 
     trips[day] = pd.read_csv(file, header = 0)
-    trips[day] = trips[day][country]/100
+    trips[day] = trips[day][country_equivalent]/100
 
 #%%
 
 #Composition of the population by percentage share
 pop_sh = {}
 
-pop_sh['working']   = pop_data.loc[country, 'Working']
-pop_sh['student']   = pop_data.loc[country, 'Student']
-pop_sh['inactive']  = pop_data.loc[country, 'Inactive']
+for us in ['working', 'student', 'inactive']:
+    pop_sh[us]   = pop_data.loc[country, us]
 
 #Share of the type of vehicles in the country
 vehicle_sh = {}
 
-vehicle_sh['small']  = vehicle_data.loc[country, 'small']
-vehicle_sh['medium'] = vehicle_data.loc[country, 'medium']
-vehicle_sh['large']  = vehicle_data.loc[country, 'large']
+for size in ['small', 'medium', 'large']:
+    vehicle_sh[size] = vehicle_data.loc[country, size]
 
 # Total daily distance 
 d_tot = {}
 
-d_tot['weekday']  = d_tot_data.loc[country, 'Weekday']
-d_tot['saturday'] = d_tot_data.loc[country, 'Weekend']
-d_tot['sunday']   = d_tot_data.loc[country, 'Weekend']
+d_tot['weekday']  = d_tot_data.loc[country_equivalent, 'weekday']
+d_tot['saturday'] = d_tot_data.loc[country_equivalent, 'weekend']
+d_tot['sunday']   = d_tot_data.loc[country_equivalent, 'weekend']
 
 # Distance by trip
 d_min = {}
 
-d_min['weekday']  = {'business': d_min_data[country]['Business']['Weekday'], 
-                     'personal': d_min_data[country]['Personal']['Weekday']}
-d_min['saturday'] = {'business': d_min_data[country]['Business']['Saturday'],
-                     'personal': d_min_data[country]['Personal']['Saturday']} 
-d_min['sunday']   = {'business': d_min_data[country]['Business']['Sunday'],
-                     'personal': d_min_data[country]['Personal']['Sunday']} 
-
-d_min['weekday']['mean']  = round(np.array([d_min['weekday'][k] for k in d_min['weekday']]).mean())
-d_min['saturday']['mean'] = round(np.array([d_min['saturday'][k] for k in d_min['saturday']]).mean())
-d_min['sunday']['mean']   = round(np.array([d_min['sunday'][k] for k in d_min['sunday']]).mean())
-
+for day in ['weekday', 'saturday', 'sunday']:    
+    d_min[day] = {}
+    for travel_type in ['business', 'personal']:
+        d_min[day][travel_type] = d_min_data[country_equivalent][travel_type][day]
+    d_min[day]['mean']  = round(np.array([d_min[day][k] for k in d_min[day]]).mean())
+        
 # Functioning time by trip [min]
 t_func = {}
 
-t_func['weekday']  = {'business': t_func_data[country]['Business']['Weekday'],  
-                      'personal': t_func_data[country]['Personal']['Weekday']}
-t_func['saturday'] = {'business': t_func_data[country]['Business']['Saturday'], 
-                      'personal': t_func_data[country]['Personal']['Saturday']} 
-t_func['sunday']   = {'business': t_func_data[country]['Business']['Sunday'], 
-                      'personal': t_func_data[country]['Personal']['Sunday']} 
-
-t_func['weekday']['mean']  = round(np.array([t_func['weekday'][k] for k in t_func['weekday']]).mean())
-t_func['saturday']['mean'] = round(np.array([t_func['saturday'][k] for k in t_func['saturday']]).mean())
-t_func['sunday']['mean']   = round(np.array([t_func['sunday'][k] for k in t_func['sunday']]).mean())
+for day in ['weekday', 'saturday', 'sunday']:    
+    t_func[day] = {}
+    for travel_type in ['business', 'personal']:
+        t_func[day][travel_type] = t_func_data[country_equivalent][travel_type][day]    
+    t_func[day]['mean']  = round(np.array([t_func[day][k] for k in t_func[day]]).mean())
 
 # Functioning windows 
-if country in window_data.columns.get_level_values(0):
-    window = {}
-    
-    window['working']   = {'main':      [[window_data[country]['Start']['Working']['Main'][1],       window_data[country]['End']['Working']['Main'][1]],  
-                                         [window_data[country]['Start']['Working']['Main'][2],       window_data[country]['End']['Working']['Main'][2]]], 
-                           'free time': [[window_data[country]['Start']['Working']['Free time'][1],  window_data[country]['End']['Working']['Free time'][1]],   
-                                         [window_data[country]['Start']['Working']['Free time'][2],  window_data[country]['End']['Working']['Free time'][2]], 
-                                         [window_data[country]['Start']['Working']['Free time'][3],  window_data[country]['End']['Working']['Free time'][3]]]}
-    window['student']   = {'main':      [[window_data[country]['Start']['Student']['Main'][1],       window_data[country]['End']['Student']['Main'][1]],  
-                                         [window_data[country]['Start']['Student']['Main'][2],       window_data[country]['End']['Student']['Main'][2]], 
-                                         [window_data[country]['Start']['Student']['Main'][3],       window_data[country]['End']['Student']['Main'][3]]], 
-                           'free time': [[window_data[country]['Start']['Student']['Free time'][1],  window_data[country]['End']['Student']['Free time'][1]],    
-                                         [window_data[country]['Start']['Student']['Free time'][2],  window_data[country]['End']['Student']['Free time'][2]]]}
-    window['inactive']  = {'main':      [[window_data[country]['Start']['Inactive']['Main'][1],      window_data[country]['End']['Inactive']['Main'][1]]], 
-                           'free time': [[window_data[country]['Start']['Inactive']['Free time'][1], window_data[country]['End']['Inactive']['Free time'][1]],   
-                                         [window_data[country]['Start']['Inactive']['Free time'][2], window_data[country]['End']['Inactive']['Free time'][2]]]}
+if country in window_data.columns.get_level_values(0):    
+    country_window = country
 else: 
     print('\n[WARNING] There are no specific functioning windows defined for the selected country, standard windows will be used. \nEdit the "windows.csv" file to add specific functioning windows.\n')
+    country_window = 'Standard'
     
-    window = {}
-    window_type = 'Standard'
-    
-    window['working']   = {'main':      [[window_data[window_type]['Start']['Working']['Main'][1],       window_data[window_type]['End']['Working']['Main'][1]],  
-                                         [window_data[window_type]['Start']['Working']['Main'][2],       window_data[window_type]['End']['Working']['Main'][2]]], 
-                           'free time': [[window_data[window_type]['Start']['Working']['Free time'][1],  window_data[window_type]['End']['Working']['Free time'][1]],   
-                                         [window_data[window_type]['Start']['Working']['Free time'][2],  window_data[window_type]['End']['Working']['Free time'][2]], 
-                                         [window_data[window_type]['Start']['Working']['Free time'][3],  window_data[window_type]['End']['Working']['Free time'][3]]]}
-    window['student']   = {'main':      [[window_data[window_type]['Start']['Student']['Main'][1],       window_data[window_type]['End']['Student']['Main'][1]],  
-                                         [window_data[window_type]['Start']['Student']['Main'][2],       window_data[window_type]['End']['Student']['Main'][2]], 
-                                         [window_data[window_type]['Start']['Student']['Main'][3],       window_data[window_type]['End']['Student']['Main'][3]]], 
-                           'free time': [[window_data[window_type]['Start']['Student']['Free time'][1],  window_data[window_type]['End']['Student']['Free time'][1]],    
-                                         [window_data[window_type]['Start']['Student']['Free time'][2],  window_data[window_type]['End']['Student']['Free time'][2]]]}
-    window['inactive']  = {'main':      [[window_data[window_type]['Start']['Inactive']['Main'][1],      window_data[window_type]['End']['Inactive']['Main'][1]]], 
-                           'free time': [[window_data[window_type]['Start']['Inactive']['Free time'][1], window_data[window_type]['End']['Inactive']['Free time'][1]],   
-                                         [window_data[window_type]['Start']['Inactive']['Free time'][2], window_data[window_type]['End']['Inactive']['Free time'][2]]]}
+window = {}
+
+window['working']   = {'main':      [[window_data[country_window]['Start']['Working']['Main'][1],       window_data[country_window]['End']['Working']['Main'][1]],  
+                                     [window_data[country_window]['Start']['Working']['Main'][2],       window_data[country_window]['End']['Working']['Main'][2]]], 
+                       'free time': [[window_data[country_window]['Start']['Working']['Free time'][1],  window_data[country_window]['End']['Working']['Free time'][1]],   
+                                     [window_data[country_window]['Start']['Working']['Free time'][2],  window_data[country_window]['End']['Working']['Free time'][2]], 
+                                     [window_data[country_window]['Start']['Working']['Free time'][3],  window_data[country_window]['End']['Working']['Free time'][3]]]}
+window['student']   = {'main':      [[window_data[country_window]['Start']['Student']['Main'][1],       window_data[country_window]['End']['Student']['Main'][1]],  
+                                     [window_data[country_window]['Start']['Student']['Main'][2],       window_data[country_window]['End']['Student']['Main'][2]], 
+                                     [window_data[country_window]['Start']['Student']['Main'][3],       window_data[country_window]['End']['Student']['Main'][3]]], 
+                       'free time': [[window_data[country_window]['Start']['Student']['Free time'][1],  window_data[country_window]['End']['Student']['Free time'][1]],    
+                                     [window_data[country_window]['Start']['Student']['Free time'][2],  window_data[country_window]['End']['Student']['Free time'][2]]]}
+window['inactive']  = {'main':      [[window_data[country_window]['Start']['Inactive']['Main'][1],      window_data[country_window]['End']['Inactive']['Main'][1]]], 
+                       'free time': [[window_data[country_window]['Start']['Inactive']['Free time'][1], window_data[country_window]['End']['Inactive']['Free time'][1]],   
+                                     [window_data[country_window]['Start']['Inactive']['Free time'][2], window_data[country_window]['End']['Inactive']['Free time'][2]]]}
 
 #Re-format functioning windows to calculare the Percentage of travels in functioning windows 
 wind_temp = copy.deepcopy(window)
