@@ -9,6 +9,8 @@ import copy
 import matplotlib.ticker as mtick
 from pathlib import Path
 import pickle
+from initialise import tot_users_calc
+import enlopy as el
 
 #%% Post-processing
 '''
@@ -116,7 +118,7 @@ def Profile_df_plot(Profile_df, year, country, start = '01-01 00:00:00', end = '
     
     return ax
 
-def Charging_Profile_df_plot(Profile_df, year, country, start = '01-01 00:00:00', end = '12-31 23:59:00'):
+def Charging_Profile_df_plot(Profile_df, year, country, color = 'blue', start = '01-01 00:00:00', end = '12-31 23:59:00'):
     
     start_plot = str(year) + ' ' + start
     end_plot = str(year) + ' ' + end
@@ -124,7 +126,7 @@ def Charging_Profile_df_plot(Profile_df, year, country, start = '01-01 00:00:00'
     Profiles_df_plot = Profile_df[start_plot : end_plot]   
     
     figsize = (10,5)
-    ax = Profiles_df_plot.plot(kind='line', color='blue', rot=0, fontsize=15, legend=False, figsize = figsize)
+    ax = Profiles_df_plot.plot(kind='line', color=color, rot=0, fontsize=15, legend=False, figsize = figsize)
     ax.set_ylabel('Power [kW]', fontsize = 15)
     ax.set_title("Charging Demand Profile - " + country, fontsize = 15) 
     
@@ -140,8 +142,8 @@ def Comparison_plot(Profile_df, Charging_Profile_df, year, country, start = '01-
 
     figsize = (10,5)
     
-    ax = Profiles_df_plot.plot(kind='line', color='royalblue', rot=0, fontsize=15, legend=True, figsize = figsize)
-    ax = Charging_Profiles_df_plot.plot(kind='line', color='orange', ax = ax, rot=0, fontsize=15, legend=True, figsize = figsize)
+    ax = Profiles_df_plot.plot(kind='line', color='royalblue', rot=0, fontsize=15, alpha = 0.7, legend=True, figsize = figsize)
+    ax = Charging_Profiles_df_plot.plot(kind='line', color='orange', ax = ax, rot=0, fontsize=15, alpha = 0.7, legend=True, figsize = figsize)
     
     ax.set_ylabel('Power [kW]', fontsize = 15)
     ax.set_title("Comparison of Charging and Transport Profiles - " + country, fontsize = 15) 
@@ -150,11 +152,7 @@ def Comparison_plot(Profile_df, Charging_Profile_df, year, country, start = '01-
 
 def Usage_df_plot(Usage_df, year, country, User_list, start = '01-01 00:00:00', end = '12-31 23:59:00'):
     
-    # Calculation of the total number of users
-    num_users = {}
-    for i in range(len(User_list)):
-        num_users[User_list[i].user_name] = User_list[i].num_users
-        tot_users = sum(num_users.values())
+    tot_users = tot_users_calc(User_list)
     
     start_plot = str(year) + ' ' + start
     end_plot = str(year) + ' ' + end
@@ -217,9 +215,9 @@ def Usage_dataframe(Profiles_series, year):
    
     return Profiles_df
 
-def temp_import(country, year, inputfile = r"TimeSeries\temp.csv"):
+def temp_import(country, year, inputfile_temp = r"Input_data\temp.csv"):
       
-    temp_profile = pd.read_csv(inputfile, index_col = 0)
+    temp_profile = pd.read_csv(inputfile_temp, index_col = 0)
     temp_profile = pd.DataFrame(temp_profile[country]) 
     temp_profile = temp_profile.loc[temp_profile.index.str.contains(str(year))]
 
@@ -234,7 +232,7 @@ def Profile_temp(Profiles_df, temp_profile,  year = 2016):
 
     Profiles_df_c = copy.deepcopy(Profiles_df)
 
-    minutes = pd.date_range(start=str(year) + '-01-01', end=str(year) + '-12-31 23:59:00', freq='min')
+    minutes = pd.date_range(start=str(year) + '-01-01', end=str(year) + '-12-31 23:59:00', freq='T', tz = 'UTC')
     temp_profile.set_index(minutes, inplace = True)
             
     temp_profile = temp_profile.loc[Profiles_df_c.index]
@@ -280,6 +278,17 @@ def Resample(df):
     
     return df
 
+def Charging_user_formatting(Ch_dict, dummy_days):
+    
+    Charging_dict = {}
+    dummy_minutes = dummy_days * 1440
+    
+    for key in Ch_dict:
+        Charging_dict[key] = np.transpose(np.vstack(Ch_dict[key]))
+        Charging_dict[key] = Charging_dict[key][dummy_minutes:-dummy_minutes, :]
+    
+    return Charging_dict
+    
 
 #%% Export individual profiles
 '''
@@ -289,18 +298,18 @@ for i in range (len(Profile)):
 
 # Export Profiles
 
-def export_csv(filename, variable, country):
+def export_csv(filename, variable, inputfile):
         
-    folder = r'results/%s/' % country
+    folder = f'results/{inputfile}/' 
     Path(folder).mkdir(parents=True, exist_ok=True) 
-    variable.to_csv(folder + '%s.csv' %filename)
+    variable.to_csv(f'{folder}{filename}.csv')
     
-def export_pickle(filename, variable, country):
+def export_pickle(filename, variable, inputfile):
     
-    folder = r'results/%s/' % country
+    folder = f'results/{inputfile}/' 
     Path(folder).mkdir(parents=True, exist_ok=True) 
 
-    file = open(folder + '%s.pkl' %filename,'wb')
+    file = open(f'{folder}{filename}.pkl','wb')
     pickle.dump(variable, file)
     file.close()
     

@@ -6,15 +6,16 @@ import numpy.ma as ma
 import random 
 import math
 import pandas as pd
-from initialise import Initialise_model, Initialise_inputs, charge_prob, charge_prob_const, infrastructure_prob, infrastructure_prob_const, SOC_initial_f, SOC_initial_f_const
+import datetime
+from initialise import Initialise_model, Initialise_inputs 
 
 #%% Core model stochastic script
 
-def Stochastic_Process_Mobility(country, year):
+def Stochastic_Process_Mobility(inputfile, country, year):
     
     (peak_enlarg, mu_peak, s_peak, Year_behaviour, User_list, 
      Profile, Usage, Profile_user, num_profiles_user, 
-     num_profiles_sim, dummy_days) = Initialise_inputs(country, year)
+     num_profiles_sim, dummy_days) = Initialise_inputs(inputfile, country, year)
     
     '''
     Calculation of the peak time range, which is used to discriminate between off-peak and on-peak coincident switch-on probability
@@ -230,9 +231,9 @@ def Stochastic_Process_Mobility(country, year):
                                 
                                 if tot_time > rand_time: #control to check when the total functioning time is reached. It will be typically overcome, so a correction is applied to avoid this
                                     indexes_adj = indexes[:-(tot_time-rand_time)] #correctes indexes size to avoid overcoming total time
-                                    if np.in1d(peak_time_range,indexes_adj).any() and App.fixed == 'no': #check if indexes are in peak window and if the coincident behaviour is locked by the "fixed" attribute
+                                    if np.isin(peak_time_range,indexes_adj, assume_unique = True).any() and App.fixed == 'no': #check if indexes are in peak window and if the coincident behaviour is locked by the "fixed" attribute
                                         coincidence = min(App.number,max(1,math.ceil(random.gauss(math.ceil(App.number*mu_peak),(s_peak*App.number*mu_peak))))) #calculates coincident behaviour within the peak time range
-                                    elif np.in1d(peak_time_range,indexes_adj).any()== False and App.fixed == 'no': #check if indexes are off-peak and if coincident behaviour is locked or not
+                                    elif (not np.isin(peak_time_range,indexes_adj, assume_unique = True).any()) and App.fixed == 'no': #check if indexes are off-peak and if coincident behaviour is locked or not
                                         Prob = random.uniform(0,(App.number-1)/App.number) #calculates probability of coincident switch_ons off-peak
                                         array = np.arange(0,App.number)/App.number
                                         try:
@@ -264,9 +265,9 @@ def Stochastic_Process_Mobility(country, year):
                                     tot_time = (tot_time - indexes.size) + indexes_adj.size #updates the total time correcting the previous value
                                     break #exit cycle and go to next App
                                 else: #if the tot_time has not yet exceeded the App total functioning time, the cycle does the same without applying corrections to indexes size
-                                    if np.in1d(peak_time_range,indexes).any() and App.fixed == 'no':
+                                    if (np.isin(peak_time_range,indexes, assume_unique = True).any()) and App.fixed == 'no':
                                         coincidence = min(App.number,max(1,math.ceil(random.gauss(math.ceil(App.number*mu_peak),(s_peak*App.number*mu_peak)))))
-                                    elif np.in1d(peak_time_range,indexes).any() == False and App.fixed == 'no':
+                                    elif not np.isin(peak_time_range,indexes, assume_unique = True).any() and App.fixed == 'no':
                                         Prob = random.uniform(0,(App.number-1)/App.number)
                                         array = np.arange(0,App.number)/App.number
                                         try:
@@ -314,242 +315,11 @@ def Stochastic_Process_Mobility(country, year):
                 Profile_dict[Us.user_name].append(daily_use_tot)
             Tot_Classes = Tot_Classes + Us.load #adds the User load to the total load of all User classes
             Tot_Usage = Tot_Usage + Us.usage
-        if (dummy_days - 1) < prof_i < (num_profiles_sim - 7): # Do not append dummy days
+        Profile_user.append(Profile_dict)
+        if (dummy_days - 1) < prof_i < (num_profiles_sim - dummy_days): # Do not append dummy days
             Profile.append(Tot_Classes) #appends the total load to the list that will contain all the generated profiles
             Usage.append(Tot_Usage)#appends the total usage to the list that will contain all the generated profiles
-            Profile_user.append(Profile_dict)
         
-        if (dummy_days - 1) < prof_i < (num_profiles_sim - 7):
             print(f'Profile {prof_i - dummy_days +1}/{num_profiles_user} completed') #screen update about progress of computation
     
-    return(Profile, Usage, User_list, Profile_user)
-
-    
-def Charging_Process(Profiles_user, User_list, year, charging_mode = 'Uncontrolled', logistic = False, SOC_initial = 'random', infr_prob = 0.5):
-    
-    # Definition of battery limits to avoid degradation
-    SOC_max = 0.8 # Maximum SOC at which the battery is charged
-    SOC_min_rand = 0.5 # Minimum SOC level with which the car can start the simulation
-    SOC_min = 0.2 # Minimum SOC level that forces the charging event
-    
-    # Calculate the number of users in simulation for screen update
-    num = {}
-    for i in range(len(User_list)):
-        num[User_list[i].user_name] = User_list[i].num_users
-        tot_users = sum(num.values())    
-    
-    # Check that the charging mode is one of the expected ones
-    charging_mode_types = ['Travel Based', 'Uncontrolled', 'Night Charge']
-    if charging_mode not in charging_mode_types:
-        raise ValueError(f"[WARNING] Invalid Charging Mode. Expected one of: {charging_mode_types}")                    
-    
-    # Check that the initial SOC is in the expected way
-    if (SOC_initial != 'random' and 
-        not isinstance(SOC_initial, (int, float))): 
-            raise ValueError(f"[WARNING] Invalid SOC initial. Expected etiher 'random', or a value between {SOC_min} and 1")                    
-
-    # Check that the infrastructure probability is in the expected way
-    if (infr_prob != 'piecewise' and 
-        not isinstance(infr_prob, (int, float))): 
-            raise ValueError("[WARNING] Invalid Infrastructure probability. Expected etiher 'piecewise', or a value between 0 and 1")                        
-    
-    eff = 0.95  # Charging/discharging efficiency
-    
-    P_ch_station_list = [3.7, 11, 120] # Nominal power of the charging station [kW]
-    prob_ch_station = [0.6, 0.3, 0.1]
-    
-    # Initialization of output variables
-    Charging_profile_user = {}
-    Charging_profile = np.zeros(len(Profiles_user['Working - Large car']))
-    SOC_user = {}
-    plug_in_user = {}
-    num_us = 0
-    
-    # Creation of date array 
-    minutes = pd.date_range(start=str(year) + '-01-01', periods = len(Profiles_user['Working - Large car']), freq='T')
-    
-    # Check if introducing the logistic function for behavioural modeling
-    if logistic is True: # Probability of charging based on the SOC of the car 
-        ch_prob = charge_prob
-    else: # The user will always try to charge (probability = 1 for every SOC)
-        ch_prob = charge_prob_const
-    
-    # Check which infrastructure probability function to use 
-    if infr_prob == 'piecewise': # Use of piecewise function based on hour of the day 
-        infr_p = infrastructure_prob 
-    elif isinstance(infr_prob, (int, float)): # Constant probability of finding infrastructure
-        infr_p = infrastructure_prob_const
-
-    # Definition of range in which the charging is shifted
-    if charging_mode == 'Night Charge':
-        charge_range = minutes.indexer_between_time('22:00', '7:00', include_start=True, include_end=False)
-    else: 
-        charge_range = np.arange(0, len(minutes))
-
-    # if SOC_initial == 'random': #Control rountine on the Initial SOC value
-    #     SOC_i = SOC_initial_f              #function to select random value
-    # elif isinstance(SOC_initial, (int, float)): 
-    #     SOC_i = SOC_initial_f_const        #function to select constant value as the one indiated by the user
-
-    print('\nPlease wait for the charging profiles...')   
-    
-    for us_num, Us in enumerate(User_list): # Simulates for each user type
-        
-        #Initialise lists
-        Charging_profile_user[Us.user_name] = []
-        SOC_user[Us.user_name] = []
-        plug_in_user[Us.user_name] = []
-        
-        # Brings tha values put to 0.001 for the mask to 0
-        Profiles_user[Us.user_name] = np.where(Profiles_user[Us.user_name] < 0.1, 0, Profiles_user[Us.user_name]) 
-        #Sets to power consumed by the car to negative values
-        power_Us = np.where(Profiles_user[Us.user_name] > 0, -Profiles_user[Us.user_name], 0) 
-        power_Us = power_Us / 1000 #kW
-        
-        # Users who never take the car in the considered period are skipped
-        power_Us = power_Us[:,np.where(power_Us.any(axis=0))[0]] 
-        
-        for i in range(power_Us.shape[1]): # Simulates for each single user with at least one travel
-                        
-            plug_in = np.zeros(len(Profiles_user[Us.user_name])) # Initialise plug-in array
-            
-            power = power_Us[:, i] # Filter power for the specific user
-            
-            # Variation of SOC for each minute, capacity multiplied by 60 to evaluate the capacity in kW - min
-            delta_soc = power / (Us.App_list[0].Battery_cap * 60) 
-            
-            #Control rountine on the Initial SOC value
-            if SOC_initial == 'random': #function to select random value
-                SOC_init = SOC_initial_f(SOC_max, SOC_min_rand, SOC_initial)           
-            elif isinstance(SOC_initial, (int, float)): # If initial SOC is a number, that will be the initial SOC
-                SOC_init = SOC_initial_f_const(SOC_max, SOC_min_rand, SOC_initial)    
-            
-            # Calculation of the SOC array
-            SOC = delta_soc
-            SOC[0] = SOC_init
-            SOC = np.cumsum(SOC)
-            
-            # travel_ind = np.where(power < 0)[0] 
-            # travel_ind = np.split(travel_ind, np.where(np.diff(travel_ind) != 1)[0]+1)
-            # travel_ind = [np.array([ind[0],ind[-1]]) for ind in travel_ind] #list of array of index of when there is a mobility travel
-            
-            # Calculation of the indexes of each parking start and end 
-            park_ind = np.where(power == 0)[0]
-            park_ind = np.split(park_ind, np.where(np.diff(park_ind) != 1)[0]+1)
-            park_ind = [np.array([ind[0],ind[-1]+1]) for ind in park_ind] #list of array of index of when there is a mobility travel
-                
-            en_to_charge = 0  # Initialise value for Travel Based chaging mode          
-            
-            # Iterates over all parkings (park = 0 corresponds to the period where no travel was made yet, so is not evaluated)
-            for park in range(1, len(park_ind)-1): 
-                
-                # SOC at the beginning of the parking
-                SOC_park = SOC[park_ind[park][0]]
-                
-                # Index range of when the car is parked                
-                ind_park_range = np.arange(park_ind[park][0], park_ind[park][1])                    
-                
-                #Charging only the energy consumed in the last travel                
-                if charging_mode == 'Travel Based':   
-                    travel_ind_range = np.arange(park_ind[park-1][1], park_ind[park][0])
-                    en_travel = abs(np.sum(power[travel_ind_range])) 
-                    en_charge_tot = en_travel + en_to_charge
-                else: 
-                    en_charge_tot = 0
-                    
-                # if logistic is True:                      # Option of introducing the probability of charging based on the SOC of the car (Behavioural aspect)
-                #     ch_prob = charge_prob(SOC[park_ind[park][0]])
-                # else:                                     # If the behavioural mode is not active, the user will always try to charge 
-                #     ch_prob = 1
-                # if infr_prob == 'piecewise':              # Use of piecewise function based on hour of the day 
-                #     infr_p = infrastructure_prob(minutes[park_ind[park][0]].hour, infr_prob) 
-                # elif isinstance(infr_prob, (int, float)): # Constant probability of finding infrastructure
-                #     infr_p = infr_prob
-                
-                # Energy used in the following travel
-                if park == range(1, len(park_ind))[-1]: # In the last park there is no following travel
-                    en_next_travel = 0
-                else:       
-                    next_travel_ind_range = np.arange(park_ind[park][1], park_ind[park+1][0])
-                    en_next_travel = abs(np.sum(power[next_travel_ind_range]))                 
-                
-                # Residual energy in the EV Battery
-                residual_energy = (Us.App_list[0].Battery_cap*60)*SOC_park
-                                
-                # Control to check if the user can charge based on infrastructure 
-                # availability, SOC, time of the day (Depending on the options activated)
-                if ((ch_prob(SOC_park) > np.random.rand() and
-                    infr_p(minutes, park_ind[park][0], infr_prob) > np.random.rand() and
-                    np.isin(ind_park_range, charge_range).any()) or # If parking happens during night
-                    np.around(SOC_park, 2) <= SOC_min or
-                    residual_energy < en_next_travel): 
-                    
-                # if (ch_prob > np.random.rand() and infr_p > np.random.rand()) or SOC[park_ind[park][0]] < SOC_min: #control to check if the user can charge based on infrastructure availability and SOC level (if behavioural modelling is activated)
-                    
-                    # Calculates the parking time
-                    t_park = int(park_ind[park][1] - park_ind[park][0])                    
-                    
-                    # Fills the array of plug in (1 = plugged, 0 = not plugged)
-                    plug_ind_range = np.arange(park_ind[park][0], park_ind[park][0] + t_park)
-                    np.put(plug_in, plug_ind_range, 1)
-                    
-                    # Samples the nominal power of the charging station
-                    P_ch_nom = random.choices(P_ch_station_list, weights=prob_ch_station)[0]                
-                    
-                    #Trying to charge always until SOC max
-                    if charging_mode != 'Travel Based': 
-                        en_charge_tot = (Us.App_list[0].Battery_cap*60)*(SOC_max - SOC_park)
-                    
-                    # Total charging time at P nominal 
-                    t_ch_tot = int(round(en_charge_tot/P_ch_nom)) 
-
-                    if charging_mode == 'Uncontrolled' or charging_mode == 'Travel Based':
-                        t_ch = min(t_ch_tot, t_park) # charge until SOC max, if parking time allows                   
-                        charge_ind_range = np.arange(park_ind[park][0], park_ind[park][0] + t_ch)
-                        P_charge = P_ch_nom # Charge at nominal power
-
-                    # elif charging_mode == 'Night Charge':
-                    if charging_mode == 'Night Charge':                        
-                        charge_ind_range = np.intersect1d(ind_park_range, charge_range)
-                        t_ch = len(charge_ind_range)
-                        if not charge_ind_range.size: # if array is empty means that we are in an extreme charging condition (SOC < 0.2 or next travel energy > SOC residual)
-                            t_ch = min(t_ch_tot, t_park) # charge until SOC max, if parking time allows                   
-                            charge_ind_range = np.arange(park_ind[park][0], park_ind[park][0] + t_ch)
-                            P_charge = P_ch_nom # Charge at nominal power
-                        # Minimum charging power (charging during night time)
-                        P_ch_min = min(en_charge_tot/len(charge_ind_range), P_ch_nom)
-                        P_charge = P_ch_min
-                        
-                    np.put(power, charge_ind_range, P_charge)
-                    en_to_charge = en_charge_tot - (t_ch * P_charge)
-                        
-                    delta_soc = power / (Us.App_list[0].Battery_cap * 60) # To evaluate the capacity in kW - min
-                    SOC = delta_soc
-                    SOC[0] = SOC_init
-                    SOC = np.cumsum(SOC)
-                
-                else: # if the user does not want to charge, then the energy consumed will be charged in a following parking                         
-                    en_to_charge = en_charge_tot                        
-                                    
-            power_pos = np.where(power<0, 0, power)
-            
-            SOC_user[Us.user_name].append(SOC)
-            Charging_profile_user[Us.user_name].append(power_pos)
-            plug_in_user[Us.user_name].append(plug_in)
-            
-            Charging_profile = Charging_profile + power_pos
-            
-            if all(SOC > 0): #Check that the car never has SOC < 0
-                continue
-            else: 
-                print(f"[WARNING: Charging process User {i + 1} ({Us.user_name}) not properly constructed, SOC < 0 in time {list(np.where(SOC<0)[0])}]") 
-        
-        num_us = num_us +  Us.num_users
-        print('Charging Profile', num_us, '/', tot_users, 'completed') #screen update about progress of computation
-    
-    return (Charging_profile_user, Charging_profile, SOC_user, plug_in_user)
-
-
-# SOC_user = SOC_user1
-# SOC_av = 0.8 - SOC_user['Working - Large car'][0]
-# SOC_av = SOC_av*100
+    return(Profile, Usage, User_list, Profile_user, dummy_days)

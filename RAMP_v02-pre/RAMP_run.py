@@ -23,59 +23,77 @@ under the License.
 
 #%% Import required modules
 
-import pandas as pd
 from stochastic_process import Stochastic_Process
-from stochastic_process_mobility import Stochastic_Process_Mobility, Charging_Process
+from stochastic_process_mobility import Stochastic_Process_Mobility
+from charging_process import Charging_Process
+import matplotlib.pyplot as plt
 
-from post_process import*
-
+import post_process as pp
+# from post_process import*
+import numpy as np
 from datetime import datetime
 startTime = datetime.now()
 
-# Calls the stochastic process and saves the result in a list of stochastic profiles [kW]
-# In this default example, the model runs for 1 input files ("IT"),
-# but single or multiple files can be run increasing the list of countries to be run
-# and naming further input files with corresponding country code
+'''
+Calls the stochastic process and saves the result in a list of stochastic profiles [kW]
+In this default example, the model runs for 1 input files ("IT"),
+but single or multiple files can be run increasing the list of countries to be run
+and naming further input files with corresponding country code
+'''
 
-mobility = 'True' # 'True' or 'False' to select the mobility version of the stochastic process
+mobility = True # True or False to select the mobility version of the stochastic process
+charging = True # True or False to select to activate the calculation of the charging profiles
 
 # Define country and year to be considered when generating profiles
-country = 'IT'
-year = 2016
+inputfile = 'NL - Validation'
+country = 'NL'
+year = 2015
 
-write_variables = False
+# Define attributes for the charging profiles
+charging_mode = 'Uncontrolled' # Select charging mode ('Until SOC_max', 'Travel Based')
+logistic = False # Select the use of a logistic curve to model the probability of charging based on the SOC of the car
+SOC_initial = 'random' # Initial SOC at first minute ('random', number between SOC_min (default 0.2) and 1)
+infr_prob = 0.5 # Probability of finding the infrastructure when parking ('piecewise', number between 0 and 1)
+
+write_variables = True
 
 #inputfile for the temperature profile: 
-inputfile = r"TimeSeries\temp_ninja_pop.csv"
+inputfile_temp = r"Input_data\temp_ninja_pop.csv"
+inputfile_pv = r"Input_data\ninja_pv_europe_v1.1_merra2.csv"
+inputfile_wind = r"Input_data\ninja_wind_europe_v1.1_current_national.csv"
+inputfile_cap = "Input_data\TIMES_Capacities_technology_2050.csv"
+inputfile_load = r"Input_data\time_series_60min_singleindex_filtered.csv"
 
 # if mobility == 'False':
 #     Profiles_list = Stochastic_Process(j)
-if mobility == 'True':
-    Profiles_list, Usage_list, User_list, Profiles_user_list = Stochastic_Process_Mobility(country, year)
+if mobility:
+    (Profiles_list, Usage_list, User_list, Profiles_user_list, 
+    dummy_days) = Stochastic_Process_Mobility(inputfile, country, year)
 
 # Post-processes the results and generates plots
-    Profiles_avg, Profiles_list_kW, Profiles_series = Profile_formatting(Profiles_list)
-    Usage_avg, Usage_series = Usage_formatting(Usage_list)
-    Profiles_user = Profiles_user_formatting(Profiles_user_list)
+    Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)
+    Usage_avg, Usage_series = pp.Usage_formatting(Usage_list)
+    Profiles_user = pp.Profiles_user_formatting(Profiles_user_list)
     
 #Create a dataframe with the profile
-    Profiles_df = Profile_dataframe(Profiles_series, year) 
-    Usage_df = Usage_dataframe(Usage_series, year)
-
-# Add temperature correction to the Power Profiles
-    temp_profile = temp_import(country, year, inputfile = inputfile) #Import temperature profiles, change the default path to the custom one
-    Profiles_temp = Profile_temp(Profiles_df, year = year, temp_profile = temp_profile)
+    Profiles_df = pp.Profile_dataframe(Profiles_series, year) 
+    Usage_df = pp.Usage_dataframe(Usage_series, year)
 
 # Time zone correction for profiles and usage
-    Profiles_utc = Time_correction(Profiles_temp, country, year) 
-    Usage_utc = Time_correction(Usage_df, country, year)    
+    Profiles_utc = pp.Time_correction(Profiles_df, country, year) 
+    Usage_utc = pp.Time_correction(Usage_df, country, year)    
+
+# Add temperature correction to the Power Profiles 
+# To be done after the UTC correction because source data for Temperatures have time in UTC
+    temp_profile = pp.temp_import(country, year, inputfile_temp) #Import temperature profiles, change the default path to the custom one
+    Profiles_temp = pp.Profile_temp(Profiles_utc, year = year, temp_profile = temp_profile)
 
 # Resampling the UTC Profiles
-    Profiles_utc_h = Resample(Profiles_utc)
+    Profiles_temp_h = pp.Resample(Profiles_temp)
 
 # by default, profiles and usage are plotted as a DataFrame
-    Profile_df_plot(Profiles_df, start = '01-01 00:00:00', end = '12-31 23:59:00', year = year, country = country)
-    Usage_df_plot(Usage_utc, start = '01-01 00:00:00', end = '12-31 23:59:00', year = year, country = country, User_list = User_list)
+    pp.Profile_df_plot(Profiles_df, start = '01-01 00:00:00', end = '12-31 23:59:00', year = year, country = country)
+    pp.Usage_df_plot(Usage_utc, start = '01-01 00:00:00', end = '12-31 23:59:00', year = year, country = country, User_list = User_list)
     # Profile_series_plot(Profiles_series) #by default, profiles and usage are plotted as a series
     # Usage_series_plot(Usage_series)
 
@@ -90,61 +108,115 @@ if mobility == 'True':
 
 #if more than one daily profile is generated, also cloud plots are shown
     if len(Profiles_list) > 1:
-        Profile_cloud_plot(Profiles_list, Profiles_avg)
+        pp.Profile_cloud_plot(Profiles_list, Profiles_avg)
 
 #Exporting all the main quantities
-    if write_variables is True:
-        export_csv('Profiles', Profiles_utc, country)
-        export_csv('Profiles Hourly', Profiles_utc_h, country)
-        export_csv('Usage', Usage_utc, country)
+    if write_variables:
+        pp.export_csv('Profiles', Profiles_temp, inputfile)
+        pp.export_csv('Profiles Hourly', Profiles_temp_h, inputfile)
+        pp.export_csv('Usage', Usage_utc, inputfile)
        
-        export_pickle('Profiles_User', Profiles_user, country)
+        pp.export_pickle('Profiles_User', Profiles_user, inputfile)
+   
+    if charging:
+        Ch_profile_user1, Charging_profile1, SOC_user1, plug_in_user1, en_sys_tot1 = Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputfile_load, inputfile_pv, inputfile_wind, inputfile_cap, charging_mode = 'Uncontrolled', logistic = False, SOC_initial = 'random', infr_prob = 0.5, 
+                          Ch_stations = (list(np.arange(0.5, 12.5, 1)), [0.009, 0.007, 0.022, 0.786, 0.006, 0.005, 0.005, 0.016, 0.042, 0.024, 0.047, 0.04 ]))
+        # Ch_profile_user2, Charging_profile2, SOC_user2, plug_in_user2, en_sys_tot2 = Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputfile_load, inputfile_pv, inputfile_wind, inputfile_cap , charging_mode = 'Night Charge', logistic = False, SOC_initial = 'random', infr_prob = 'piecewise')
+        # Ch_profile_user3, Charging_profile3, SOC_user3, plug_in_user3 = Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputfile_load, inputfile_pv, inputfile_wind, inputfile_cap , charging_mode = 'Self-consumption', logistic = False, SOC_initial = 'random', infr_prob = 'piecewise')
+        # Ch_profile_user4, Charging_profile4, SOC_user4, plug_in_user4, en_sys_tot4 = Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputfile_load, inputfile_pv, inputfile_wind, inputfile_cap , charging_mode = 'Perfect Foresight', logistic = False, SOC_initial = 'random', infr_prob = 'piecewise')
+        # Ch_profile_user5, Charging_profile5, SOC_user5, plug_in_user5, en_sys_tot5 = Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputfile_load, inputfile_pv, inputfile_wind, inputfile_cap , charging_mode = 'RES Integration', logistic = False, SOC_initial = 'random', infr_prob = 'piecewise')
+
+        # (Charging_profile_us1, SOC_us1, plug_in_us1) = list(map(
+        # Charging_user_formatting, [Ch_profile_user1, SOC_user1, plug_in_user1], [dummy_days, dummy_days, dummy_days]))       
+        # (Charging_profile_us2, SOC_us2, plug_in_us2) = list(map(
+        # Charging_user_formatting, [Ch_profile_user2, SOC_user1, plug_in_user1], [dummy_days, dummy_days, dummy_days]))
+        # (Charging_profile_us3, SOC_us3, plug_in_us3) = list(map(
+        # Charging_user_formatting, [Ch_profile_user3, SOC_user3, plug_in_user3], [dummy_days, dummy_days, dummy_days]))
+
+        Charging_profile1_df = pp.Charging_Profile_dataframe(Charging_profile1, year) 
+        # Charging_profile2_df = pp.Charging_Profile_dataframe(Charging_profile2, year) 
+        # # Charging_profile3_df = pp.Charging_Profile_dataframe(Charging_profile3, year) 
+        # Charging_profile4_df = pp.Charging_Profile_dataframe(Charging_profile4, year) 
+        # Charging_profile5_df = pp.Charging_Profile_dataframe(Charging_profile5, year) 
+        
+        # Postprocess of charging profiles 
+        Charging_profile1_utc = pp.Time_correction(Charging_profile1_df, country, year) 
+        Charging_Profiles_temp = pp.Profile_temp(Charging_profile1_utc, year = year, temp_profile = temp_profile)
+
+        pp.export_csv('Charging Profiles', Charging_Profiles_temp, inputfile)
+
+        pp.Charging_Profile_df_plot(Charging_Profiles_temp, color = 'green', start = '01-01 00:00:00', end = '12-31 23:59:00', year = year, country = country)
+        
+        # AF = en_sys_tot4 / (tot_battery_cap_calc(User_list) * 60)
+        # AF_df = pp.Charging_Profile_dataframe(AF, year) 
+        # ax = pp.Charging_Profile_df_plot(AF_df, start = '01-01 00:00:00', end = '12-31 23:59:00', year = year, country = country)
+        # ax.set_title('AF - Perfect Foresight charging mode')
+        # ax.set_ylabel('')
+        
+        # el.plot.plot_percentiles(Charging_profile1_df, x = 'hour', zz = 'day')
+#%%
+        # fig = plt.figure(figsize=(20, 15))
+        # plt.rcParams.update({'font.size': 15})        
+        
+        # gs = fig.add_gridspec(3,2)
+        # ax1 = fig.add_subplot(gs[0, 0])
+        # ax2 = fig.add_subplot(gs[0, 1], sharey=ax1)
+        # ax3 = fig.add_subplot(gs[1, :])
+        # # ax4 = fig.add_subplot(gs[2, 0])
+        # ax5 = fig.add_subplot(gs[2, 0])
+        # ax6 = fig.add_subplot(gs[2, 1], sharey=ax5)
+
+        # # fig, axes = plt.subplots(nrows=2, ncols=3, sharey = True, sharex=False, figsize=(15, 4))
+
+        # ax1 = Charging_profile1_df.plot(color = 'orangered', ax = ax1, alpha = 0.7)
+        # ax1 = (Profiles_df/1000).plot(color = 'green', ax = ax1, alpha = 0.5)
+        # ax1.set_ylabel('Power [kW]')
+        # ax1.legend(["Uncontrolled", "Mobility Profile"])
+        # ax1.set_ylim(0, 2000)
+        
+        # ax2 = Charging_profile4_df.plot(color = 'lightpink', ax =  ax2, alpha = 0.7)
+        # ax2 = (Profiles_df/1000).plot(color = 'green', ax =  ax2, alpha = 0.5)
+        # ax2.legend(["Perfect Foresight", "Mobility Profile"])
+        # ax2.set_ylim(0, 2000)
+
+        # ax3 = Charging_profile1_df.plot(color = 'orangered', ax = ax3, alpha = 0.7)
+        # ax3 = Charging_profile4_df.plot(color = 'lightpink', ax =  ax3, alpha = 0.7)
+        # ax3 = Charging_profile2_df.plot(color = 'blue', ax =  ax3, alpha = 0.7)
+        # # ax3 = Charging_profile3_df.plot(color = 'gold', ax =  ax3, alpha = 0.7)
+        # ax3 = Charging_profile5_df.plot(color = 'black', ax = ax3, alpha = 0.7)
+        # ax3.set_ylabel('Power [kW]')
+        # ax3.legend(["Uncontrolled", "Perfect Foresight", "Night charge", "RES Integration"])
+        # ax3.set_ylim(0, 2000)
+
+        # # ax4 = Charging_profile3_df.plot(color = 'gold', ax =  ax4, alpha = 0.7)
+        # # ax4 = (Profiles_df/1000).plot(color = 'green', ax =  ax4, alpha = 0.5)
+        # # ax4.set_ylabel('Power [kW]')
+        # # ax4.legend(["Self-consumption", "Mobility Profile"])
+        # # ax4.set_ylim(0, 2000)
+
+        # ax5 = Charging_profile2_df.plot(color = 'blue', ax = ax5, alpha = 0.7)
+        # ax5 = (Profiles_df/1000).plot(color = 'green', ax = ax5, alpha = 0.5)
+        # ax5.legend(["Night charge", "Mobility Profile"])
+        # ax5.set_ylim(0, 2000)
+        
+        # ax6 = Charging_profile5_df.plot(color = 'black', ax = ax6, alpha = 0.7)
+        # ax6 = (Profiles_df/1000).plot(color = 'green', ax = ax6, alpha = 0.5)
+        # ax6.legend(["RES Integration", "Mobility Profile"])
+        # ax6.set_ylim(0, 2000)
+
+        # plt.tight_layout()
+
+        
+#%%
+        # Charging_profile_df = Charging_Profile_dataframe(Charging_profile3, year) 
     
-    Charging_profile_user1, Charging_profile1, SOC_user1 = Charging_Process(Profiles_user, User_list, simple = True)
-    Charging_profile_user2, Charging_profile2, SOC_user2 = Charging_Process(Profiles_user, User_list, simple = False)
-
-    Charging_profile1_df = Charging_Profile_dataframe(Charging_profile1, year) 
-    Charging_profile2_df = Charging_Profile_dataframe(Charging_profile2, year) 
-
-    ax = Charging_profile1_df.plot(color = 'gold', alpha = 0.5, legend = 'Travel Based Charging')
-    ax = Charging_profile2_df.plot(color = 'blue', ax = ax, alpha = 0.5, legend = 'Charging as much as possible')
-    ax.legend(["Charging as much as possible", "Travel Based Charging"])
-         
-    Charging_profile_df = Charging_Profile_dataframe(Charging_profile, year) 
-
-    Charging_Profile_df_plot(Charging_profile_df, start = '01-01 00:00:00', end = '12-31 23:59:00', year = year, country = country)
-
-    ax1 = Comparison_plot(Profiles_df, Charging_profile1_df, start = '01-01 00:00:00', end = '12-31 23:59:00', year = year, country = country)
-    ax1.legend(["Moblity Profile", "Charging as much as possible"])
     
-    ax2 = Comparison_plot(Profiles_df, Charging_profile2_df, start = '01-01 00:00:00', end = '12-31 23:59:00', year = year, country = country)
-    ax2.legend(["Moblity Profile", "Travel Based Charging"])
-
+        # ax1 = Comparison_plot(Profiles_df, Charging_profile1_df, start = '01-01 00:00:00', end = '12-31 23:59:00', year = year, country = country)
+        # ax1.legend(["Moblity Profile", "Uncontrolled"])
+        # ax1.set_ylim(0,1000)
+        
+        # ax2 = Comparison_plot(Profiles_df, Charging_profile2_df, start = '01-01 00:00:00', end = '12-31 23:59:00', year = year, country = country)
+        # ax2.legend(["Moblity Profile", "Night Charge"])
+        # ax2.set_ylim(0,1000)
 
 print('\nExecution Time:', datetime.now() - startTime)
-
-# check = np.zeros((len(Profiles_series), len(Profiles_user)))
-# a = {}
-# for i, us_type in enumerate(Profiles_user.keys2()):
-#     check[:,i] = np.sum(Profiles_user[us_type], axis = 1)
-# check = np.sum(check, axis = 1)
-# a = np.round(check,0) == np.round(Profiles_series,0)
-# if a.all():
-#     print('Detailed Profile correctly extracted' )
-
-daily_use_tot = np.random.random(1440)
-daily_use_tot1 = np.random.random(1440)
-
-# from timeit import default_timer as timer
-
-# start1 = timer()
-# power = daily_use_tot + daily_use_tot1
-# end1 = timer()
-
-
-# start2 = timer()
-# power = np.sum([daily_use_tot, daily_use_tot1], axis = 0)
-# end2 = timer()
-
-# t1 = end1 - start1
-# t2 = end2 - start2
