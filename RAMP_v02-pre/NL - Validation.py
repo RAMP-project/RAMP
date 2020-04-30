@@ -25,8 +25,8 @@ r_v   = 0.3 #random in velocity
 
 #Variabilites in functioning windows 
 r_w['working'] = 0.25
-r_w['student'] = 0.33
-r_w['inactive'] = 0.1
+r_w['student'] = 0.25
+r_w['inactive'] = 0.2
 r_w['free time'] = 0.2
 
 #Occasional use 
@@ -38,7 +38,7 @@ occasional_use['weekday'] = 1/elaad_occasional_coeff
 occasional_use['saturday'] = 0.6/elaad_occasional_coeff
 occasional_use['sunday'] = 0.5/elaad_occasional_coeff
 occasional_use['free time'] = {'weekday': 0.15/elaad_occasional_coeff, 
-                               'weekend': 0.15/elaad_occasional_coeff} #1/7, meaning taking car for free time once a week
+                               'weekend': 0.5/elaad_occasional_coeff} #1/7, meaning taking car for free time once a week
 
 #Calibartion parameters for the Velocity - Power Curve [kW]
 Par_P_EV = {}
@@ -112,7 +112,7 @@ for day in ['weekday', 'saturday', 'sunday']:
 pop_sh = {}
 
 for us in ['working', 'student', 'inactive']:
-    pop_sh[us]   = pop_data.loc[country, us]
+    pop_sh[us] = pop_data.loc[country, us]
 
 #Share of the type of vehicles in the country
 vehicle_sh = {}
@@ -120,9 +120,9 @@ vehicle_sh = {}
 # for size in ['small', 'medium', 'large']:
 #     vehicle_sh[size] = vehicle_data.loc[country, size]
 
-vehicle_sh['small'] = 0.80
-vehicle_sh['medium'] = 0.086
-vehicle_sh['large'] = 0.114
+vehicle_sh['small'] = 0.602
+vehicle_sh['medium'] = 0
+vehicle_sh['large'] = 0.398
 
 # Total daily distance 
 d_tot = {}
@@ -164,10 +164,10 @@ window['working']   = {'main':      [[window_data[country_window]['Start']['Work
                                      [window_data[country_window]['Start']['Working']['Free time'][2],  window_data[country_window]['End']['Working']['Free time'][2]], 
                                      [window_data[country_window]['Start']['Working']['Free time'][3],  window_data[country_window]['End']['Working']['Free time'][3]]]}
 window['student']   = {'main':      [[window_data[country_window]['Start']['Student']['Main'][1],       window_data[country_window]['End']['Student']['Main'][1]],  
-                                     [window_data[country_window]['Start']['Student']['Main'][2],       window_data[country_window]['End']['Student']['Main'][2]], 
-                                     [window_data[country_window]['Start']['Student']['Main'][3],       window_data[country_window]['End']['Student']['Main'][3]]], 
+                                     [window_data[country_window]['Start']['Student']['Main'][2],       window_data[country_window]['End']['Student']['Main'][2]]],                                     
                        'free time': [[window_data[country_window]['Start']['Student']['Free time'][1],  window_data[country_window]['End']['Student']['Free time'][1]],    
-                                     [window_data[country_window]['Start']['Student']['Free time'][2],  window_data[country_window]['End']['Student']['Free time'][2]]]}
+                                     [window_data[country_window]['Start']['Student']['Free time'][2],  window_data[country_window]['End']['Student']['Free time'][2]],
+                                     [window_data[country_window]['Start']['Student']['Free time'][3],  window_data[country_window]['End']['Student']['Free time'][3]]]}
 window['inactive']  = {'main':      [[window_data[country_window]['Start']['Inactive']['Main'][1],      window_data[country_window]['End']['Inactive']['Main'][1]]], 
                        'free time': [[window_data[country_window]['Start']['Inactive']['Free time'][1], window_data[country_window]['End']['Inactive']['Free time'][1]],   
                                      [window_data[country_window]['Start']['Inactive']['Free time'][2], window_data[country_window]['End']['Inactive']['Free time'][2]]]}
@@ -186,13 +186,13 @@ for key in wind_temp.keys():
 perc_usage = {}
 
 perc_usage['weekday']  = {'working' :{'main': trips['weekday'].iloc[np.r_[wind_temp['working']['main'][0]:wind_temp['working']['main'][1], wind_temp['working']['main'][2]:wind_temp['working']['main'][3]]].sum()},
-                          'student' :{'main': trips['weekday'].iloc[np.r_[wind_temp['student']['main'][0]:wind_temp['student']['main'][1], wind_temp['student']['main'][2]:wind_temp['student']['main'][3], wind_temp['student']['main'][4]:wind_temp['student']['main'][5]]].sum()}, 
+                          'student' :{'main': trips['weekday'].iloc[np.r_[wind_temp['student']['main'][0]:wind_temp['student']['main'][1], wind_temp['student']['main'][2]:wind_temp['student']['main'][3]]].sum()}, 
                           'inactive':{'main': trips['weekday'].iloc[np.r_[wind_temp['inactive']['main'][0]:wind_temp['inactive']['main'][1]]].sum()}}
 perc_usage['saturday'] = {'working' :{'main': trips['saturday'].iloc[np.r_[wind_temp['working']['main'][0]:wind_temp['working']['main'][1], wind_temp['working']['main'][2]:wind_temp['working']['main'][3]]].sum()},
-                          'student' :{'main': trips['saturday'].iloc[np.r_[wind_temp['student']['main'][0]:wind_temp['student']['main'][1], wind_temp['student']['main'][2]:wind_temp['student']['main'][3], wind_temp['student']['main'][4]:wind_temp['student']['main'][5]]].sum()}, 
+                          'student' :{'main': trips['saturday'].iloc[np.r_[wind_temp['student']['main'][0]:wind_temp['student']['main'][1], wind_temp['student']['main'][2]:wind_temp['student']['main'][3]]].sum()}, 
                           'inactive':{'main': trips['saturday'].iloc[np.r_[wind_temp['inactive']['main'][0]:wind_temp['inactive']['main'][1]]].sum()}}
 perc_usage['sunday']   = {'working' :{'main': trips['saturday'].iloc[np.r_[wind_temp['working']['main'][0]:wind_temp['working']['main'][1], wind_temp['working']['main'][2]:wind_temp['working']['main'][3]]].sum()},
-                          'student' :{'main': trips['saturday'].iloc[np.r_[wind_temp['student']['main'][0]:wind_temp['student']['main'][1], wind_temp['student']['main'][2]:wind_temp['student']['main'][3], wind_temp['student']['main'][4]:wind_temp['student']['main'][5]]].sum()}, 
+                          'student' :{'main': trips['saturday'].iloc[np.r_[wind_temp['student']['main'][0]:wind_temp['student']['main'][1], wind_temp['student']['main'][2]:wind_temp['student']['main'][3]]].sum()}, 
                           'inactive':{'main': trips['saturday'].iloc[np.r_[wind_temp['inactive']['main'][0]:wind_temp['inactive']['main'][1]]].sum()}}
 
 #Calulate the Percentage of travels in functioning windows for free time
@@ -268,7 +268,7 @@ Working_EV_large_wd_ft = Working_L.Appliance(Working_L, n = 1, Par_power = Par_P
 Working_EV_large_wd_ft.windows(w1 = window['working']['free time'][0], w2 = window['working']['free time'][1], w3 = window['working']['free time'][2], r_w = r_w['free time'])
 
 # Working - Large Car - Saturday
-Working_EV_large_sat = Working_L.Appliance(Working_L, n = 1, Par_power = Par_P_EV['large'], P_var = P_var, w = 1, d_tot = d_tot['saturday']*perc_usage['saturday']['inactive']['main'], r_d = r_d, t_func = t_func['saturday']['business'], r_v = r_v, d_min = d_min['saturday']['business'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['saturday'], flat = 'no', pref_index = 0, wd_we_type = 1, P_series = False)
+Working_EV_large_sat = Working_L.Appliance(Working_L, n = 1, Par_power = Par_P_EV['large'], Battery_cap = Battery_cap['large'], P_var = P_var, w = 1, d_tot = d_tot['saturday']*perc_usage['saturday']['inactive']['main'], r_d = r_d, t_func = t_func['saturday']['business'], r_v = r_v, d_min = d_min['saturday']['business'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['saturday'], flat = 'no', pref_index = 0, wd_we_type = 1, P_series = False)
 Working_EV_large_sat.windows(w1 = window['inactive']['main'][0],  r_w = r_w['inactive'])
 
 # Working - Large Car - Saturday - Free Time
@@ -340,12 +340,12 @@ Working_EV_small_sun_ft.windows(w1 = window['inactive']['free time'][0], w2 = wi
 ### Large Car ###
 
 # Student - Large Car - Weekday
-Student_EV_large_wd = Student_L.Appliance(Student_L, n = 1, Par_power = Par_P_EV['large'], Battery_cap = Battery_cap['large'], P_var = P_var, w = 3, d_tot = d_tot['weekday']*perc_usage['weekday']['student']['main'], r_d = r_d, t_func = t_func['weekday']['mean'], r_v = r_v, d_min = d_min['weekday']['mean'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['weekday'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
-Student_EV_large_wd.windows(w1 = window['student']['main'][0], w2 = window['student']['main'][1], w3 = window['student']['main'][2], r_w = r_w['student'])
+Student_EV_large_wd = Student_L.Appliance(Student_L, n = 1, Par_power = Par_P_EV['large'], Battery_cap = Battery_cap['large'], P_var = P_var, w = 2, d_tot = d_tot['weekday']*perc_usage['weekday']['student']['main'], r_d = r_d, t_func = t_func['weekday']['mean'], r_v = r_v, d_min = d_min['weekday']['mean'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['weekday'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
+Student_EV_large_wd.windows(w1 = window['student']['main'][0], w2 = window['student']['main'][1], r_w = r_w['student'])
 
 # Student - Large Car - Weekday - Free Time
-Student_EV_large_wd_ft = Student_L.Appliance(Student_L, n = 1, Par_power = Par_P_EV['large'], Battery_cap = Battery_cap['large'], P_var = P_var, w = 2, d_tot = d_tot['weekday']*perc_usage['weekday']['student']['free time'], r_d = r_d, t_func = t_func['weekday']['personal'], r_v = r_v, d_min = d_min['weekday']['personal'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['free time']['weekday'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
-Student_EV_large_wd_ft.windows(w1 = window['student']['free time'][0], w2 = window['student']['free time'][1], r_w = r_w['free time'])
+Student_EV_large_wd_ft = Student_L.Appliance(Student_L, n = 1, Par_power = Par_P_EV['large'], Battery_cap = Battery_cap['large'], P_var = P_var, w = 3, d_tot = d_tot['weekday']*perc_usage['weekday']['student']['free time'], r_d = r_d, t_func = t_func['weekday']['personal'], r_v = r_v, d_min = d_min['weekday']['personal'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['free time']['weekday'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
+Student_EV_large_wd_ft.windows(w1 = window['student']['free time'][0], w2 = window['student']['free time'][1],  w3 = window['student']['free time'][2], r_w = r_w['free time'])
 
 # Student - Large Car - Saturday
 Student_EV_large_sat = Student_L.Appliance(Student_L, n = 1, Par_power = Par_P_EV['large'], Battery_cap = Battery_cap['large'], P_var = P_var, w = 1, d_tot = d_tot['saturday']*perc_usage['saturday']['inactive']['main'], r_d = r_d, t_func = t_func['saturday']['mean'], r_v = r_v, d_min = d_min['saturday']['mean'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['saturday'], flat = 'no', pref_index = 0, wd_we_type = 1, P_series = False)
@@ -366,12 +366,12 @@ Student_EV_large_sun_ft.windows(w1 = window['inactive']['free time'][0], w2 = wi
 ### Medium Car ###
 
 # Student - Medium Car - Weekday
-Student_EV_medium_wd = Student_M.Appliance(Student_M, n = 1, Par_power = Par_P_EV['medium'], Battery_cap = Battery_cap['medium'], P_var = P_var, w = 3, d_tot = d_tot['weekday']*perc_usage['weekday']['student']['main'], r_d = r_d, t_func = t_func['weekday']['mean'], r_v = r_v, d_min = d_min['weekday']['mean'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['weekday'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
-Student_EV_medium_wd.windows(w1 = window['student']['main'][0], w2 = window['student']['main'][1], w3 = window['student']['main'][2], r_w = r_w['student'])
+Student_EV_medium_wd = Student_M.Appliance(Student_M, n = 1, Par_power = Par_P_EV['medium'], Battery_cap = Battery_cap['medium'], P_var = P_var, w = 2, d_tot = d_tot['weekday']*perc_usage['weekday']['student']['main'], r_d = r_d, t_func = t_func['weekday']['mean'], r_v = r_v, d_min = d_min['weekday']['mean'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['weekday'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
+Student_EV_medium_wd.windows(w1 = window['student']['main'][0], w2 = window['student']['main'][1], r_w = r_w['student'])
 
 # Student - Medium Car - Weekday - Free Time
-Student_EV_medium_wd_ft = Student_M.Appliance(Student_M, n = 1, Par_power = Par_P_EV['medium'], Battery_cap = Battery_cap['medium'], P_var = P_var, w = 2, d_tot = d_tot['weekday']*perc_usage['weekday']['student']['free time'], r_d = r_d, t_func = t_func['weekday']['personal'], r_v = r_v, d_min = d_min['weekday']['personal'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['free time']['weekday'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
-Student_EV_medium_wd_ft.windows(w1 = window['student']['free time'][0], w2 = window['student']['free time'][1], r_w = r_w['free time'])
+Student_EV_medium_wd_ft = Student_M.Appliance(Student_M, n = 1, Par_power = Par_P_EV['medium'], Battery_cap = Battery_cap['medium'], P_var = P_var, w = 3, d_tot = d_tot['weekday']*perc_usage['weekday']['student']['free time'], r_d = r_d, t_func = t_func['weekday']['personal'], r_v = r_v, d_min = d_min['weekday']['personal'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['free time']['weekday'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
+Student_EV_medium_wd_ft.windows(w1 = window['student']['free time'][0], w2 = window['student']['free time'][1], w3 = window['student']['free time'][2], r_w = r_w['free time'])
 
 # Student - Medium Car - Saturday
 Student_EV_medium_sat = Student_M.Appliance(Student_M, n = 1, Par_power = Par_P_EV['medium'], Battery_cap = Battery_cap['medium'], P_var = P_var, w = 1, d_tot = d_tot['saturday']*perc_usage['saturday']['inactive']['main'], r_d = r_d, t_func = t_func['saturday']['mean'], r_v = r_v, d_min = d_min['saturday']['mean'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['saturday'], flat = 'no', pref_index = 0, wd_we_type = 1, P_series = False)
@@ -392,12 +392,12 @@ Student_EV_medium_sun_ft.windows(w1 = window['inactive']['free time'][0], w2 = w
 ### Small Car ###
 
 # Student - Small Car - Weekday
-Student_EV_small_wd = Student_S.Appliance(Student_S, n = 1, Par_power = Par_P_EV['small'], Battery_cap = Battery_cap['small'], P_var = P_var, w = 3, d_tot = d_tot['weekday']*perc_usage['weekday']['student']['main'], r_d = r_d, t_func = t_func['weekday']['mean'], r_v = r_v, d_min = d_min['weekday']['mean'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['weekday'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
-Student_EV_small_wd.windows(w1 = window['student']['main'][0], w2 = window['student']['main'][1], w3 = window['student']['main'][2], r_w = r_w['student'])
+Student_EV_small_wd = Student_S.Appliance(Student_S, n = 1, Par_power = Par_P_EV['small'], Battery_cap = Battery_cap['small'], P_var = P_var, w = 2, d_tot = d_tot['weekday']*perc_usage['weekday']['student']['main'], r_d = r_d, t_func = t_func['weekday']['mean'], r_v = r_v, d_min = d_min['weekday']['mean'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['weekday'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
+Student_EV_small_wd.windows(w1 = window['student']['main'][0], w2 = window['student']['main'][1], r_w = r_w['student'])
 
 # Student - Small Car - Weekday - Free Time
-Student_EV_small_wd_ft = Student_S.Appliance(Student_S, n = 1, Par_power = Par_P_EV['small'], Battery_cap = Battery_cap['small'], P_var = P_var, w = 2, d_tot = d_tot['weekday']*perc_usage['weekday']['student']['free time'], r_d = r_d, t_func = t_func['weekday']['personal'], r_v = r_v, d_min = d_min['weekday']['personal'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['free time']['weekday'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
-Student_EV_small_wd_ft.windows(w1 = window['student']['free time'][0], w2 = window['student']['free time'][1], r_w = r_w['free time'])
+Student_EV_small_wd_ft = Student_S.Appliance(Student_S, n = 1, Par_power = Par_P_EV['small'], Battery_cap = Battery_cap['small'], P_var = P_var, w = 3, d_tot = d_tot['weekday']*perc_usage['weekday']['student']['free time'], r_d = r_d, t_func = t_func['weekday']['personal'], r_v = r_v, d_min = d_min['weekday']['personal'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['free time']['weekday'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
+Student_EV_small_wd_ft.windows(w1 = window['student']['free time'][0], w2 = window['student']['free time'][1], w3 = window['student']['free time'][2], r_w = r_w['free time'])
 
 # Student - Small Car - Saturday
 Student_EV_small_sat = Student_S.Appliance(Student_S, n = 1, Par_power = Par_P_EV['small'], Battery_cap = Battery_cap['small'], P_var = P_var, w = 1, d_tot = d_tot['saturday']*perc_usage['saturday']['inactive']['main'], r_d = r_d, t_func = t_func['saturday']['mean'], r_v = r_v, d_min = d_min['saturday']['mean'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['saturday'], flat = 'no', pref_index = 0, wd_we_type = 1, P_series = False)
@@ -483,8 +483,8 @@ Inactive_EV_small_wd_ft.windows(w1 = window['inactive']['free time'][0], w2 = wi
 Inactive_EV_small_sat = Inactive_S.Appliance(Inactive_S, n = 1, Par_power = Par_P_EV['small'], Battery_cap = Battery_cap['small'], P_var = P_var, w = 1, d_tot = d_tot['saturday']*perc_usage['saturday']['inactive']['main'], r_d = r_d, t_func = t_func['saturday']['personal'], r_v = r_v, d_min = d_min['saturday']['personal'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['saturday'], flat = 'no', pref_index = 0, wd_we_type = 1, P_series = False)
 Inactive_EV_small_sat.windows(w1 = window['inactive']['main'][0], r_w = r_w['inactive'])
 
-# Inactive - Small Car - Weekday - Free Time
-Inactive_EV_small_sat_ft = Inactive_S.Appliance(Inactive_S, n = 1, Par_power = Par_P_EV['small'], Battery_cap = Battery_cap['small'], P_var = P_var, w = 2, d_tot = d_tot['weekday']*perc_usage['saturday']['inactive']['free time'], r_d = r_d, t_func = t_func['weekday']['personal'], r_v = r_v, d_min = d_min['weekday']['personal'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['free time']['weekend'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
+# Inactive - Small Car - Saturday - Free Time
+Inactive_EV_small_sat_ft = Inactive_S.Appliance(Inactive_S, n = 1, Par_power = Par_P_EV['small'], Battery_cap = Battery_cap['small'], P_var = P_var, w = 2, d_tot = d_tot['saturday']*perc_usage['saturday']['inactive']['free time'], r_d = r_d, t_func = t_func['saturday']['personal'], r_v = r_v, d_min = d_min['saturday']['personal'], fixed = 'no', fixed_cycle = 0, occasional_use = occasional_use['free time']['weekend'], flat = 'no', pref_index = 0, wd_we_type = 0, P_series = False)
 Inactive_EV_small_sat_ft.windows(w1 = window['inactive']['free time'][0], w2 = window['inactive']['free time'][1], r_w = r_w['free time'])
 
 # Inactive - Small Car - Sunday

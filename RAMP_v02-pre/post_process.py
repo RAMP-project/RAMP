@@ -10,7 +10,7 @@ import matplotlib.ticker as mtick
 from pathlib import Path
 import pickle
 from initialise import tot_users_calc
-import enlopy as el
+#import enlopy as el
 
 #%% Post-processing
 '''
@@ -253,16 +253,16 @@ def Time_correction(df, country, year):
     ind = df_c.index.tz_localize(pytz.country_timezones[country][0], nonexistent = 'NaT', ambiguous='NaT')
     ind_filter = ind[~ ind.isnull()]
         
-    idx = pd.date_range(start=min(ind_filter), end=max(ind_filter), freq = pd.infer_freq(ind))
+    idx = pd.date_range(start=min(ind_filter), end=max(ind_filter), freq = ind.to_series().diff().min())
     df_c = df_c.set_index(idx)
     
     ind_utc = ind.tz_convert('utc')
     temp_utc = df_c.set_index(ind_utc)
     
-    ind_year = pd.date_range(start=str(year) + '-01-01', end=str(max(temp_utc.index).date()) + ' 23:59:00', freq = pd.infer_freq(ind), tz = 'utc')
+    ind_year = pd.date_range(start=str(year) + '-01-01', end=str(max(temp_utc.index).date()) + ' 23:59:00', freq = ind.to_series().diff().min(), tz = 'utc')
     temp_year = pd.DataFrame([np.nan] * len(ind_year), index = ind_year)
     
-    df_utc_final = pd.concat([temp_utc, temp_year], axis=1, sort=False)
+    df_utc_final = temp_utc.join(temp_year, how='outer')
     df_utc_final = df_utc_final.dropna(axis=1, how='all')
     df_utc_final = df_utc_final.loc[df_utc_final.index.notnull()]
     df_utc_final = df_utc_final.ffill()
@@ -274,7 +274,7 @@ def Time_correction(df, country, year):
 
 def Resample(df):
     
-    df = df.resample('H').sum()
+    df = df.resample('H').mean()
     
     return df
 
@@ -310,7 +310,7 @@ def export_pickle(filename, variable, inputfile):
     Path(folder).mkdir(parents=True, exist_ok=True) 
 
     file = open(f'{folder}{filename}.pkl','wb')
-    pickle.dump(variable, file)
+    pickle.dump(variable, file, protocol=4)
     file.close()
     
  
