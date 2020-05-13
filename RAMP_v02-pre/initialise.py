@@ -20,7 +20,7 @@ def yearly_pattern(country, year):
     Definition of a yearly pattern of weekends and weekdays, in case some appliances have specific wd/we behaviour
     ''' 
     # Number of days to add at the beginning and the end of the simulation to avoid special cases at the beginning and at the end
-    dummy_days = 1 
+    dummy_days = 5
 
     #Yearly behaviour pattern
     first_day = datetime.date(year, 1, 1).strftime("%A")
@@ -174,7 +174,7 @@ def pv_indexing(minutes, country, year, inputfile_pv = r"Input_data\ninja_pv_eur
         
     return pv_ind
 
-def residual_load(minutes, country, inputfile_load = r"Input_data\time_series_60min_singleindex_filtered.csv", inputfile_pv = r"Input_data\ninja_pv_europe_v1.1_merra2.csv", inputfile_wind = r"Input_data\ninja_wind_europe_v1.1_current_national.csv", inputfile_cap = "Input_data\TIMES_Capacities_technology_2050.csv"):
+def residual_load(minutes, country, load_multiplier = 2.5, inputfile_load = r"Input_data\time_series_60min_singleindex_filtered.csv", inputfile_pv = r"Input_data\ninja_pv_europe_v1.1_merra2.csv", inputfile_wind = r"Input_data\ninja_wind_europe_v1.1_current_national.csv", inputfile_cap = "Input_data\TIMES_Capacities_technology_2050.csv"):
     
     # Solar AF 
     pv_af = pd.read_csv(inputfile_pv, index_col = 0) #Read the input file
@@ -225,7 +225,7 @@ def residual_load(minutes, country, inputfile_load = r"Input_data\time_series_60
     load_loc = load_tz.tz_localize(None, ambiguous = 'NaT') # Remove the timezone information (local time)
     load_loc = load_loc[~load_loc.index.duplicated(keep='first')] # Remove duplicate hours arising from tz conversion
 
-    load_multiplier = 2.5 # Multiplier to account for higher load in the future 
+    load_multiplier = load_multiplier # Multiplier to account for higher load in the future 
     load_local_mult = load_loc * load_multiplier
 
     # Residual Load
@@ -244,8 +244,6 @@ def residual_load(minutes, country, inputfile_load = r"Input_data\time_series_60
     res_load_neg = res_load[res_load < 0].fillna(0)
             
     res_load_neg_ind = np.nonzero(res_load_neg.values)[0]
-
-    # ldc = el.analysis.get_LDC(res_load, x_norm=False)
     
     return res_load_neg_ind
     
@@ -259,7 +257,7 @@ def tot_users_calc(User_list):
     return tot_users
 
 def tot_battery_cap_calc(User_list):
-    # Calculation of the total number of users
+    # Calculation of the total fleet battery capacity
     cap_users = {}
     for Us in User_list:
         cap_users[Us.user_name] = Us.num_users *  Us.App_list[0].Battery_cap

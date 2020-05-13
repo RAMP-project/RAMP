@@ -9,7 +9,8 @@ import copy
 import matplotlib.ticker as mtick
 from pathlib import Path
 import pickle
-from initialise import tot_users_calc
+from initialise import tot_users_calc, tot_battery_cap_calc
+import datetime as dt
 #import enlopy as el
 
 #%% Post-processing
@@ -194,6 +195,19 @@ def Charging_Profile_dataframe(Profiles_series, year):
    
     return Profiles_df
 
+def AF_dataframe(Profiles_series, year):
+    
+    minutes = pd.date_range(start=str(year) + '-01-01', periods = len(Profiles_series), freq='T')
+    
+    if Profiles_series.ndim == 1:
+        Profiles_df = pd.DataFrame(Profiles_series, columns = ['Availability Factor'])
+    else: 
+        Profiles_df = pd.DataFrame(Profiles_series)   
+    
+    Profiles_df.set_index(minutes, inplace = True)
+   
+    return Profiles_df
+
 def Profile_user_dataframe(Profiles_user, year):
     
     minutes = pd.date_range(start=str(year) + '-01-01', periods = len(Profiles_user[list(Profiles_user.keys())[0]]), freq='T')
@@ -219,9 +233,9 @@ def temp_import(country, year, inputfile_temp = r"Input_data\temp.csv"):
       
     temp_profile = pd.read_csv(inputfile_temp, index_col = 0)
     temp_profile = pd.DataFrame(temp_profile[country]) 
-    temp_profile = temp_profile.loc[temp_profile.index.str.contains(str(year))]
+    temp_profile = temp_profile.loc[temp_profile.index.str.contains(str(year)+ '|' + str(year-1)+ '|' + str(year+1))]
 
-    hours = pd.period_range(start=str(year) + '-01-01', end=str(year) + '-12-31 23:00', freq='H')
+    hours = pd.period_range(start=str(year-1) + '-01-01', end=str(year+1) + '-12-31 23:00', freq='H')
     temp_profile.set_index(hours, inplace = True)
     
     temp_profile = temp_profile.resample('T', closed='right').pad()
@@ -232,7 +246,7 @@ def Profile_temp(Profiles_df, temp_profile,  year = 2016):
 
     Profiles_df_c = copy.deepcopy(Profiles_df)
 
-    minutes = pd.date_range(start=str(year) + '-01-01', end=str(year) + '-12-31 23:59:00', freq='T', tz = 'UTC')
+    minutes = pd.date_range(start=str(year-1) + '-01-01', end=str(year+1) + '-12-31 23:59:00', freq='T', tz = 'UTC')
     temp_profile.set_index(minutes, inplace = True)
             
     temp_profile = temp_profile.loc[Profiles_df_c.index]
@@ -245,6 +259,31 @@ def Profile_temp(Profiles_df, temp_profile,  year = 2016):
     Profiles_temp = Profiles_df_c * temp_coeff.values
     
     return Profiles_temp
+
+def Profile_temp_users(Profiles_user, temp_profile,  year = 2016, dummy_days = 1):
+
+    start_day = dt.datetime(year, 1, 1) - dt.timedelta(days=dummy_days)
+    n_periods = len(Profiles_user['Working - Large car'])
+    
+    minutes_sim = pd.date_range(start=start_day, periods = n_periods, freq='T')
+        
+    minutes = pd.date_range(start=str(year-1) + '-01-01', end=str(year+1) + '-12-31 23:59:00', freq='T')
+
+    temp_profile.set_index(minutes, inplace = True)
+            
+    temp_profile = temp_profile.loc[minutes_sim]
+    
+    temp_coeff = pd.DataFrame(1, index = temp_profile.index, columns = temp_profile.columns)
+    
+    temp_coeff[temp_profile < 15] = 1.12 - 0.01*temp_profile[temp_profile < 15]
+    temp_coeff[temp_profile > 20] = 0.63 + 0.02*temp_profile[temp_profile > 20]
+    
+    Profiles_user_temp = {}
+    
+    for user in Profiles_user: 
+        Profiles_user_temp[user] = Profiles_user[user] * temp_coeff.values
+            
+    return Profiles_user_temp
 
 def Time_correction(df, country, year):
     
@@ -289,6 +328,13 @@ def Charging_user_formatting(Ch_dict, dummy_days):
     
     return Charging_dict
     
+def Availability_factors(en_system, User_list, security_margin = 0.5):
+    
+    tot_Battery_cap_min = tot_battery_cap_calc(User_list) * 60 
+    
+    AF = (en_system * security_margin) / tot_Battery_cap_min
+    
+    return AF
 
 #%% Export individual profiles
 '''
@@ -298,15 +344,25 @@ for i in range (len(Profile)):
 
 # Export Profiles
 
-def export_csv(filename, variable, inputfile):
+def export_csv(filename, variable, inputfile, simulation_name):
+    
+    if simulation_name:
+        simulation = f'/{simulation_name}/'
+    else:
+        simulation = '/'
         
-    folder = f'results/{inputfile}/' 
+    folder = f'results/{inputfile}' + simulation 
     Path(folder).mkdir(parents=True, exist_ok=True) 
     variable.to_csv(f'{folder}{filename}.csv')
     
-def export_pickle(filename, variable, inputfile):
+def export_pickle(filename, variable, inputfile, simulation_name):
     
-    folder = f'results/{inputfile}/' 
+    if simulation_name:
+        simulation = f'/{simulation_name}/'
+    else:
+        simulation = '/'
+
+    folder = f'results/{inputfile}' + simulation  
     Path(folder).mkdir(parents=True, exist_ok=True) 
 
     file = open(f'{folder}{filename}.pkl','wb')

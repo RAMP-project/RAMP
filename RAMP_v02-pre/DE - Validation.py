@@ -14,7 +14,7 @@ User_list = []
 country = 'DE'
 
 #Total number of users to be simulated
-tot_users = 5000
+tot_users = 10
 
 #Variabilities 
 r_w = {}
@@ -35,7 +35,7 @@ occasional_use = {}
 occasional_use['weekday'] = 1
 occasional_use['saturday'] = 0.6
 occasional_use['sunday'] = 0.5
-occasional_use['free time'] = {'weekday': 0.15, 'weekend': 0.5} #1/7, meaning taking car for free time once a week
+occasional_use['free time'] = {'weekday': 0.15, 'weekend': 0.3} #1/7, meaning taking car for free time once a week
 
 #Calibartion parameters for the Velocity - Power Curve [kW]
 Par_P_EV = {}

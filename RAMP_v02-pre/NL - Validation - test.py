@@ -14,7 +14,7 @@ User_list = []
 country = 'NL'
 
 #Total number of users to be simulated
-tot_users = 2215 
+tot_users = 10
 
 #Variabilities 
 r_w = {}
@@ -118,9 +118,9 @@ vehicle_sh = {}
 # for size in ['small', 'medium', 'large']:
 #     vehicle_sh[size] = vehicle_data.loc[country, size]
 
-vehicle_sh['small'] = 0.6
+vehicle_sh['small'] = 1
 vehicle_sh['medium'] = 0
-vehicle_sh['large'] = 0.4
+vehicle_sh['large'] = 0
 
 # Total daily distance 
 d_tot = {}

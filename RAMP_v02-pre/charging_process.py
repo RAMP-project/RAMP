@@ -17,24 +17,35 @@ import initialise
 
 #%% Charging process calculation script
 
-def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputfile_load, inputfile_pv, inputfile_wind, inputfile_cap, charging_mode = 'Uncontrolled', logistic = False, SOC_initial = 'random', infr_prob = 0.5, Ch_stations = ([3.7, 11, 120], [0.6, 0.3, 0.1])):
+def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputfile_load, inputfile_pv, inputfile_wind, inputfile_cap, charging_mode = 'Uncontrolled', logistic = False, infr_prob = 0.5, Ch_stations = ([3.7, 11, 120], [0.6, 0.3, 0.1])):
     
+    #SOC value at the beginning of the simulation, relevant only for
+    # Perfect Foresight charging strategy, as is the maximum SOC that the car 
+    # will always try to go back to
+    SOC_initial = 0.8
+    SOC_min_rand = 0.5 # Minimum SOC level with which the car can start the simulation
+
     # Definition of battery limits to avoid degradation
     SOC_max = 0.8 # Maximum SOC at which the battery is charged
-    SOC_min_rand = 0.5 # Minimum SOC level with which the car can start the simulation
-    SOC_min = 0.2 # Minimum SOC level that forces the charging event
+    SOC_min = 0.25 # Minimum SOC level that forces the charging event
     
-    eff = 0.95  # Charging/discharging efficiency
+    eff = 0.90  # Charging/discharging efficiency
     
     P_ch_station_list = Ch_stations[0] # Nominal power of the charging station [kW]
     prob_ch_station = Ch_stations[1]    
-
-    # Security margin for the availability factors
-    sec_marg = 0.5
+    
+    # Parameters for the piecewise infrastructure probability function
+    prob_max = 0.9
+    prob_min = 0.4
+    t1 = '06:00'
+    t2 = '19:00'
     
     # Calculate the number of users in simulation for screen update
     tot_users = initialise.tot_users_calc(User_list)
-       
+      
+    # Load multiplier for the residual load calculation
+    load_multiplier = 2.5
+    
     # Check that the charging mode is one of the expected ones
     charging_mode_types = ['Uncontrolled', 'Night Charge', 'Self-consumption', 'RES Integration', 'Perfect Foresight']
     assert charging_mode in charging_mode_types, f"[WARNING] Invalid Charging Mode. Expected one of: {charging_mode_types}"
@@ -71,13 +82,13 @@ def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputf
     # Check which infrastructure probability function to use 
     if infr_prob == 'piecewise': # Use of piecewise function based on hour of the day 
         # Windows for piecewise infrastructure probability
-        window_1 = minutes.indexer_between_time('0:00', '6:00', include_start=True, include_end=False)
-        window_2 = minutes.indexer_between_time('6:00', '19:00', include_start=True, include_end=False)
-        window_3 = minutes.indexer_between_time('19:00', '0:00', include_start=True, include_end=True)
+        window_1 = minutes.indexer_between_time('0:00', t1, include_start=True, include_end=False)
+        window_2 = minutes.indexer_between_time(t1, t2, include_start=True, include_end=False)
+        window_3 = minutes.indexer_between_time(t2, '0:00', include_start=True, include_end=True)
         infr_pr = np.zeros(len(minutes))
-        infr_pr[window_1] = 0.9
-        infr_pr[window_2] = 0.4
-        infr_pr[window_3] = 0.9
+        infr_pr[window_1] = prob_max
+        infr_pr[window_2] = prob_min
+        infr_pr[window_3] = prob_max
     elif isinstance(infr_prob, (int, float)): # Constant probability of finding infrastructure
         infr_pr = np.ones(len(minutes)) * infr_prob
         window_1 = 0
@@ -92,17 +103,11 @@ def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputf
         charge_range = initialise.pv_indexing(minutes, country, year, inputfile_pv = r"Input_data\ninja_pv_europe_v1.1_merra2.csv")
         charge_range_check = initialise.charge_check_smart
     elif charging_mode == "RES Integration":
-        charge_range = initialise.residual_load(minutes, country, inputfile_load, inputfile_pv, inputfile_wind, inputfile_cap)
+        charge_range = initialise.residual_load(minutes, country, load_multiplier, inputfile_load, inputfile_pv, inputfile_wind, inputfile_cap)
         charge_range_check = initialise.charge_check_smart
     else: 
         charge_range = 0
         charge_range_check = initialise.charge_check_normal
-
-
-    # if SOC_initial == 'random': #Control rountine on the Initial SOC value
-    #     SOC_i = SOC_initial_f              #function to select random value
-    # elif isinstance(SOC_initial, (int, float)): 
-    #     SOC_i = SOC_initial_f_const        #function to select constant value as the one indiated by the user
 
     print('\nPlease wait for the charging profiles...')   
     
@@ -176,6 +181,9 @@ def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputf
                 
                 try:  # Energy used in the following travel
                     next_travel_ind_range = np.arange(park_ind[park][1], park_ind[park+1][0])
+                    len_next_park =  park_ind[park+1][1] - park_ind[park+1][0]
+                    if len_next_park < 10:
+                        next_travel_ind_range = np.arange(park_ind[park][1], park_ind[park+2][0])
                     en_next_travel = abs(np.sum(power[next_travel_ind_range]))                 
                 except IndexError: # If there is an index error means we are in the last parking, special case
                     en_next_travel = 0
@@ -183,7 +191,7 @@ def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputf
                 if charging_mode != 'Perfect Foresight':  # If not perfect foresight set energy charge tot=0, will be calculated only if parking
                     en_charge_tot = 0
                 else: # Calculating the energy consumed in the following travel   
-                    en_charge_tot = en_next_travel + en_to_charge
+                    en_charge_tot = (en_next_travel + en_to_charge)/eff
                 
                 residual_energy = Battery_cap_Us_min*SOC_park  # Residual energy in the EV Battery
 
@@ -193,16 +201,16 @@ def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputf
                     (ch_prob(SOC_park) > np.random.rand() and
                     infr_pr[park_ind[park][0]] > np.random.rand() and
                     charge_range_check(ind_park_range, charge_range)
-                    ) or # If parking happens during night
-                    np.around(SOC_park, 2) <= SOC_min or
-                    residual_energy < en_next_travel): 
+                    ) or 
+                    (np.around(SOC_park, 2) <= SOC_min) or
+                    (np.floor(residual_energy) <= np.ceil(en_next_travel/eff))
+                    ): 
                                         
                     # Calculates the parking time
                     t_park = park_ind[park][1] - park_ind[park][0]                 
                     
                     # Fills the array of plug in (1 = plugged, 0 = not plugged)
                     plug_in[park_ind[park][0]:park_ind[park][1]] = 1
-                    # np.put(plug_in, ind_park_range, 1)
                     
                     # Samples the nominal power of the charging station
                     P_ch_nom = random.choices(P_ch_station_list, weights=prob_ch_station)[0]                
@@ -217,7 +225,7 @@ def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputf
                         power[charge_start: charge_end] = P_charge
                         en_to_charge = en_charge_tot - (t_ch * P_charge)
                     else: # In the other charging modes a common routine is defined
-                        en_charge_tot = Battery_cap_Us_min*(SOC_max - SOC_park)
+                        en_charge_tot = Battery_cap_Us_min*(SOC_max - SOC_park)/eff
                         with np.errstate(divide='raise'):
                             try: # Charging strategy for time based modes (Night charge, RES integration, Self-consumption)
                                 charge_ind_range = np.intersect1d(ind_park_range, charge_range)
@@ -228,7 +236,8 @@ def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputf
                                 charge_start = charge_ind_range[0]
                                 charge_end = charge_ind_range[-1] + 1
                                 np.put(power, charge_ind_range, P_charge)
-                            # if intersection array is empty means that we are in an extreme charging condition (SOC < 0.2 or next travel energy > SOC residual), or that we are in uncontrolled charging mode
+                            # if intersection array is empty means that we are in forced charging 
+                            # (SOC<0.2 / too low SOC residual), or in uncontrolled charging mode
                             except (FloatingPointError, ZeroDivisionError): 
                                 # Total charging time at P nominal 
                                 t_ch_tot = int(round(en_charge_tot/P_ch_nom)) 
@@ -247,26 +256,26 @@ def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputf
                 else: # if the user does not charge, then the energy consumed will be charged in a following parking                         
                     en_to_charge = en_charge_tot                        
             
-            power_pos = np.where(power<0, 0, power)
+            charging_power = np.where(power<0, 0, power) # Filtering only for the charging power 
             
             # SOC_user[Us.user_name].append(SOC)
             # Charging_profile_user[Us.user_name].append(power_pos)
             # plug_in_user[Us.user_name].append(plug_in)
             
-            Charging_profile = Charging_profile + power_pos
+            Charging_profile = Charging_profile + charging_power
             # SOC_user[Us.user_name].append(SOC)
             # Charging_profile_user[Us.user_name].append(power_pos)
             # plug_in_user[Us.user_name].append(plug_in)
 
             if charging_mode == 'Perfect Foresight':
-                en_system = (Battery_cap_Us_min - power_pos) * sec_marg * plug_in
+                en_system = (Battery_cap_Us_min - charging_power) * plug_in
                 en_sys_tot = en_sys_tot + en_system
-                
+
             if all(SOC > 0): #Check that the car never has SOC < 0
                 continue
             else: 
                 SOC_user[Us.user_name].append(SOC)
-                Charging_profile_user[Us.user_name].append(power_pos)
+                Charging_profile_user[Us.user_name].append(charging_power)
                 plug_in_user[Us.user_name].append(plug_in)
 
                 neg_soc_ind = np.where(SOC < 0)[0]
@@ -278,7 +287,7 @@ def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputf
                 # plug_in_user[Us.user_name].append(plug_in)
 
         num_us = num_us + Us.num_users
-        print(f'Charging Profile {num_us}/{tot_users} completed') #screen update about progress of computation
+        print(f'Charging Profile of "{Us.user_name}" user completed ({num_us}/{tot_users})') #screen update about progress of computation
     
     dummy_minutes = 1440 * dummy_days
     Charging_profile = Charging_profile[dummy_minutes:-dummy_minutes]

@@ -35,7 +35,7 @@ occasional_use = {}
 occasional_use['weekday'] = 1
 occasional_use['saturday'] = 0.6
 occasional_use['sunday'] = 0.5
-occasional_use['free time'] = {'weekday': 0.15, 'weekend': 0.5} #1/7, meaning taking car for free time once a week
+occasional_use['free time'] = {'weekday': 0.15, 'weekend': 0.3} #1/7, meaning taking car for free time once a week
 
 #Calibartion parameters for the Velocity - Power Curve [kW]
 Par_P_EV = {}
@@ -53,7 +53,7 @@ Battery_cap['large']  = 100
 
 # For the data coming from the JRC Survey, a dictionary is defined to assign each country to the neighbouring one
 # these data are: d_tot, d_min, t_func, trips distribution by time
-country_dict = {'AT':'DE', 'CH':'DE', 'CZ':'DE', 'DK':'DE', 'FI':'DE', 'NL':'DE', 'NO':'DE','SE':'DE', 'SK':'DE',
+country_dict = {'AT':'DE', 'CH':'DE', 'CZ':'DE', 'DK':'DE', 'FI':'DE', 'HU':'DE', 'NL':'DE', 'NO':'DE','SE':'DE', 'SK':'DE',
                 'PT':'ES',
                 'BE':'FR', 'LU':'FR',
                 'EL':'IT', 'HR':'IT', 'MT':'IT', 'SI':'IT',
