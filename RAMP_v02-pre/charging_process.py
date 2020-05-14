@@ -122,14 +122,14 @@ def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputf
 
         # Brings tha values put to 0.001 for the mask to 0
         Profiles_user[Us.user_name] = np.where(Profiles_user[Us.user_name] < 0.1, 0, Profiles_user[Us.user_name]) 
-        #Sets to power consumed by the car to negative values
+        # Sets to power consumed by the car to negative values
         power_Us = np.where(Profiles_user[Us.user_name] > 0, -Profiles_user[Us.user_name], 0) 
         power_Us = power_Us / 1000 #kW
         
         # Users who never take the car in the considered period are skipped
         power_Us = power_Us[:,np.where(power_Us.any(axis=0))[0]] 
         
-        Battery_cap_Us_min = Us.App_list[0].Battery_cap * 60 # Capacity multiplied by 60 to evaluate the capacity in kW - min
+        Battery_cap_Us_min = Us.App_list[0].Battery_cap * 60 # Capacity multiplied by 60 to evaluate the capacity in kWmin
         
         for i in range(power_Us.shape[1]): # Simulates for each single user with at least one travel
             
@@ -263,9 +263,9 @@ def Charging_Process(Profiles_user, User_list, country, year, dummy_days, inputf
             # plug_in_user[Us.user_name].append(plug_in)
             
             Charging_profile = Charging_profile + charging_power
-            # SOC_user[Us.user_name].append(SOC)
-            # Charging_profile_user[Us.user_name].append(power_pos)
-            # plug_in_user[Us.user_name].append(plug_in)
+            SOC_user[Us.user_name].append(SOC)
+            Charging_profile_user[Us.user_name].append(charging_power)
+            plug_in_user[Us.user_name].append(plug_in)
 
             if charging_mode == 'Perfect Foresight':
                 en_system = (Battery_cap_Us_min - charging_power) * plug_in
