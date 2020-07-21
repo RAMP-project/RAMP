@@ -11,7 +11,7 @@ RAMP is a bottom-up stochastic model for the generation of high-resolution multi
 
 The source-code is currently released as v.0.2.1-pre. This should be regarded as a pre-release: it is not yeat accompained by a detailed documentation, but the Python code is fully commented in each line to allow a complete understanding of it. Further details about the conceptual and mathematical model formulation are provided in the related Journal publication (https://doi.org/10.1016/j.energy.2019.04.097). 
 
-Please consider that a newer, fully commented and more user friendly version is under development and should be released soon. In the while, you can also join our **Gitter chat [https://gitter.im/RAMP-project/community]** to discuss doubts and make questions about the code!
+Please consider that a newer, fully commented and more user friendly version is under development and should be released soon. In the while, you can also join our **[Gitter chat](https://gitter.im/RAMP-project/community)** to discuss doubts and make questions about the code!
 
 The repository also hosts all the input files used to generate the profiles appearing in the abovementioned study, which may be also used as a reference example. To access the code version used for the Journal publication, select the tag "v.0.1-pre".
 An up-to-date list of all publications featuring RAMP, for a variety of applications, is available [here](https://github.com/SESAM-Polimi/RAMP/blob/master/pubs_list.md).
