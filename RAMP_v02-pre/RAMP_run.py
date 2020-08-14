@@ -30,7 +30,7 @@ from post_process import*
 # In this default example, the model runs for 2 input files ("input_file_1", "input_file_2"),
 # but single or multiple files can be run restricting or enlarging the iteration range 
 # and naming further input files with progressive numbering
-for j in range(2,3):
+for j in range(1,3):
     Profiles_list = Stochastic_Process(j)
     
 # Post-processes the results and generates plots
