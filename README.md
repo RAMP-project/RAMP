@@ -52,6 +52,6 @@ This project is open-source. Interested users are therefore invited to test, com
 ## License
 Copyright 2019 RAMP, contributors listed in **Authors**
 
-Licensed under the European Union Public Licence (EUPL), Version 1.1; you may not use this file except in compliance with the License. 
+Licensed under the European Union Public Licence (EUPL), Version 1.2-or-later; you may not use this file except in compliance with the License. 
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License
