@@ -9,8 +9,6 @@ This is an up-to-date list of all publications featuring RAMP.
 
 *Giacomo Falchetta, Nicolò Stevanato, Magda Moner-Girona, Davide Mazzoni, Emanuela Colombo, Manfred Hafner, M-LED: Multi-sectoral Latent Electricity Demand Assessment for Energy Access Planning, FEEM Working Papers (2020), https://www.econstor.eu/handle/10419/223636*
 
-*Nicolò Stevanato, Francesco Lombardi, Giulia Guidicini, Lorenzo Rinaldi, Sergio Balderrama, Matija Pavičević, Sylvain Quoilin, Emanuela Colombo, Long-term sizing of rural microgrids: accounting for load evolution through multi-step investment plan and stochastic optimization, Energy for Sustainable Development (2020), 58, pp. 12-29, https://doi.org/10.1016/j.esd.2020.02.009*
-
 *Francesco Lombardi, Sylvain Quoilin, Emanuela Colombo, Modelling distributed Power-to-Heat technologies as a flexibility option for smart heat-electricity integration, Proceedings of ECOS 2020, pp. 2369-2380, http://hdl.handle.net/11311/1143671*
 
 *Sergio Balderrama, Gabriela Peña Balderrama, Francesco Lombardi, Nicolò Stevanato, Andreas Sahlberg, Mark Howells, Emanuela Colombo and Sylvain Quoilin, Model-Base cost evaluation of Microgrids systems for rural Electrification and energy planning purposes, Proceedings of ISES Solar World Congress 2019, http://hdl.handle.net/11311/1139750*
