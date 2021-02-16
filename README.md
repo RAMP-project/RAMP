@@ -30,8 +30,8 @@ To get started, download the repository and simply run the "RAMP_run.py" script.
 The model has been developed by:
 
 **Francesco Lombardi** <br/>
-Politecnico di Milano, Italy <br/>
-E-mail: francesco.lombardi@polimi.it <br/>
+TU Delft, Netherlands <br/>
+E-mail: f.lombardi@tudelft.nl <br/>
 
 **Sergio Balderrama** <br/>
 University of Liege, Belgium - Universidad Mayor de San Simon, Bolivia <br/>
