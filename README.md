@@ -37,7 +37,7 @@ E-mail: f.lombardi@tudelft.nl <br/>
 University of Liege, Belgium - Universidad Mayor de San Simon, Bolivia <br/>
 
 **Sylvain Quoilin** <br/>
-KU Leuven, Belgium <br/>
+University of Liege, Belgium <br/>
 
 **Emanuela Colombo** <br/>
 Politecnico di Milano, Italy <br/>
