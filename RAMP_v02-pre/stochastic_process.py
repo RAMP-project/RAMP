@@ -205,9 +205,9 @@ def Stochastic_Process(j):
                                 if tot_time > rand_time: #control to check when the total functioning time is reached. It will be typically overcome, so a correction is applied to avoid this
                                     indexes_adj = indexes[:-(tot_time-rand_time)] #correctes indexes size to avoid overcoming total time
                                     if np.in1d(peak_time_range,indexes_adj).any() and App.fixed == 'no': #check if indexes are in peak window and if the coincident behaviour is locked by the "fixed" attribute
-                                        coincidence = min(App.number,max(1,math.ceil(random.gauss(math.ceil(App.number*mu_peak),(s_peak*App.number*mu_peak))))) #calculates coincident behaviour within the peak time range
+                                        coincidence = min(App.number,max(1,math.ceil(random.gauss((App.number*mu_peak+0.5),(s_peak*App.number*mu_peak))))) #calculates coincident behaviour within the peak time range
                                     elif np.in1d(peak_time_range,indexes_adj).any()== False and App.fixed == 'no': #check if indexes are off-peak and if coincident behaviour is locked or not
-                                        Prob = random.uniform(0,(App.number-1)/App.number) #calculates probability of coincident switch_ons off-peak
+                                        Prob = random.uniform(0,(App.number-0.5)/App.number) #calculates probability of coincident switch_ons off-peak
                                         array = np.arange(0,App.number)/App.number
                                         try:
                                             on_number = np.max(np.where(Prob>=array))+1
@@ -239,9 +239,9 @@ def Stochastic_Process(j):
                                     break #exit cycle and go to next App
                                 else: #if the tot_time has not yet exceeded the App total functioning time, the cycle does the same without applying corrections to indexes size
                                     if np.in1d(peak_time_range,indexes).any() and App.fixed == 'no':
-                                        coincidence = min(App.number,max(1,math.ceil(random.gauss(math.ceil(App.number*mu_peak),(s_peak*App.number*mu_peak)))))
+                                        coincidence = min(App.number,max(1,math.ceil(random.gauss((App.number*mu_peak+0.5),(s_peak*App.number*mu_peak)))))
                                     elif np.in1d(peak_time_range,indexes).any() == False and App.fixed == 'no':
-                                        Prob = random.uniform(0,(App.number-1)/App.number)
+                                        Prob = random.uniform(0,(App.number-0.5)/App.number)
                                         array = np.arange(0,App.number)/App.number
                                         try:
                                             on_number = np.max(np.where(Prob>=array))+1
