@@ -11,7 +11,7 @@ from initialise import Initialise_model, Initialise_inputs
 
 def Stochastic_Process(j):
     Profile, num_profiles = Initialise_model()
-    peak_enlarg, mu_peak, s_peak, Year_behaviour, User_list = Initialise_inputs(j)
+    peak_enlarg, mu_peak, s_peak, op_factor, Year_behaviour, User_list = Initialise_inputs(j)
     '''
     Calculation of the peak time range, which is used to discriminate between off-peak and on-peak coincident switch-on probability
     Calculates first the overall Peak Window (taking into account all User classes). 
@@ -207,7 +207,7 @@ def Stochastic_Process(j):
                                     if np.in1d(peak_time_range,indexes_adj).any() and App.fixed == 'no': #check if indexes are in peak window and if the coincident behaviour is locked by the "fixed" attribute
                                         coincidence = min(App.number,max(1,math.ceil(random.gauss((App.number*mu_peak+0.5),(s_peak*App.number*mu_peak))))) #calculates coincident behaviour within the peak time range
                                     elif np.in1d(peak_time_range,indexes_adj).any()== False and App.fixed == 'no': #check if indexes are off-peak and if coincident behaviour is locked or not
-                                        Prob = random.uniform(0,(App.number-0.5)/App.number) #calculates probability of coincident switch_ons off-peak
+                                        Prob = random.uniform(0,(App.number-op_factor)/App.number) #calculates probability of coincident switch_ons off-peak
                                         array = np.arange(0,App.number)/App.number
                                         try:
                                             on_number = np.max(np.where(Prob>=array))+1
@@ -241,7 +241,7 @@ def Stochastic_Process(j):
                                     if np.in1d(peak_time_range,indexes).any() and App.fixed == 'no':
                                         coincidence = min(App.number,max(1,math.ceil(random.gauss((App.number*mu_peak+0.5),(s_peak*App.number*mu_peak)))))
                                     elif np.in1d(peak_time_range,indexes).any() == False and App.fixed == 'no':
-                                        Prob = random.uniform(0,(App.number-0.5)/App.number)
+                                        Prob = random.uniform(0,(App.number-op_factor)/App.number)
                                         array = np.arange(0,App.number)/App.number
                                         try:
                                             on_number = np.max(np.where(Prob>=array))+1
