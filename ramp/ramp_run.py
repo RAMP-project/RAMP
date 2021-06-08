@@ -2,7 +2,7 @@
 """
 Created on Fri Apr 19 14:35:00 2019
 This is the code for the open-source stochastic model for the generation of 
-multi-energy load profiles in off-grid areas, called RAMP, v.0.2.1-pre.
+multi-energy load profiles in off-grid areas, called RAMP, v0.3.0.
 
 @authors:
 - Francesco Lombardi, Politecnico di Milano
@@ -11,7 +11,7 @@ multi-energy load profiles in off-grid areas, called RAMP, v.0.2.1-pre.
 - Emanuela Colombo, Politecnico di Milano
 
 Copyright 2019 RAMP, contributors listed above.
-Licensed under the European Union Public Licence (EUPL), Version 1.1;
+Licensed under the European Union Public Licence (EUPL), Version 1.2;
 you may not use this file except in compliance with the License.
 
 Unless required by applicable law or agreed to in writing,
@@ -23,22 +23,25 @@ under the License.
 
 #%% Import required modules
 
-from stochastic_process import Stochastic_Process
-from post_process import*
+import sys,os
+sys.path.append('../')
+
+from core.stochastic_process import Stochastic_Process
+from post_process import post_process as pp
 
 # Calls the stochastic process and saves the result in a list of stochastic profiles
 # In this default example, the model runs for 2 input files ("input_file_1", "input_file_2"),
 # but single or multiple files can be run restricting or enlarging the iteration range 
 # and naming further input files with progressive numbering
-for j in range(1,3):
+for j in range(2,3):
     Profiles_list = Stochastic_Process(j)
     
 # Post-processes the results and generates plots
-    Profiles_avg, Profiles_list_kW, Profiles_series = Profile_formatting(Profiles_list)
-    Profile_series_plot(Profiles_series) #by default, profiles are plotted as a series
+    Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)
+    pp.Profile_series_plot(Profiles_series) #by default, profiles are plotted as a series
     
-    export_series(Profiles_series,j)
+    pp.export_series(Profiles_series,j)
 
     if len(Profiles_list) > 1: #if more than one daily profile is generated, also cloud plots are shown
-        Profile_cloud_plot(Profiles_list, Profiles_avg)
+        pp.Profile_cloud_plot(Profiles_list, Profiles_avg)
 
