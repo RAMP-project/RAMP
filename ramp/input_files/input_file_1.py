@@ -1,25 +1,33 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Feb  7 10:23:10 2019
 
-@author: Lombardi
-"""
-
+#%% Definition of the inputs
 '''
-OCTOBER
+Input data definition 
 '''
 
-#User classes definition
-HI = User("high income",11)
+
+from ramp.core.core import User, np
+User_list = []
+
+'''
+This example input file represents an whole village-scale community,
+adapted from the data used for the Journal publication. It should provide a 
+complete guidance to most of the possibilities ensured by RAMP for inputs definition,
+including specific modular duty cycles and cooking cycles. 
+For examples related to "thermal loads", see the "input_file_2".
+'''
+
+#Create new user classes
+HI = User("high income",11,3)
 User_list.append(HI)
 
-HMI = User("higher middle income",38)
+HMI = User("higher middle income",38,3)
 User_list.append(HMI)
 
-LMI = User("lower middle income",34)
+LMI = User("lower middle income",34,3)
 User_list.append(LMI)
 
-LI = User("low income",45)
+LI = User("low income",45,3)
 User_list.append(LI)
 
 Hospital = User("hospital",1)
@@ -34,23 +42,41 @@ User_list.append(Public_lighting)
 Church = User("church",3)
 User_list.append(Church)
 
-#Appliances definition
+#Create new appliances
+
+#Church
+Ch_indoor_bulb = Church.Appliance(Church,10,26,1,210,0.2,60,'yes', flat = 'yes')
+Ch_indoor_bulb.windows([1200,1440],[0,0],0.1)
+
+Ch_outdoor_bulb = Church.Appliance(Church,7,26,1,240,0.2,60, 'yes', flat = 'yes')
+Ch_outdoor_bulb.windows([1200,1440],[0,0],0.1)
+
+Ch_speaker = Church.Appliance(Church,1,100,1,240,0.2,60)
+Ch_speaker.windows([1200,1350],[0,0],0.1)
+
+#Public lighting
+Pub_lights = Public_lighting.Appliance(Public_lighting,12,40,2,310,0.1,300, 'yes', flat = 'yes')
+Pub_lights.windows([0,336],[1110,1440],0.2)
+
+Pub_lights_2 = Public_lighting.Appliance(Public_lighting,25,150,2,310,0.1,300, 'yes', flat = 'yes')
+Pub_lights_2.windows([0,336],[1110,1440],0.2)
+
 
 #High-Income
 HI_indoor_bulb = HI.Appliance(HI,6,7,2,120,0.2,10)
-HI_indoor_bulb.windows([1094,1440],[0,30],0.35)
+HI_indoor_bulb.windows([1170,1440],[0,30],0.35)
 
 HI_outdoor_bulb = HI.Appliance(HI,2,13,2,600,0.2,10)
-HI_outdoor_bulb.windows([0,330],[1094,1440],0.35)
+HI_outdoor_bulb.windows([0,330],[1170,1440],0.35)
 
 HI_TV = HI.Appliance(HI,2,60,3,180,0.1,5)
-HI_TV.windows([720,900],[1094,1440],0.35,[0,60])
+HI_TV.windows([720,900],[1170,1440],0.35,[0,60])
 
 HI_DVD = HI.Appliance(HI,1,8,3,60,0.1,5)
-HI_DVD.windows([720,900],[1094,1440],0.35,[0,60])
+HI_DVD.windows([720,900],[1170,1440],0.35,[0,60])
 
 HI_Antenna = HI.Appliance(HI,1,8,3,120,0.1,5)
-HI_Antenna.windows([720,900],[1094,1440],0.35,[0,60])
+HI_Antenna.windows([720,900],[1170,1440],0.35,[0,60])
 
 HI_Phone_charger = HI.Appliance(HI,5,2,2,300,0.2,5)
 HI_Phone_charger.windows([1110,1440],[0,30],0.35)
@@ -74,19 +100,19 @@ HI_Mixer.windows([420,480],[660,750],0.35,[1140,1200])
 
 #Higher-Middle Income
 HMI_indoor_bulb = HMI.Appliance(HMI,5,7,2,120,0.2,10)
-HMI_indoor_bulb.windows([1094,1440],[0,30],0.35)
+HMI_indoor_bulb.windows([1170,1440],[0,30],0.35)
 
 HMI_outdoor_bulb = HMI.Appliance(HMI,2,13,2,600,0.2,10)
-HMI_outdoor_bulb.windows([0,330],[1094,1440],0.35)
+HMI_outdoor_bulb.windows([0,330],[1170,1440],0.35)
 
 HMI_TV = HMI.Appliance(HMI,1,60,2,120,0.1,5)
-HMI_TV.windows([1094,1440],[0,60],0.35)
+HMI_TV.windows([1170,1440],[0,60],0.35)
 
 HMI_DVD = HMI.Appliance(HMI,1,8,2,40,0.1,5)
-HMI_DVD.windows([1094,1440],[0,60],0.35)
+HMI_DVD.windows([1170,1440],[0,60],0.35)
 
 HMI_Antenna = HMI.Appliance(HMI,1,8,2,80,0.1,5)
-HMI_Antenna.windows([1094,1440],[0,60],0.35)
+HMI_Antenna.windows([1170,1440],[0,60],0.35)
 
 HMI_Radio = HMI.Appliance(HMI,1,36,2,60,0.1,5)
 HMI_Radio.windows([390,450],[1140,1260],0.35)
@@ -106,19 +132,19 @@ HMI_Mixer.windows([420,450],[660,750],0.35,[1020,1170])
 
 #Lower-Midlle Income
 LMI_indoor_bulb = LMI.Appliance(LMI,3,7,2,120,0.2,10)
-LMI_indoor_bulb.windows([1094,1440],[0,30],0.35)
+LMI_indoor_bulb.windows([1170,1440],[0,30],0.35)
 
 LMI_outdoor_bulb = LMI.Appliance(LMI,2,13,2,600,0.2,10)
-LMI_outdoor_bulb.windows([0,330],[1094,1440],0.35)
+LMI_outdoor_bulb.windows([0,330],[1170,1440],0.35)
 
 LMI_TV = LMI.Appliance(LMI,1,60,3,90,0.1,5)
-LMI_TV.windows([450,660],[1094,1440],0.35)
+LMI_TV.windows([450,660],[720,840],0.35,[1170,1440])
 
 LMI_DVD = LMI.Appliance(LMI,1,8,3,30,0.1,5)
-LMI_DVD.windows([450,660],[1094,1440],0.35)
+LMI_DVD.windows([450,660],[720,840],0.35,[1170,1440])
 
 LMI_Antenna = LMI.Appliance(LMI,1,8,3,60,0.1,5)
-LMI_Antenna.windows([450,660],[1094,1440],0.35)
+LMI_Antenna.windows([450,660],[720,840],0.35,[1170,1440])
 
 LMI_Phone_charger = LMI.Appliance(LMI,4,2,1,300,0.2,5)
 LMI_Phone_charger.windows([1020,1440],[0,0],0.35)
@@ -128,19 +154,19 @@ LMI_Mixer.windows([660,750],[1110,1200],0.35)
 
 #Low Income
 LI_indoor_bulb = LI.Appliance(LI,2,7,2,120,0.2,10)
-LI_indoor_bulb.windows([1094,1440],[0,30],0.35)
+LI_indoor_bulb.windows([1170,1440],[0,30],0.35)
 
 LI_outdoor_bulb = LI.Appliance(LI,1,13,2,600,0.2,10)
-LI_outdoor_bulb.windows([0,330],[1094,1440],0.35)
+LI_outdoor_bulb.windows([0,330],[1170,1440],0.35)
 
 LI_TV = LI.Appliance(LI,1,60,3,90,0.1,5)
-LI_TV.windows([750,840],[1094,1440],0.35,[0,30])
+LI_TV.windows([750,840],[1170,1440],0.35,[0,30])
 
 LI_DVD = LI.Appliance(LI,1,8,3,30,0.1,5)
-LI_DVD.windows([750,840],[1094,1440],0.35,[0,30])
+LI_DVD.windows([750,840],[1170,1440],0.35,[0,30])
 
 LI_Antenna = LI.Appliance(LI,1,8,3,60,0.1,5)
-LI_Antenna.windows([750,840],[1094,1440],0.35,[0,30])
+LI_Antenna.windows([750,840],[1170,1440],0.35,[0,30])
 
 LI_Phone_charger = LI.Appliance(LI,2,2,1,300,0.2,5)
 LI_Phone_charger.windows([1080,1440],[0,0],0.35)
@@ -150,7 +176,7 @@ Ho_indoor_bulb = Hospital.Appliance(Hospital,12,7,2,690,0.2,10)
 Ho_indoor_bulb.windows([480,720],[870,1440],0.35)
 
 Ho_outdoor_bulb = Hospital.Appliance(Hospital,1,13,2,690,0.2,10)
-Ho_outdoor_bulb.windows([0,342],[1037,1440],0.35)
+Ho_outdoor_bulb.windows([0,330],[1050,1440],0.35)
 
 Ho_Phone_charger = Hospital.Appliance(Hospital,8,2,2,300,0.2,5)
 Ho_Phone_charger.windows([480,720],[900,1440],0.35)
@@ -184,10 +210,10 @@ Ho_Mixer.windows([480,720],[1050,1440],0.35)
 
 #School
 S_indoor_bulb = School.Appliance(School,8,7,1,60,0.2,10)
-S_indoor_bulb.windows([1007,1080],[0,0],0.35)
+S_indoor_bulb.windows([1020,1080],[0,0],0.35)
 
 S_outdoor_bulb = School.Appliance(School,6,13,1,60,0.2,10)
-S_outdoor_bulb.windows([1007,1080],[0,0],0.35)
+S_outdoor_bulb.windows([1020,1080],[0,0],0.35)
 
 S_Phone_charger = School.Appliance(School,5,2,2,180,0.2,5)
 S_Phone_charger.windows([510,750],[810,1080],0.35)
@@ -214,19 +240,5 @@ S_DVD.windows([510,750],[810,1080],0.35)
 S_Stereo = School.Appliance(School,1,150,2,90,0.1,5, occasional_use = 0.33)
 S_Stereo.windows([510,750],[810,1080],0.35)
 
-#Public lighting
-Pub_lights = Public_lighting.Appliance(Public_lighting,12,40,2,310,0,300, 'yes', flat = 'yes')
-Pub_lights.windows([0,322],[1094,1440],0.1)
 
-Pub_lights_2 = Public_lighting.Appliance(Public_lighting,25,150,2,310,0,300, 'yes', flat = 'yes')
-Pub_lights_2.windows([0,322],[1094,1440],0.1)
 
-#Church
-Ch_indoor_bulb = Church.Appliance(Church,10,26,1,210,0.2,60,'yes', flat = 'yes')
-Ch_indoor_bulb.windows([1094,1440],[0,0],0.1)
-
-Ch_outdoor_bulb = Church.Appliance(Church,7,26,1,240,0.2,60, 'yes', flat = 'yes')
-Ch_outdoor_bulb.windows([1094,1440],[0,0],0.1)
-
-Ch_speaker = Church.Appliance(Church,1,100,1,240,0.2,60)
-Ch_speaker.windows([1094,1350],[0,0],0.1)
