@@ -2,7 +2,7 @@
 
 #%% Initialisation of a model instance
 
-from core import np
+import numpy as np 
 import importlib
 
 
@@ -22,7 +22,11 @@ def user_defined_inputs(j):
     '''
     Imports an input file and returns a processed User_list
     '''
-    User_list = getattr((importlib.import_module('input_file_%d' %j)), 'User_list')
+
+    file_module = importlib.import_module(f'input_files.input_file_{j}')
+    
+    User_list = file_module.User_list
+
     return(User_list)
 
 
@@ -48,7 +52,8 @@ def Initialise_inputs(j):
     '''
     peak_enlarg = 0 #percentage random enlargement or reduction of peak time range length
     mu_peak = 0.5 #median value of gaussian distribution [0,1] by which the number of coincident switch_ons is randomly selected
-    s_peak = 1 #standard deviation (as percentage of the median value) of the gaussian distribution [0,1] above mentioned
+    s_peak = 0.5 #standard deviation (as percentage of the median value) of the gaussian distribution [0,1] above mentioned
+    op_factor = 0.5 #off-peak coincidence calculation parameter
 
-    return (peak_enlarg, mu_peak, s_peak, Year_behaviour, user_list)
+    return (peak_enlarg, mu_peak, s_peak, op_factor, Year_behaviour, user_list)
 

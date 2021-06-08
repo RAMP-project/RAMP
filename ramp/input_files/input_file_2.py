@@ -5,7 +5,7 @@
 Input data definition 
 '''
 
-from core import User, np, pd
+from ramp.core.core import User, np, pd
 User_list = []
 
 
@@ -19,7 +19,7 @@ the thermal_P_var attribute.
 HH = User("generic households",1)
 User_list.append(HH)
 
-HH_shower_P = pd.read_csv('TimeSeries/shower_P.csv')
+HH_shower_P = pd.read_csv('input_files/time_series/shower_P.csv')
 
 #High-Income
 HH_shower = HH.Appliance(HH,1,HH_shower_P,2,15,0.1,3, thermal_P_var = 0.2, P_series=True)
