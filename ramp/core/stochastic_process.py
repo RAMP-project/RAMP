@@ -5,7 +5,7 @@ import numpy as np
 import numpy.ma as ma
 import random 
 import math
-from initialise import Initialise_model, Initialise_inputs
+from ramp.core.initialise import Initialise_model, Initialise_inputs
 
 #%% Core model stochastic script
 

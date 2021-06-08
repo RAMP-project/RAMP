@@ -2,7 +2,7 @@
 
 #%% Initialisation of a model instance
 
-from core import np
+import numpy as np 
 import importlib
 
 
@@ -22,7 +22,11 @@ def user_defined_inputs(j):
     '''
     Imports an input file and returns a processed User_list
     '''
-    User_list = getattr((importlib.import_module('input_file_%d' %j)), 'User_list')
+
+    file_module = importlib.import_module(f'input_files.input_file_{j}')
+    
+    User_list = file_module.User_list
+
     return(User_list)
 
 
