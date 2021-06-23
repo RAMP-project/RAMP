@@ -26,7 +26,7 @@ The model is developed in Python 3.6, and requires the following libraries:
 ## Quick start
 To get started, download the repository and simply run the "ramp_run.py" script. The console will ask how many profiles (i.e. independent days) need to be simulated, and will provide the results based on the default inputs defined in `input_file_x`.py. To change the inputs, just modify the latter files. Some guidance about the meaning of each input parameter is available in the `core.py` file, where the *User* and *Appliance* Python classes are defined and fully commented. 
 
-## Input files
+### Example input files
 Three different input files are provided as example representing three different categories of appliancces that can be modelled with RAMP.
 
 `input_file_1.py`: represents the most basic electric appliances, is an example of how to model lightbulbs, radios, TVs, fridges, and other electric appliances. This input file is based on the ones used for [this publication](https://doi.org/10.1016/j.energy.2019.04.097).
