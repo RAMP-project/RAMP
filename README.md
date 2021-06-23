@@ -28,8 +28,11 @@ To get started, download the repository and simply run the "ramp_run.py" script.
 
 ## Input files
 Three different input files are provided as example representing three different categories of appliancces that can be modelled with RAMP.
+
 `input_file_1`.py: represents the most basic electric appliances, is an example of how to model lightbulbs, radios, TVs, fridges, and other electric appliances. This input file is used in this publication: https://doi.org/10.1016/j.energy.2019.04.097
+
 `input_file_2`.py: shows how to model thermal loads, in particular an example of a shower is modelled. The peculiarity of this thermal appiance is that the nominal power is provided as external input, `shower_P`.csv, this is to account for the varying groundwater temperature throughout the years. Anyway this can be avoided for more basic applications providing a nominal power likewise the normal electrical appliances. This input file is used in this publication: https://doi.org/10.3390/app10217445
+
 `input_file_3`.py: represents an example of how to model electric cooking patterns. This input file is used in this publication: https://doi.org/10.1109/PTC.2019.8810571
 
 ## Authors
