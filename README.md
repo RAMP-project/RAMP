@@ -33,10 +33,12 @@ Three different input files are provided as example representing three different
 
 - `input_file_2.py`: shows how to model thermal loads, with the example of a "shower" appliance. The peculiarity of thermal appiances is that the nominal power can be provided as external input as a "csv" file (in this case, `shower_P.csv`). For the example "shower" appliance, the varying nominal power accounts for the effect of groundwater temperature variation throughout the year. This input file is based on that used for [this publication](https://doi.org/10.3390/app10217445).
 
-- `input_file_3.py`: represents an example of how to model electric cooking appliances. This input file is used in [this publication](https://doi.org/10.1109/PTC.2019.8810571)
+- `input_file_3.py`: represents an example of how to model electric cooking appliances. In this input file two different kind of meals are modelled, i) repetitive meals (i.e. breakfast), and ii) varying meals (i.e. lunch). Every househols is considered to cook the same breakfast every day, while for lunch, every household will randomly choose between 3 different kind of meals. To model this variability in meal adoption, two parameters are introduced: the `user preference` and the `preference index`.
+The `user preference` defines from how many kinds of meals can the user choose from every day, while a different `preference index` is assigned to every meal to be choosen from.
+This input file is used in [this publication](https://doi.org/10.1109/PTC.2019.8810571)
 
 ## Authors
-The model has been developed by:
+The model has been develo`ped by:
 
 **Francesco Lombardi** <br/>
 TU Delft, Netherlands <br/>
