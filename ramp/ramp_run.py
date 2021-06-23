@@ -29,11 +29,12 @@ sys.path.append('../')
 from core.stochastic_process import Stochastic_Process
 from post_process import post_process as pp
 
+# Define which input files should be considered and run. 
+# Files are specified as numbers in a list (e.g. [1,2] will consider input_file_1.py and input_file_2.py)
+input_files_to_run = [1,2,3]
+
 # Calls the stochastic process and saves the result in a list of stochastic profiles
-# In this default example, the model runs for 2 input files ("input_file_1", "input_file_2"),
-# but single or multiple files can be run restricting or enlarging the iteration range 
-# and naming further input files with progressive numbering
-for j in range(2,3):
+for j in input_files_to_run:
     Profiles_list = Stochastic_Process(j)
     
 # Post-processes the results and generates plots

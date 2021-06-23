@@ -24,7 +24,16 @@ The model is developed in Python 3.6, and requires the following libraries:
 * random
 
 ## Quick start
-To get started, download the repository and simply run the "ramp_run.py" script. The console will ask how many profiles (i.e. independent days) need to be simulated, and will provide the results based on the default inputs defined in `input_file_1`.py and `input_file_2`. To change the inputs, just modify the latter files. Some guidance about the meaning of each input parameter is available in the `core.py` file, where the *User* and *Appliance* Python classes are defined and fully commented. 
+To get started, download the repository and simply run the "ramp_run.py" script. The console will ask how many profiles (i.e. independent days) need to be simulated, and will provide the results based on the default inputs defined in `input_file_x`.py. To change the inputs, just modify the latter files. Some guidance about the meaning of each input parameter is available in the `core.py` file, where the *User* and *Appliance* Python classes are defined and fully commented. 
+
+### Example input files
+Three different input files are provided as example representing three different categories of appliancces that can be modelled with RAMP.
+
+- `input_file_1.py`: represents the most basic electric appliances, is an example of how to model lightbulbs, radios, TVs, fridges, and other electric appliances. This input file is based on the ones used for [this publication](https://doi.org/10.1016/j.energy.2019.04.097).
+
+- `input_file_2.py`: shows how to model thermal loads, with the example of a "shower" appliance. The peculiarity of thermal appiances is that the nominal power can be provided as external input as a "csv" file (in this case, `shower_P.csv`). For the example "shower" appliance, the varying nominal power accounts for the effect of groundwater temperature variation throughout the year. This input file is based on that used for [this publication](https://doi.org/10.3390/app10217445).
+
+- `input_file_3.py`: represents an example of how to model electric cooking appliances. This input file is used in [this publication](https://doi.org/10.1109/PTC.2019.8810571)
 
 ## Authors
 The model has been developed by:
