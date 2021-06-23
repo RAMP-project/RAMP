@@ -9,7 +9,7 @@ This is an up-to-date list of all publications featuring RAMP.
 
 *Giacomo Falchetta, Nicolò Stevanato, Magda Moner-Girona, Davide Mazzoni, Emanuela Colombo, Manfred Hafner, The M-LED platform: advancing electricity demand assessment for communities living in energy poverty, Environmental Reasearch Letters (2021), https://doi.org/10.1088/1748-9326/ac0cab*
 
-*Nicolò Stevanato, Lorenzo Rinaldi, Stefano Pistolese, Sergio Balderrama, Sylvain Quoilin, Emanuela Colombo, Modeling of a Village-Scale Multi-Energy System for the Integrated Supply of Electric and Thermal Energy, Applied Sciences (2020), https://www.mdpi.com/2076-3417/10/21/7445*
+*Nicolò Stevanato, Lorenzo Rinaldi, Stefano Pistolese, Sergio Balderrama, Sylvain Quoilin, Emanuela Colombo, Modeling of a Village-Scale Multi-Energy System for the Integrated Supply of Electric and Thermal Energy, Applied Sciences (2020), https://doi.org/10.3390/app10217445*
 
 *Francesco Lombardi, Sylvain Quoilin, Emanuela Colombo, Modelling distributed Power-to-Heat technologies as a flexibility option for smart heat-electricity integration, Proceedings of ECOS 2020, pp. 2369-2380, http://hdl.handle.net/11311/1143671*
 
