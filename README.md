@@ -33,12 +33,13 @@ Three different input files are provided as example representing three different
 
 - `input_file_2.py`: shows how to model thermal loads, with the example of a "shower" appliance. The peculiarity of thermal appiances is that the nominal power can be provided as external input as a "csv" file (in this case, `shower_P.csv`). For the example "shower" appliance, the varying nominal power accounts for the effect of groundwater temperature variation throughout the year. This input file is based on that used for [this publication](https://doi.org/10.3390/app10217445).
 
-- `input_file_3.py`: represents an example of how to model electric cooking appliances. In this input file two different kind of meals are modelled, i) repetitive meals (i.e. breakfast), and ii) varying meals (i.e. lunch). Every househols is considered to cook the same breakfast every day, while for lunch, every household will randomly choose between 3 different kind of meals. To model this variability in meal adoption, two parameters are introduced: the `user preference` and the `preference index`.
-The `user preference` defines from how many kinds of meals can the user choose from every day, while a different `preference index` is assigned to every meal to be choosen from.
+- `input_file_3.py`: represents an example of how to model electric cooking appliances. In this input file two different kind of meals are modelled: 1) short and repetitive meals (e.g. breakfast); and 2) main meals (e.g. lunch, dinner). 
+Repetitive meals do not vary across days, whilst main meals do so. In particular, every household can randomly choose between 3 different types of main meal every day. Such variability in meal preferences is modelled by means of two parameters: the `user preference` and the `preference index`. 
+The `user preference` defines how many types of meal are available for each user to choose every day (e.g. 3). Then, each of the available meal options is modelled separately, with a different `preference index` attached. The stochastic process randomly varies the meal preference of each user every day, deciding whether they want a "type 1" meal, or a "type 2", etc. on a given day.
 This input file is used in [this publication](https://doi.org/10.1109/PTC.2019.8810571)
 
 ## Authors
-The model has been develo`ped by:
+The model has been developed by:
 
 **Francesco Lombardi** <br/>
 TU Delft, Netherlands <br/>
