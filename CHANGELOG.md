@@ -1,22 +1,28 @@
 Release History
 ===============
 
+0.3.1-dev ()
+------------------
+
+**|fixed|**   the default value for the `peak_enlarg` parameter has been changed from the mistyped value of 0 to the intended value of 0.15 
+
+
 0.3.1 (2021-06-23)
 ------------------
 
-**|new|**       added "input_file_3" as an example of e-cooking loads
+**|new|**       added `input_file_3` as an example of e-cooking loads
 
 **|changed|**   the way in which input files are called in the ramp_run script has been changed to be more explicit and user-friendly
 
-**|changed|**   the readme.md has been updated to describe the purpose of the 3 provided input files, 1: basic electric appliances, 2: DHW, 3: cooking
+**|changed|**   the `readme.md` has been updated to describe the purpose of the 3 provided input files, 1: basic electric appliances, 2: DHW, 3: cooking
 
-**|changed|**   the pubs_list.md has been updated with two new publications
+**|changed|**   the `pubs_list.md` has been updated with two new publications
 
 
 0.3.0 (2021-05-28)
 ------------------
 
-**|new|**       created a CHANGELOG.md file to keep track of code changes from now on
+**|new|**       created a `CHANGELOG.md` file to keep track of code changes from now on
 
 **|changed|**   the repository structure has been modified for better clarity, replicating the structure of the sister-project RAMP-mobility
 
