@@ -38,28 +38,22 @@ Repetitive meals do not vary across days, whilst main meals do so. In particular
 The `user preference` defines how many types of meal are available for each user to choose every day (e.g. 3). Then, each of the available meal options is modelled separately, with a different `preference index` attached. The stochastic process randomly varies the meal preference of each user every day, deciding whether they want a "type 1" meal, or a "type 2", etc. on a given day.
 This input file is used in [this publication](https://doi.org/10.1109/PTC.2019.8810571)
 
-## Authors
-The model has been developed by:
-
-**Francesco Lombardi** <br/>
-TU Delft, Netherlands <br/>
-E-mail: f.lombardi@tudelft.nl <br/>
-
-**Sergio Balderrama** <br/>
-University of Liege, Belgium - Universidad Mayor de San Simon, Bolivia <br/>
-
-**Sylvain Quoilin** <br/>
-University of Liege, Belgium <br/>
-
-**Emanuela Colombo** <br/>
-Politecnico di Milano, Italy <br/>
-
 ## Citing
 Please cite the original Journal publication if you use RAMP in your research:
 *F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo, Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model, Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.*
 
 ## Contribute
 This project is open-source. Interested users are therefore invited to test, comment or contribute to the tool. Submitting issues is the best way to get in touch with the development team, which will address your comment, question, or development request in the best possible way. We are also looking for contributors to the main code, willing to contibute to its capabilities, computational-efficiency, formulation, etc. 
+
+To contribute changes:
+- Fork the project on GitHub
+- Create a feature branch (e.g. named "add-this-new-feature") to work on in your fork
+- Add your name to the [AUTHORS](AUTHORS) file
+- Commit your changes to the feature branch
+- Push the branch to GitHub
+- On GitHub, create a new pull request from the feature branch
+
+When committing new changes, please also take care of checking code stability by means of the [qualitative testing](CONTRIBUTING.md) functionality.
 
 ## License
 Copyright 2019 RAMP, contributors listed in **Authors**
