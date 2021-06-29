@@ -4,6 +4,8 @@ Release History
 0.3.1-dev ()
 ------------------
 
+**|fixed|**   the way in which the random switch-on time is computed in the `stochastic_process` has been changed so that it is sampled with uniform probability from a concatenated set of functioning windows, rather than for each window separately (which led to short windows having higher concentration of switch-on events and demand peaks)
+
 **|fixed|**   the default value for the `peak_enlarg` parameter has been changed from the mistyped value of 0 to the intended value of 0.15 
 
 
