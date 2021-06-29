@@ -49,6 +49,8 @@ We have a qualitative testing functionality that allows to compare the results a
 This functionality is accessible via `test/test_run.py`. To run the qualitative test, you'll have to go through the following steps:
    1. run your modified code for the 3 reference input files for 30 days each. This will create 3 corresponding output files in the `results` folder
    2. run `test/test_run.py` and visualise the comparison between the results of your code and those obtainable with the latest stable version
+   
+Ideally, the difference between reference and new results should be minimal and just due to the stochastic nature of the code. If more pronounced, it should be fully explainable based on the changes made to the code and aligned to the expectations of the developers (i.e. it should reflect a change in the output *wanted* and precisely *sought* with the commit in question)
 
 ## Attribution
 
