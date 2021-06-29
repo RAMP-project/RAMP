@@ -142,9 +142,15 @@ def Stochastic_Process(j):
                             if App.num_windows == 1:
                                 switch_on = int(random.choice([random.uniform(rand_window_1[0],(rand_window_1[1]))]))
                             elif App.num_windows == 2:
-                                switch_on = int(random.choice([random.uniform(rand_window_1[0],(rand_window_1[1])),random.uniform(rand_window_2[0],(rand_window_2[1]))]))
+                                switch_on = int(random.choice(np.concatenate((np.arange(rand_window_1[0],rand_window_1[1]),np.arange(rand_window_2[0],rand_window_2[1])),axis=0)))
                             else: 
-                                switch_on = int(random.choice([random.uniform(rand_window_1[0],(rand_window_1[1])),random.uniform(rand_window_2[0],(rand_window_2[1])),random.uniform(rand_window_3[0],(rand_window_3[1]))]))
+                                switch_on = int(random.choice(np.concatenate((np.arange(rand_window_1[0],
+                                                        rand_window_1[1]),
+                                              np.arange(rand_window_2[0],
+                                                        rand_window_2[1]),
+                                              np.arange(rand_window_3[0],
+                                                        rand_window_3[1]),
+                                              ), axis=0)))                            
                             #Identifies a random switch on time within the available functioning windows
                             if App.daily_use[switch_on] == 0.001: #control to check if the app is not already on at the randomly selected switch-on time
                                 if switch_on in range(rand_window_1[0],rand_window_1[1]):
