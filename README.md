@@ -14,7 +14,7 @@ The source-code is currently released as v0.3.1. It is not yeat accompained by a
 Furthermore, you can join our **[Gitter chat](https://gitter.im/RAMP-project/community)** to discuss doubts and make questions about the code!
 
 The repository also hosts all the input files used to generate the profiles appearing in the abovementioned study, which may be also used as a reference example. To access the code version used for the Journal publication, select the tag "v.0.1-pre".
-An up-to-date list of all publications featuring RAMP, for a variety of applications, is available [here](/docs/pubs_list.md).
+An up-to-date list of publications featuring RAMP, for a variety of applications, is available [here](/docs/pubs_list.md).
 
 ## Requirements
 The model is developed in Python 3.6, and requires the following libraries:
