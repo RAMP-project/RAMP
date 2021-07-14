@@ -7,7 +7,7 @@
 ## List of publications
 This is an up-to-date list of publications featuring RAMP.
 
-*William Clements, Surendra Pandit, Prashanna Bajracharya, Joe Butchers, Sam Williamson, Biraj Gautam, and Paul Harper. Techno-Economic Modelling of Micro-Hydropower Mini-Grids in Nepal to Improve Financial Sustainability and Enable Electric Cooking, Energies (2020), 14, no. 14: 4232. https://doi.org/10.3390/en14144232
+*William Clements, Surendra Pandit, Prashanna Bajracharya, Joe Butchers, Sam Williamson, Biraj Gautam, and Paul Harper. Techno-Economic Modelling of Micro-Hydropower Mini-Grids in Nepal to Improve Financial Sustainability and Enable Electric Cooking, Energies (2020), 14, no. 14: 4232. https://doi.org/10.3390/en14144232*
 
 *Giacomo Falchetta, Nicolò Stevanato, Magda Moner-Girona, Davide Mazzoni, Emanuela Colombo, Manfred Hafner, The M-LED platform: advancing electricity demand assessment for communities living in energy poverty, Environmental Reasearch Letters (2021), https://doi.org/10.1088/1748-9326/ac0cab*
 
