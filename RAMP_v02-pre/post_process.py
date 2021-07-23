@@ -46,13 +46,13 @@ def Profile_series_plot(stoch_profiles_series):
     #x = np.arange(0,1440,5)
     plt.figure(figsize=(10,5))
     plt.plot(np.arange(len(stoch_profiles_series)),stoch_profiles_series,'#4169e1')
-    #plt.xlabel('Time (hours)')
+    plt.xlabel('Time (years)')
     plt.ylabel('Power (W)')
     plt.ylim(ymin=0)
     #plt.ylim(ymax=5000)
     plt.margins(x=0)
     plt.margins(y=0)
-    #plt.xticks([0,240,480,(60*12),(60*16),(60*20),(60*24)],[0,4,8,12,16,20,24])
+    # plt.xticks([0,240,480,(60*12),(60*16),(60*20),(60*24)],[0,4,8,12,16,20,24])
     #plt.savefig('profiles.eps', format='eps', dpi=1000)
     plt.show()
 
@@ -66,4 +66,16 @@ for i in range (len(Profile)):
 
 def export_series(stoch_profiles_series, j):
     series_frame = pd.DataFrame(stoch_profiles_series)
+    series_frame.to_csv('results/output_file_%d.csv' % (j))
+    
+    
+def yearly_export_series(stoch_profiles_series, j):
+    
+    n_years = len(stoch_profiles_series)/(1440*365)
+    
+    series_frame = pd.DataFrame()
+    for year in range(int(n_years)):
+        series_frame = pd.concat([series_frame, pd.DataFrame(stoch_profiles_series[year*1440*365 : (year+1)*1440*365])], axis=1)
+    
+    series_frame.columns = ["Year {}".format(year+1) for year in range(int(n_years))]
     series_frame.to_csv('results/output_file_%d.csv' % (j))
