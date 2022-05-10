@@ -14,6 +14,97 @@ at the inner level all the available appliances within each user class, with
 their own characteristics. Within the Appliance class, some other functions are
 created to define windows of use and, if needed, specific duty cycles
 '''
+class UseCase:
+    def __init__(self, name="", users=None):
+        self.name = name
+        if users is None:
+            users = []
+        self.users = users
+
+    def add_user(self, user):
+        if isinstance(user, User):
+            self.users.append(user)
+
+    def save(self, filename=None):
+        answer = pd.concat([user.save() for user in self.users], ignore_index=True)
+        if filename is not None:
+            answer.to_excel(f"{filename}.xlsx", index=False)
+        else:
+            return answer
+
+    def export_to_dataframe(self):
+        return self.save()
+
+    def load(self, filename):
+        """Open an .xlsx file which was produces via the save method and create instances of Users and Appliances"""
+
+        appliance_args = (
+            "number",
+            "power",
+            "num_windows",
+            "func_time",
+            "time_fraction_random_variability",
+            "func_cycle",
+            "fixed",
+            "fixed_cycle",
+            "occasional_use",
+            "flat",
+            "thermal_p_var",
+            "pref_index",
+            "wd_we_type",
+        )
+        windows_args = ("window_1", "window_2", "window_3", "random_var_w")
+        cycle_args = (
+            ("p_11", "t_11", "p_12", "t_12", "r_c1"),
+            ("p_21", "t_21", "p_22", "t_22", "r_c2"),
+            ("p_31", "t_31", "p_32", "t_32", "r_c3"),
+        )
+
+        df = pd.read_excel(filename)
+        for user_name in df.user_name.unique()[0:1]:
+            user_df = df.loc[df.user_name == user_name]
+            num_users = user_df.num_users.unique()
+            if len(num_users) == 1:
+                num_users = num_users[0]
+            else:
+                raise ValueError(
+                    "'num_users' should be the same for a given user profile"
+                )
+            user_preference = user_df.user_preference.unique()
+            if len(user_preference) == 1:
+                user_preference = user_preference[0]
+            else:
+                raise ValueError(
+                    "'user_preference' should be the same for a given user profile"
+                )
+
+            # create user and add it to usecase
+            user = User(user_name, num_users, user_preference)
+            self.add_user(user)
+            # itereate through the lines of the DataFrame, each line representing one Appliance instance
+            for row in user_df.loc[
+                :, ~user_df.columns.isin(["user_name", "num_users", "user_preference"])
+            ].to_dict(orient="records"):
+                # assign Appliance arguments
+                appliance_parameters = {k: row[k] for k in appliance_args}
+                appliance = user.add_appliance(**appliance_parameters)
+
+                # assign windows arguments
+                windows_parameters = {}
+                for k in windows_args:
+                    if "window" in k:
+                        windows_parameters[k] = np.array(
+                            [row.get(k + "_start"), row.get(k + "_end")]
+                        )
+                    else:
+                        windows_parameters[k] = row.get(k)
+                appliance.windows(**windows_parameters)
+
+                # assign cycles arguments
+                for i, cycle in enumerate(cycle_args):
+                    if np.isnan(row.get(cycle[0])) is False:
+                        cycle_parameters = {k: row.get(k) for k in cycle}
+                        appliance.specific_cycle(cycle_num=i, **cycle_parameters)
 
 
 class User:
@@ -257,6 +348,13 @@ class Appliance:
             self.cw11 = self.window_1
             self.cw12 = self.window_2
 
+    def specific_cycle(self, cycle_num, **kwargs):
+        if cycle_num == 1:
+            self.specific_cycle_1(**kwargs)
+        elif cycle_num == 2:
+            self.specific_cycle_2(**kwargs)
+        elif cycle_num == 3:
+            self.specific_cycle_3(**kwargs)
         #if needed, specific duty cycles can be defined for each Appliance, for a maximum of three different ones
     def specific_cycle_1(self, p_11 = 0, t_11 = 0, p_21 = 0, t_21 = 0, r_c1 = 0):
         self.p_11 = p_11 #power absorbed during first part of the duty cycle
