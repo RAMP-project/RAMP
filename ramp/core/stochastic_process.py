@@ -57,14 +57,14 @@ def Stochastic_Process(j):
                     else:
                         pass
                     
-                    if App.Pref_index == 0:
+                    if App.pref_index == 0:
                         pass
                     else:
-                        if rand_daily_pref == App.Pref_index: #evaluates if daily preference coincides with the randomised daily preference number
+                        if rand_daily_pref == App.pref_index: #evaluates if daily preference coincides with the randomised daily preference number
                             pass
                         else:
                             continue
-                    if App.wd_we == Year_behaviour[prof_i] or App.wd_we == 2 : #checks if the app is allowed in the given yearly behaviour pattern
+                    if App.wd_we_type == Year_behaviour[prof_i] or App.wd_we_type == 2 : #checks if the app is allowed in the given yearly behaviour pattern
                         pass
                     else:
                         continue
@@ -104,28 +104,28 @@ def Stochastic_Process(j):
                     App.power = App.POWER[prof_i]
                     
                     #random variability is applied to the total functioning time and to the duration of the duty cycles, if they have been specified
-                    random_var_t = random.uniform((1-App.r_t),(1+App.r_t))
-                    if App.activate == 1:
-                        App.p_11 = App.P_11*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                        App.p_12 = App.P_12*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                    random_var_t = random.uniform((1-App.time_fraction_random_variability),(1+App.time_fraction_random_variability))
+                    if App.fixed_cycle == 1:
+                        App.p_11 = App.p_11*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                        App.p_12 = App.p_12*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
                         random_cycle1 = np.concatenate(((np.ones(int(App.t_11*(random.uniform((1+App.r_c1),(1-App.r_c1)))))*App.p_11),(np.ones(int(App.t_12*(random.uniform((1+App.r_c1),(1-App.r_c1)))))*App.p_12))) #randomise also the fixed cycle
                         random_cycle2 = random_cycle1
                         random_cycle3 = random_cycle1
-                    elif App.activate == 2:
-                        App.p_11 = App.P_11*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                        App.p_12 = App.P_12*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                        App.p_21 = App.P_21*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                        App.p_22 = App.P_22*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                    elif App.fixed_cycle == 2:
+                        App.p_11 = App.p_11*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                        App.p_12 = App.p_12*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                        App.p_21 = App.p_21*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                        App.p_22 = App.p_22*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
                         random_cycle1 = np.concatenate(((np.ones(int(App.t_11*(random.uniform((1+App.r_c1),(1-App.r_c1)))))*App.p_11),(np.ones(int(App.t_12*(random.uniform((1+App.r_c1),(1-App.r_c1)))))*App.p_12))) #randomise also the fixed cycle
                         random_cycle2 = np.concatenate(((np.ones(int(App.t_21*(random.uniform((1+App.r_c2),(1-App.r_c2)))))*App.p_21),(np.ones(int(App.t_22*(random.uniform((1+App.r_c2),(1-App.r_c2)))))*App.p_22))) #randomise also the fixed cycle
                         random_cycle3 = random_cycle1
-                    elif App.activate == 3:
-                        App.p_11 = App.P_11*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                        App.p_12 = App.P_12*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                        App.p_21 = App.P_21*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                        App.p_22 = App.P_22*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                        App.p_31 = App.P_31*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                        App.p_32 = App.P_32*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                    elif App.fixed_cycle == 3:
+                        App.p_11 = App.p_11*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                        App.p_12 = App.p_12*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                        App.p_21 = App.p_21*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                        App.p_22 = App.p_22*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                        App.p_31 = App.p_31*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                        App.p_32 = App.p_32*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
                         random_cycle1 = random.choice([np.concatenate(((np.ones(int(App.t_11*(random.uniform((1+App.r_c1),(1-App.r_c1)))))*App.p_11),(np.ones(int(App.t_12*(random.uniform((1+App.r_c1),(1-App.r_c1)))))*App.p_12))),np.concatenate(((np.ones(int(App.t_12*(random.uniform((1+App.r_c1),(1-App.r_c1)))))*App.p_12),(np.ones(int(App.t_11*(random.uniform((1+App.r_c1),(1-App.r_c1)))))*App.p_11)))]) #randomise also the fixed cycle
                         random_cycle2 = random.choice([np.concatenate(((np.ones(int(App.t_21*(random.uniform((1+App.r_c2),(1-App.r_c2)))))*App.p_21),(np.ones(int(App.t_22*(random.uniform((1+App.r_c2),(1-App.r_c2)))))*App.p_22))),np.concatenate(((np.ones(int(App.t_22*(random.uniform((1+App.r_c2),(1-App.r_c2)))))*App.p_22),(np.ones(int(App.t_21*(random.uniform((1+App.r_c2),(1-App.r_c2)))))*App.p_21)))])                    
                         random_cycle3 = random.choice([np.concatenate(((np.ones(int(App.t_31*(random.uniform((1+App.r_c3),(1-App.r_c3)))))*App.p_31),(np.ones(int(App.t_32*(random.uniform((1+App.r_c3),(1-App.r_c3)))))*App.p_32))),np.concatenate(((np.ones(int(App.t_32*(random.uniform((1+App.r_c3),(1-App.r_c3)))))*App.p_32),(np.ones(int(App.t_31*(random.uniform((1+App.r_c3),(1-App.r_c3)))))*App.p_31)))])#this is to avoid that all cycles are sincronous                      
@@ -222,7 +222,7 @@ def Stochastic_Process(j):
                                         coincidence = on_number #randomly selects how many apps are on at the same time for each app type based on the above probabilistic algorithm
                                     else:
                                         coincidence = App.number #this is the case when App.fixed is activated. All 'n' apps of an App instance are switched_on altogether
-                                    if App.activate > 0: #evaluates if the app has some duty cycles to be considered
+                                    if App.fixed_cycle > 0: #evaluates if the app has some duty cycles to be considered
                                         if indexes_adj.size > 0:
                                             evaluate = round(np.mean(indexes_adj)) #calculates the mean time position of the current switch_on event, to later select the proper duty cycle
                                         else:
@@ -238,8 +238,8 @@ def Stochastic_Process(j):
                                             np.put(App.daily_use,indexes_adj,(random_cycle3*coincidence))
                                             np.put(App.daily_use_masked,indexes_adj,(random_cycle3*coincidence),mode='clip')
                                     else: #if no duty cycles are specififed, a regular switch_on event is modelled
-                                        np.put(App.daily_use,indexes_adj,(App.power*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var)))*coincidence)) #randomises also the App Power if Thermal_P_var is on
-                                        np.put(App.daily_use_masked,indexes_adj,(App.power*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var)))*coincidence),mode='clip')
+                                        np.put(App.daily_use,indexes_adj,(App.power*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence)) #randomises also the App Power if thermal_p_var is on
+                                        np.put(App.daily_use_masked,indexes_adj,(App.power*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence),mode='clip')
                                     App.daily_use_masked = np.zeros_like(ma.masked_greater_equal(App.daily_use_masked,0.001)) #updates the mask excluding the current switch_on event to identify the free_spots for the next iteration
                                     tot_time = (tot_time - indexes.size) + indexes_adj.size #updates the total time correcting the previous value
                                     break #exit cycle and go to next App
@@ -256,7 +256,7 @@ def Stochastic_Process(j):
                                         coincidence = on_number
                                     else:
                                         coincidence = App.number
-                                    if App.activate > 0:
+                                    if App.fixed_cycle > 0:
                                         if indexes.size > 0:
                                             evaluate = round(np.mean(indexes))
                                         else:
@@ -271,8 +271,8 @@ def Stochastic_Process(j):
                                             np.put(App.daily_use,indexes,(random_cycle3*coincidence))
                                             np.put(App.daily_use_masked,indexes,(random_cycle3*coincidence),mode='clip')
                                     else:
-                                        np.put(App.daily_use,indexes,(App.power*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var)))*coincidence))
-                                        np.put(App.daily_use_masked,indexes,(App.power*(random.uniform((1-App.Thermal_P_var),(1+App.Thermal_P_var)))*coincidence),mode='clip')
+                                        np.put(App.daily_use,indexes,(App.power*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence))
+                                        np.put(App.daily_use_masked,indexes,(App.power*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence),mode='clip')
                                     App.daily_use_masked = np.zeros_like(ma.masked_greater_equal(App.daily_use_masked,0.001))
                                     tot_time = tot_time #no correction applied to previously calculated value
                                                     
