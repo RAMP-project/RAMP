@@ -7,13 +7,14 @@ import pandas as pd
 from ramp.core.constants import NEW_TO_OLD_MAPPING, OLD_TO_NEW_MAPPING
 
 #%% Definition of Python classes that constitute the model architecture
-'''
-The code is based on two concatenated python classes, namely 'User' and
-'Appliance', which are used to define at the outer level the User classes and 
-at the inner level all the available appliances within each user class, with 
-their own characteristics. Within the Appliance class, some other functions are
-created to define windows of use and, if needed, specific duty cycles
-'''
+"""
+The code is based on UseCase, User and Appliance classes.
+A UseCase instance consists of a list of User instances which own Appliance instances
+Within the Appliance class, some other functions are created to define windows of use and, 
+if needed, specific duty cycles
+"""
+
+
 class UseCase:
     def __init__(self, name="", users=None):
         self.name = name
