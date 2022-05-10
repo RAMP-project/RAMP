@@ -165,7 +165,7 @@ class User:
             thermal_p_var=thermal_P_var,
             pref_index=pref_index,
             wd_we_type=wd_we_type,
-            P_series=P_series,
+            p_series=P_series,
             name=name,
         )
 # Define the inner class for modelling user's appliances within the correspoding user class
@@ -308,7 +308,7 @@ class Appliance:
                     dm[attribute] = getattr(self, attribute)
             else:
                 # this is for legacy purpose, so that people can export their old models to new format
-                old_attribute = NEW_TO_OLD_MAPPING[attribute]
+                old_attribute = NEW_TO_OLD_MAPPING.get(attribute,attribute)
                 if hasattr(self, old_attribute):
                     if "window_" in old_attribute:
                         window_value = getattr(self, old_attribute)
@@ -356,6 +356,7 @@ class Appliance:
             self.specific_cycle_2(**kwargs)
         elif cycle_num == 3:
             self.specific_cycle_3(**kwargs)
+
         #if needed, specific duty cycles can be defined for each Appliance, for a maximum of three different ones
     def specific_cycle_1(self, p_11 = 0, t_11 = 0, p_21 = 0, t_21 = 0, r_c1 = 0):
         self.p_11 = p_11 #power absorbed during first part of the duty cycle
@@ -394,3 +395,4 @@ class Appliance:
         self.cw22 = cw22
         self.cw31 = cw31 #same for cycle 3
         self.cw32 = cw32
+
