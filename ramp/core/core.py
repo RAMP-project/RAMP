@@ -135,7 +135,7 @@ class User:
         self,
         user,
         n=1,
-        POWER=0,
+        P=0,
         w=1,
         t=0,
         r_t=0,
@@ -153,7 +153,7 @@ class User:
         """Back-compatibility with legacy code"""
         return self.add_appliance(
             number=n,
-            power=POWER,
+            power=P,
             num_windows=w,
             func_time=t,
             time_fraction_random_variability=r_t,
@@ -168,7 +168,6 @@ class User:
             p_series=P_series,
             name=name,
         )
-# Define the inner class for modelling user's appliances within the correspoding user class
 class Appliance:
     def __init__(
         self,
@@ -258,6 +257,7 @@ class Appliance:
         for user_attribute in ("user_name", "num_users", "user_preference"):
             dm[user_attribute] = getattr(self.user, user_attribute)
         for attribute in (
+            "name"
             "number",
             "power",
             "num_windows",
