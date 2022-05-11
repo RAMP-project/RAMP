@@ -63,7 +63,7 @@ class UseCase:
         )
 
         df = pd.read_excel(filename)
-        for user_name in df.user_name.unique()[0:1]:
+        for user_name in df.user_name.unique():
             user_df = df.loc[df.user_name == user_name]
             num_users = user_df.num_users.unique()
             if len(num_users) == 1:
@@ -217,6 +217,7 @@ class Appliance:
         if (
             p_series is False and isinstance(power, pd.DataFrame) is False
         ):  #check if the user defined P as timeseries
+
             self.power = power * np.ones(
                 365
             )  #treat the power as single value for the entire year
