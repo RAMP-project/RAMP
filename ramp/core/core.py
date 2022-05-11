@@ -40,6 +40,7 @@ class UseCase:
         """Open an .xlsx file which was produces via the save method and create instances of Users and Appliances"""
 
         appliance_args = (
+            "name",
             "number",
             "power",
             "num_windows",
@@ -56,9 +57,9 @@ class UseCase:
         )
         windows_args = ("window_1", "window_2", "window_3", "random_var_w")
         cycle_args = (
-            ("p_11", "t_11", "p_12", "t_12", "r_c1"),
-            ("p_21", "t_21", "p_22", "t_22", "r_c2"),
-            ("p_31", "t_31", "p_32", "t_32", "r_c3"),
+            ("p_11", "t_11", "cw11", "p_12", "t_12", "cw12", "r_c1"),
+            ("p_21", "t_21", "cw21", "p_22", "t_22", "cw22", "r_c2"),
+            ("p_31", "t_31", "cw31", "p_32", "t_32", "cw32", "r_c3"),
         )
 
         df = pd.read_excel(filename)
@@ -102,10 +103,16 @@ class UseCase:
                 appliance.windows(**windows_parameters)
 
                 # assign cycles arguments
-                for i, cycle in enumerate(cycle_args):
-                    if np.isnan(row.get(cycle[0])) is False:
-                        cycle_parameters = {k: row.get(k) for k in cycle}
-                        appliance.specific_cycle(cycle_num=i, **cycle_parameters)
+                for i in range(appliance.fixed_cycle):
+                    cycle_parameters ={}
+                    for k in cycle_args[i]:
+                        if "cw" in k:
+                            cycle_parameters[k] = np.array(
+                                [row.get(k + "_start"), row.get(k + "_end")],dtype=np.intc
+                            )
+                        else:
+                            cycle_parameters[k] = row.get(k)
+                    appliance.specific_cycle(cycle_num=i+1, **cycle_parameters)
 
 
 class User:
@@ -257,7 +264,7 @@ class Appliance:
         for user_attribute in ("user_name", "num_users", "user_preference"):
             dm[user_attribute] = getattr(self.user, user_attribute)
         for attribute in (
-            "name"
+            "name",
             "number",
             "power",
             "num_windows",
@@ -273,18 +280,24 @@ class Appliance:
             "wd_we_type",
             "p_11",
             "t_11",
+            "cw11",
             "p_12",
             "t_12",
+            "cw12",
             "r_c1",
             "p_21",
             "t_21",
+            "cw21",
             "p_22",
             "t_22",
+            "cw22",
             "r_c2",
             "p_31",
             "t_31",
+            "cw31",
             "p_32",
             "t_32",
+            "cw32",
             "r_c3",
             "window_1",
             "window_2",
@@ -293,7 +306,7 @@ class Appliance:
         ):
 
             if hasattr(self, attribute):
-                if "window_" in attribute:
+                if "window_" in attribute or "cw" in attribute:
                     window_value = getattr(self, attribute)
                     dm[attribute + "_start"] = window_value[0]
                     dm[attribute + "_end"] = window_value[1]
@@ -310,7 +323,7 @@ class Appliance:
                 # this is for legacy purpose, so that people can export their old models to new format
                 old_attribute = NEW_TO_OLD_MAPPING.get(attribute,attribute)
                 if hasattr(self, old_attribute):
-                    if "window_" in old_attribute:
+                    if "window_" in attribute or "cw" in attribute:
                         window_value = getattr(self, old_attribute)
                         dm[attribute + "_start"] = window_value[0]
                         dm[attribute + "_end"] = window_value[1]
@@ -324,7 +337,11 @@ class Appliance:
                     else:
                         dm[attribute] = getattr(self, old_attribute)
                 else:
-                    dm[attribute] = None
+                    if "cw" in old_attribute:
+                        dm[attribute + "_start"] = None
+                        dm[attribute + "_end"] = None
+                    else:
+                        dm[attribute] = None
         return pd.DataFrame.from_records([dm])
 
     def export_to_dataframe(self):
@@ -358,32 +375,44 @@ class Appliance:
             self.specific_cycle_3(**kwargs)
 
         #if needed, specific duty cycles can be defined for each Appliance, for a maximum of three different ones
-    def specific_cycle_1(self, p_11 = 0, t_11 = 0, p_21 = 0, t_21 = 0, r_c1 = 0):
+    def specific_cycle_1(self, p_11 = 0, t_11 = 0, p_12 = 0, t_12 = 0, r_c1 = 0, cw11=None, cw12=None):
         self.p_11 = p_11 #power absorbed during first part of the duty cycle
-        self.t_11 = t_11 #duration of first part of the duty cycle
-        self.p_12 = p_21 #power absorbed during second part of the duty cycle
-        self.t_12 = t_21 #duration of second part of the duty cycle
+        self.t_11 = int(t_11) #duration of first part of the duty cycle
+        self.p_12 = p_12 #power absorbed during second part of the duty cycle
+        self.t_12 = int(t_12) #duration of second part of the duty cycle
         self.r_c1 = r_c1 #random variability of duty cycle segments duration
+        if cw11 is not None:
+            self.cw11 = cw11
+        if cw12 is not None:
+            self.cw12 = cw12
         # Below is not used
-        self.fixed_cycle1 = np.concatenate(((np.ones(t_11)*p_11),(np.ones(t_21)*p_21))) #create numpy array representing the duty cycle
+        self.fixed_cycle1 = np.concatenate(((np.ones(self.t_11)*p_11),(np.ones(self.t_12)*p_12))) #create numpy array representing the duty cycle
 
-    def specific_cycle_2(self, p_21 = 0, t_21 = 0, p_22 = 0, t_22 = 0, r_c2 = 0):
+    def specific_cycle_2(self, p_21 = 0, t_21 = 0, p_22 = 0, t_22 = 0, r_c2 = 0, cw21=None, cw22=None):
         self.p_21 = p_21 #same as for cycle1
-        self.t_21 = t_21
+        self.t_21 = int(t_21)
         self.p_22 = p_22
-        self.t_22 = t_22
+        self.t_22 = int(t_22)
         self.r_c2 = r_c2
+        if cw21 is not None:
+            self.cw21 = cw21
+        if cw22 is not None:
+            self.cw22 = cw22
         # Below is not used
-        self.fixed_cycle2 = np.concatenate(((np.ones(t_21)*p_21),(np.ones(t_22)*p_22)))
+        self.fixed_cycle2 = np.concatenate(((np.ones(self.t_21)*p_21),(np.ones(self.t_22)*p_22)))
 
-    def specific_cycle_3(self, p_31 = 0, t_31 = 0, p_32 = 0, t_32 = 0, r_c3 = 0):
+    def specific_cycle_3(self, p_31 = 0, t_31 = 0, p_32 = 0, t_32 = 0, r_c3 = 0, cw31=None, cw32=None):
         self.p_31 = p_31 #same as for cycle1
-        self.t_31 = t_31
+        self.t_31 = int(t_31)
         self.p_32 = p_32
-        self.t_32 = t_32
+        self.t_32 = int(t_32)
         self.r_c3 = r_c3
+        if cw31 is not None:
+            self.cw31 = cw31
+        if cw32 is not None:
+            self.cw32 = cw32
         # Below is not used
-        self.fixed_cycle3 = np.concatenate(((np.ones(t_31)*p_31),(np.ones(t_32)*p_32)))
+        self.fixed_cycle3 = np.concatenate(((np.ones(self.t_31)*p_31),(np.ones(self.t_32)*p_32)))
 
     #different time windows can be associated with different specific duty cycles
     def cycle_behaviour(self, cw11 = np.array([0,0]), cw12 = np.array([0,0]), cw21 = np.array([0,0]), cw22 = np.array([0,0]), cw31 = np.array([0,0]), cw32 = np.array([0,0])):
