@@ -9,9 +9,12 @@ from ramp.core.initialise import Initialise_model, Initialise_inputs
 
 #%% Core model stochastic script
 
-def Stochastic_Process(j):
-    Profile, num_profiles = Initialise_model()
-    peak_enlarg, mu_peak, s_peak, op_factor, Year_behaviour, User_list = Initialise_inputs(j)
+
+
+
+def Stochastic_Process(j=None, fname=None, num_profiles=None):
+    Profile, num_profiles = Initialise_model(num_profiles)
+    peak_enlarg, mu_peak, s_peak, op_factor, Year_behaviour, User_list = Initialise_inputs(j, fname)
     '''
     Calculation of the peak time range, which is used to discriminate between off-peak and on-peak coincident switch-on probability
     Calculates first the overall Peak Window (taking into account all User classes). 
