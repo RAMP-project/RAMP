@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 #%% Import required libraries
+import os.path
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -64,6 +66,9 @@ for i in range (len(Profile)):
 
 # Export Profiles
 
-def export_series(stoch_profiles_series, j):
+def export_series(stoch_profiles_series, j=None, fname=None):
     series_frame = pd.DataFrame(stoch_profiles_series)
-    series_frame.to_csv('results/output_file_%d.csv' % (j))
+    if j is not None:
+        series_frame.to_csv('results/output_file_%d.csv' % (j))
+    if fname is not None:
+        series_frame.to_csv(f'results/output_file_{os.path.split(fname)[-1]}.csv')
