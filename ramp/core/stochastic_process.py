@@ -24,14 +24,6 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
     windows_curve = np.zeros(1440) #creates an empty daily profile
     Tot_curve = np.zeros(1440) #creates another empty daily profile
     for Us in User_list:
-        App_count = 0
-        for App in Us.App_list:
-            #Calculate windows curve, i.e. the theoretical maximum curve that can be obtained, for each app, by switching-on always all the 'n' apps altogether in any time-step of the functioning windows
-            single_wcurve = Us.App_list[App_count].daily_use*np.mean(Us.App_list[App_count].power)*Us.App_list[App_count].number #this computes the curve for the specific App
-            windows_curve = np.vstack([windows_curve, single_wcurve]) #this stacks the specific App curve in an overall curve comprising all the Apps within a User class
-            App_count += 1
-        Us.windows_curve = windows_curve #after having iterated for all the Apps within a User class, saves the overall User class theoretical maximum curve
-        Us.windows_curve = np.transpose(np.sum(Us.windows_curve, axis = 0))*Us.num_users
         Tot_curve = Tot_curve + Us.windows_curve #adds the User's theoretical max profile to the total theoretical max comprising all classes
     peak_window = np.transpose(np.argwhere(Tot_curve == np.amax(Tot_curve))) #Find the peak window within the theoretical max profile
     peak_time = round(random.normalvariate(round(np.average(peak_window)),1/3*(peak_window[0,-1]-peak_window[0,0]))) #Within the peak_window, randomly calculate the peak_time using a gaussian distribution
