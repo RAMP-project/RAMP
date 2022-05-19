@@ -550,9 +550,7 @@ class Appliance:
             self.cw12 = self.window_2
 
     def assign_random_cycles(self):
-        """
-        calculates the new randomised cycles taking the random variability in the duty cycle duration
-        """
+        """Calculates randomised cycles taking the random variability in the duty cycle duration"""
         if self.fixed_cycle >= 1:
             self.p_11 = self.p_11*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
             self.p_12 = self.p_12*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
@@ -571,7 +569,17 @@ class Appliance:
             pass
 
     def update_daily_use(self, coincidence, power, indexes):
-        """Update the daily use depending on existence of duty cycles of the Appliance instance"""
+        """Update the daily use depending on existence of duty cycles of the Appliance instance
+
+            This corresponds to step 2d. and 2e. of [1]
+
+        Notes
+        -----
+        [1] F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo,
+            Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
+            Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
+
+        """
 
         if self.fixed_cycle > 0:  # evaluates if the app has some duty cycles to be considered
             evaluate = np.round(np.mean(indexes)) if indexes.size > 0 else 0
