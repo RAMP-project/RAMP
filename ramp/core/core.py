@@ -601,7 +601,6 @@ class Appliance:
             rand_time = int(0.99 * (np.diff(rand_window_1) + np.diff(rand_window_2) + np.diff(rand_window_3)))
         return rand_time
 
-
     def switch_on(self, rand_window_1, rand_window_2, rand_window_3):
         """Return a random switch-on time of the Appliance instance
 
@@ -675,3 +674,93 @@ class Appliance:
             # All 'n' copies of an Appliance instance are switched on altogether
             coincidence = self.number
         return coincidence
+
+    def generate_load_profile(self, rand_time, peak_time_range, rand_window_1, rand_window_2, rand_window_3, power):
+        """Generate load profile of the Appliance instance by updating its daily_use attribute
+
+            Repeat steps 2c – 2e of [1] until the sum of the durations of all the switch-on events equals
+            the randomised total time of use of the Appliance
+
+        Notes
+        -----
+        [1] F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo,
+            Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
+            Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
+        """
+        max_free_spot = rand_time  # free spots are used to detect if there's still space for switch_ons. Before calculating actual free spots, the max free spot is set equal to the entire randomised func_time
+        rand_windows = [rand_window_1, rand_window_2, rand_window_3]
+        tot_time = 0
+        while tot_time <= rand_time:
+            # Identifies a random switch on time within the available functioning windows
+            # step 2c of [1]
+            switch_on = self.switch_on(*rand_windows)
+
+            if self.daily_use[switch_on] == 0.001:
+                # control to check if the Appliance instance is not already on
+                # at the randomly selected switch-on time
+                if switch_on in range(rand_window_1[0], rand_window_1[1]):
+                    # random switch_on happens in rand_windows_1
+                    rand_window = rand_window_1
+                elif switch_on in range(rand_window_2[0], rand_window_2[1]):
+                    # random switch_on happens in rand_windows_2
+                    rand_window = rand_window_2
+                else:
+                    # if switch_on is not in rand_window_1 nor in rand_window_2, it shall be in rand_window_3.
+                    rand_window = rand_window_3
+
+                indexes = self.calc_indexes_for_rand_switch_on(
+                    switch_on=switch_on,
+                    rand_time=rand_time,
+                    max_free_spot=max_free_spot,
+                    rand_window=rand_window
+                )
+                if indexes is None:
+                    continue
+
+                # the count of total time is updated with the size of the indexes array
+                tot_time = tot_time + indexes.size
+
+                if tot_time > rand_time:
+                    # the total functioning time is reached, a correction is applied to avoid overflow of indexes
+                    indexes_adj = indexes[:-(tot_time - rand_time)]
+                    # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
+                    coincidence = self.calc_coincident_switch_on(
+                        peak_time_range=peak_time_range,
+                        indexes=indexes_adj,
+                    )
+                    # Update the daily use depending on existence of duty cycles of the Appliance instance
+                    self.update_daily_use(
+                        coincidence,
+                        power=power,
+                        index=indexes_adj
+                    )
+                    break  # exit cycle and go to next Appliance
+
+                else:
+                    # the total functioning time has not yet exceeded the rand_time
+                    # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
+                    coincidence = self.calc_coincident_switch_on(
+                        peak_time_range=peak_time_range,
+                        indexes=indexes,
+                    )
+                    # Update the daily use depending on existence of duty cycles of the Appliance instance
+                    self.update_daily_use(
+                        coincidence,
+                        power=power,
+                        index=indexes
+                    )
+
+                free_spots = []  # calculate how many free spots remain for further switch_ons
+                try:
+                    for j in ma.notmasked_contiguous(self.daily_use_masked):
+                        free_spots.append(j.stop - j.start)
+                except TypeError:
+                    free_spots = [0]
+                max_free_spot = max(free_spots)
+
+            else:
+                # if the random switch_on falls somewhere where the Appliance instance
+                # has been already turned on, tries again from beginning of the while cycle
+                # TODO not sure this code is useful as the while loop would continue anyway in that case
+                continue
+
