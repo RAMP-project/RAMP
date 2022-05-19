@@ -98,6 +98,14 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                     rand_window_2 = App.calc_rand_window(window_idx=2)
                     rand_window_3 = App.calc_rand_window(window_idx=3)
                     rand_windows = [rand_window_1, rand_window_2, rand_window_3]
+
+                    # random variability is applied to the total functioning time and to the duration
+                    # of the duty cycles provided they have been specified
+                    # step 2a of [1]
+                    rand_time = App.rand_total_time_of_use(*rand_windows)
+
+                    max_free_spot = rand_time  # free spots are used to detect if there's still space for switch_ons. Before calculating actual free spots, the max free spot is set equal to the entire randomised func_time
+
                     #redefines functioning windows based on the previous randomisation of the boundaries
                     if App.flat == 'yes': #if the app is "flat" the code stops right after filling the newly created windows without applying any further stochasticity
                         App.daily_use[rand_window_1[0]:rand_window_1[1]] = np.full(np.diff(rand_window_1),App.power[prof_i]*App.number)
@@ -109,10 +117,12 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                         App.daily_use[rand_window_1[0]:rand_window_1[1]] = np.full(np.diff(rand_window_1),0.001)
                         App.daily_use[rand_window_2[0]:rand_window_2[1]] = np.full(np.diff(rand_window_2),0.001)
                         App.daily_use[rand_window_3[0]:rand_window_3[1]] = np.full(np.diff(rand_window_3),0.001)
+
                     App.daily_use_masked = np.zeros_like(ma.masked_not_equal(App.daily_use,0.001))
-                    
-                    #random variability is applied to the total functioning time and to the duration of the duty cycles, if they have been specified
-                    random_var_t = random.uniform((1-App.time_fraction_random_variability),(1+App.time_fraction_random_variability))
+
+
+
+
                     if App.fixed_cycle == 1:
                         App.p_11 = App.p_11*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
                         App.p_12 = App.p_12*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
@@ -139,12 +149,8 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                         random_cycle3 = random.choice([np.concatenate(((np.ones(int(App.t_31*(random.uniform((1+App.r_c3),(1-App.r_c3)))))*App.p_31),(np.ones(int(App.t_32*(random.uniform((1+App.r_c3),(1-App.r_c3)))))*App.p_32))),np.concatenate(((np.ones(int(App.t_32*(random.uniform((1+App.r_c3),(1-App.r_c3)))))*App.p_32),(np.ones(int(App.t_31*(random.uniform((1+App.r_c3),(1-App.r_c3)))))*App.p_31)))])#this is to avoid that all cycles are sincronous                      
                     else:
                         pass
-                    rand_time = round(random.uniform(App.func_time,int(App.func_time*random_var_t)))
-                    #control to check that the total randomised time of use does not exceed the total space available in the windows
-                    if rand_time > 0.99*(np.diff(rand_window_1)+np.diff(rand_window_2)+np.diff(rand_window_3)):
-                        rand_time = int(0.99*(np.diff(rand_window_1)+np.diff(rand_window_2)+np.diff(rand_window_3)))
-                    max_free_spot = rand_time #free spots are used to detect if there's still space for switch_ons. Before calculating actual free spots, the max free spot is set equal to the entire randomised func_time
-                           
+
+
                     while tot_time <= rand_time: #this is the key cycle, which runs for each App until the switch_ons and their duration equals the randomised total time of use of the App
                             #check how many windows to consider
                             # step 2c of [1]
