@@ -334,6 +334,10 @@ class Appliance:
         self.random_cycle2 = np.array([])
         self.random_cycle3 = np.array([])
 
+        self.random_cycle1 = None
+        self.random_cycle2 = None
+        self.random_cycle3 = None
+
     def save(self):
         dm = {}
         for user_attribute in ("user_name", "num_users", "user_preference"):
@@ -451,21 +455,52 @@ class Appliance:
             self.cw11 = self.window_1
             self.cw12 = self.window_2
 
-    def update_daily_use(self, random_cycle1, random_cycle2, random_cycle3, coincidence, power, indexes):
+    def assign_random_cycles(self):
+        """
+        calculates the new randomised cycles taking the random variability in the duty cycle duration
+        """
+        if self.fixed_cycle == 1:
+            self.p_11 = self.p_11*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.p_12 = self.p_12*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.random_cycle1 = np.concatenate(((np.ones(int(self.t_11*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_11),(np.ones(int(self.t_12*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_12))) #randomise also the fixed cycle
+            self.random_cycle2 = self.random_cycle1
+            self.random_cycle3 = self.random_cycle1
+        elif self.fixed_cycle == 2:
+            self.p_11 = self.p_11*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.p_12 = self.p_12*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.p_21 = self.p_21*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.p_22 = self.p_22*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.random_cycle1 = np.concatenate(((np.ones(int(self.t_11*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_11),(np.ones(int(self.t_12*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_12))) #randomise also the fixed cycle
+            self.random_cycle2 = np.concatenate(((np.ones(int(self.t_21*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_21),(np.ones(int(self.t_22*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_22))) #randomise also the fixed cycle
+            self.random_cycle3 = self.random_cycle1
+        elif self.fixed_cycle == 3:
+            self.p_11 = self.p_11*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.p_12 = self.p_12*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.p_21 = self.p_21*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.p_22 = self.p_22*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.p_31 = self.p_31*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.p_32 = self.p_32*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.random_cycle1 = random.choice([np.concatenate(((np.ones(int(self.t_11*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_11),(np.ones(int(self.t_12*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_12))),np.concatenate(((np.ones(int(self.t_12*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_12),(np.ones(int(self.t_11*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_11)))]) #randomise also the fixed cycle
+            self.random_cycle2 = random.choice([np.concatenate(((np.ones(int(self.t_21*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_21),(np.ones(int(self.t_22*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_22))),np.concatenate(((np.ones(int(self.t_22*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_22),(np.ones(int(self.t_21*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_21)))])
+            self.random_cycle3 = random.choice([np.concatenate(((np.ones(int(self.t_31*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_31),(np.ones(int(self.t_32*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_32))),np.concatenate(((np.ones(int(self.t_32*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_32),(np.ones(int(self.t_31*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_31)))])#this is to avoid that all cycles are sincronous
+        else:
+            pass
+
+    def update_daily_use(self, coincidence, power, indexes):
         """Update the daily use depending on existence of duty cycles of the Appliance instance"""
 
         if self.fixed_cycle > 0:  # evaluates if the app has some duty cycles to be considered
             evaluate = np.round(np.mean(indexes)) if indexes.size > 0 else 0
             # selects the proper duty cycle and puts the corresponding power values in the indexes range
             if evaluate in range(self.cw11[0], self.cw11[1]) or evaluate in range(self.cw12[0], self.cw12[1]):
-                np.put(self.daily_use, indexes, (random_cycle1 * coincidence))
-                np.put(self.daily_use_masked, indexes, (random_cycle1 * coincidence), mode='clip')
+                np.put(self.daily_use, indexes, (self.random_cycle1 * coincidence))
+                np.put(self.daily_use_masked, indexes, (self.random_cycle1 * coincidence), mode='clip')
             elif evaluate in range(self.cw21[0], self.cw21[1]) or evaluate in range(self.cw22[0], self.cw22[1]):
-                np.put(self.daily_use, indexes, (random_cycle2 * coincidence))
-                np.put(self.daily_use_masked, indexes, (random_cycle2 * coincidence), mode='clip')
+                np.put(self.daily_use, indexes, (self.random_cycle2 * coincidence))
+                np.put(self.daily_use_masked, indexes, (self.random_cycle2 * coincidence), mode='clip')
             else:
-                np.put(self.daily_use, indexes, (random_cycle3 * coincidence))
-                np.put(self.daily_use_masked, indexes, (random_cycle3 * coincidence), mode='clip')
+                np.put(self.daily_use, indexes, (self.random_cycle3 * coincidence))
+                np.put(self.daily_use_masked, indexes, (self.random_cycle3 * coincidence), mode='clip')
         else:  # if no duty cycles are specified, a regular switch_on event is modelled
             # randomises also the App Power if thermal_p_var is on
             np.put(self.daily_use, indexes, (coincidence * power * (random.uniform((1 - self.thermal_p_var), (1 + self.thermal_p_var)))))
@@ -502,7 +537,8 @@ class Appliance:
         elif cycle_num == 3:
             self.specific_cycle_3(**kwargs)
 
-        #if needed, specific duty cycles can be defined for each Appliance, for a maximum of three different ones
+        # if needed, specific duty cycles can be defined for each Appliance, for a maximum of three different ones
+
     def specific_cycle_1(self, p_11 = 0, t_11 = 0, p_12 = 0, t_12 = 0, r_c1 = 0, cw11=None, cw12=None):
         self.p_11 = p_11 #power absorbed during first part of the duty cycle
         self.t_11 = int(t_11) #duration of first part of the duty cycle
