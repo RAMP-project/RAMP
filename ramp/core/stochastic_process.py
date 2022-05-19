@@ -107,16 +107,20 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                     max_free_spot = rand_time  # free spots are used to detect if there's still space for switch_ons. Before calculating actual free spots, the max free spot is set equal to the entire randomised func_time
 
                     #redefines functioning windows based on the previous randomisation of the boundaries
-                    if App.flat == 'yes': #if the app is "flat" the code stops right after filling the newly created windows without applying any further stochasticity
-                        App.daily_use[rand_window_1[0]:rand_window_1[1]] = np.full(np.diff(rand_window_1),App.power[prof_i]*App.number)
-                        App.daily_use[rand_window_2[0]:rand_window_2[1]] = np.full(np.diff(rand_window_2),App.power[prof_i]*App.number)
-                        App.daily_use[rand_window_3[0]:rand_window_3[1]] = np.full(np.diff(rand_window_3),App.power[prof_i]*App.number)
+                    # step 2b of [1]
+                    if App.flat == 'yes':
+                        # for "flat" appliances the algorithm stops right after filling the newly
+                        # created windows without applying any further stochasticity
+                        total_power_value = App.power[prof_i] * App.number
+                        for rand_window in rand_windows:
+                            App.daily_use[rand_window[0]:rand_window[1]] = np.full(np.diff(rand_window), total_power_value)
                         Us.load = Us.load + App.daily_use
                         continue
-                    else: #otherwise, for "non-flat" apps it puts a mask on the newly defined windows and continues    
-                        App.daily_use[rand_window_1[0]:rand_window_1[1]] = np.full(np.diff(rand_window_1),0.001)
-                        App.daily_use[rand_window_2[0]:rand_window_2[1]] = np.full(np.diff(rand_window_2),0.001)
-                        App.daily_use[rand_window_3[0]:rand_window_3[1]] = np.full(np.diff(rand_window_3),0.001)
+                    else:
+                        # "non-flat" appliances a mask is applied on the newly defined windows and
+                        # the algorithm goes further on
+                        for rand_window in rand_windows:
+                            App.daily_use[rand_window[0]:rand_window[1]] = np.full(np.diff(rand_window), 0.001)
 
                     App.daily_use_masked = np.zeros_like(ma.masked_not_equal(App.daily_use,0.001))
 
