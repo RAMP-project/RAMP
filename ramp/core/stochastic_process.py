@@ -76,22 +76,18 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                     #initialises variables for the cycle
                     tot_time = 0
                     App.daily_use = np.zeros(1440)
-                    if random.uniform(0,1) > App.occasional_use: #evaluates if occasional use happens or not
+
+                    # skip this appliance in any of the following applies
+                    if (
+                        # evaluates if occasional use happens or not
+                        (random.uniform(0, 1) > App.occasional_use
+                            # evaluates if daily preference coincides with the randomised daily preference number
+                            or (App.pref_index != 0 and rand_daily_pref != App.pref_index)
+                            # checks if the app is allowed in the given yearly behaviour pattern
+                            or App.wd_we_type not in [Year_behaviour[prof_i], 2])
+                    ):
                         continue
-                    else:
-                        pass
-                    
-                    if App.pref_index == 0:
-                        pass
-                    else:
-                        if rand_daily_pref == App.pref_index: #evaluates if daily preference coincides with the randomised daily preference number
-                            pass
-                        else:
-                            continue
-                    if App.wd_we_type == Year_behaviour[prof_i] or App.wd_we_type == 2 : #checks if the app is allowed in the given yearly behaviour pattern
-                        pass
-                    else:
-                        continue
+
 
                     # recalculate windows start and ending times randomly, based on the inputs
                     rand_window_1 = App.calc_rand_window(window_idx=1)
