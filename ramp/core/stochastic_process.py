@@ -72,9 +72,9 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                     pass
                 else:
                     rand_daily_pref = random.randint(1,Us.user_preference)
+
                 for App in Us.App_list: #iterates for all the App types in the given User class
                     #initialises variables for the cycle
-                    tot_time = 0
                     App.daily_use = np.zeros(1440)
 
                     # skip this appliance in any of the following applies
@@ -88,7 +88,6 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                     ):
                         continue
 
-
                     # recalculate windows start and ending times randomly, based on the inputs
                     rand_window_1 = App.calc_rand_window(window_idx=1)
                     rand_window_2 = App.calc_rand_window(window_idx=2)
@@ -100,9 +99,7 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                     # step 2a of [1]
                     rand_time = App.rand_total_time_of_use(*rand_windows)
 
-                    max_free_spot = rand_time  # free spots are used to detect if there's still space for switch_ons. Before calculating actual free spots, the max free spot is set equal to the entire randomised func_time
-
-                    #redefines functioning windows based on the previous randomisation of the boundaries
+                    # redefines functioning windows based on the previous randomisation of the boundaries
                     # step 2b of [1]
                     if App.flat == 'yes':
                         # for "flat" appliances the algorithm stops right after filling the newly
@@ -117,85 +114,14 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                         # the algorithm goes further on
                         for rand_window in rand_windows:
                             App.daily_use[rand_window[0]:rand_window[1]] = np.full(np.diff(rand_window), 0.001)
-
                     App.daily_use_masked = np.zeros_like(ma.masked_not_equal(App.daily_use,0.001))
 
+                    # calculates randomised cycles taking the random variability in the duty cycle duration
                     App.assign_random_cycles()
 
-                    while tot_time <= rand_time: #this is the key cycle, which runs for each App until the switch_ons and their duration equals the randomised total time of use of the App
-                            #check how many windows to consider
-                            # step 2c of [1]
-                            switch_on = App.switch_on(*rand_windows)
+                    # steps 2c-2e repeated until the sum of the durations of all the switch-on events equals rand_time
+                    App.generate_load_profile(rand_time, peak_time_range, *rand_windows, power=App.power[prof_i])
 
-                            #Identifies a random switch on time within the available functioning windows
-                            if App.daily_use[switch_on] == 0.001: #control to check if the app is not already on at the randomly selected switch-on time
-                                if switch_on in range(rand_window_1[0],rand_window_1[1]):
-                                    indexes = App.calc_indexes_for_rand_switch_on(
-                                        switch_on=switch_on,
-                                        rand_time=rand_time,
-                                        max_free_spot=max_free_spot,
-                                        rand_window=rand_window_1
-                                    )
-                                elif switch_on in range(rand_window_2[0],rand_window_2[1]): #if random switch_on happens in windows2, same code as above is repeated for windows2
-                                    indexes = App.calc_indexes_for_rand_switch_on(
-                                        switch_on=switch_on,
-                                        rand_time=rand_time,
-                                        max_free_spot=max_free_spot,
-                                        rand_window=rand_window_2
-                                    )
-                                        
-                                else: #if switch_on is not in window1 nor in window2, it shall be in window3. Same code is repreated
-                                    indexes = App.calc_indexes_for_rand_switch_on(
-                                        switch_on=switch_on,
-                                        rand_time=rand_time,
-                                        max_free_spot=max_free_spot,
-                                        rand_window=rand_window_3
-                                    )
-
-                                if indexes is None:
-                                    continue
-                                tot_time = tot_time + indexes.size #the count of total time is updated with the size of the indexes array
-                                
-                                if tot_time > rand_time: #control to check when the total functioning time is reached. It will be typically overcome, so a correction is applied to avoid this
-                                    indexes_adj = indexes[:-(tot_time-rand_time)] #correctes indexes size to avoid overcoming total time
-                                    # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
-                                    coincidence = App.calc_coincident_switch_on(
-                                        peak_time_range=peak_time_range,
-                                        indexes=indexes_adj,
-                                    )
-                                    # Update the daily use depending on existence of duty cycles of the Appliance instance
-                                    App.update_daily_use(
-                                        coincidence,
-                                        power=App.power[prof_i],
-                                        index=indexes_adj
-                                    )
-                                    tot_time = (tot_time - indexes.size) + indexes_adj.size #updates the total time correcting the previous value
-                                    break #exit cycle and go to next Appliance
-                                else: #if the tot_time has not yet exceeded the App total functioning time, the cycle does the same without applying corrections to indexes size
-                                    # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
-                                    coincidence = App.calc_coincident_switch_on(
-                                        peak_time_range=peak_time_range,
-                                        indexes=indexes,
-                                    )
-                                    # Update the daily use depending on existence of duty cycles of the Appliance instance
-                                    App.update_daily_use(
-                                        coincidence,
-                                        power=App.power[prof_i],
-                                        index=indexes
-                                    )
-
-                                    tot_time = tot_time #no correction applied to previously calculated value
-                                                    
-                                free_spots = [] #calculate how many free spots remain for further switch_ons
-                                try:
-                                    for j in ma.notmasked_contiguous(App.daily_use_masked):
-                                        free_spots.append(j.stop-j.start)
-                                except TypeError:
-                                    free_spots = [0]
-                                max_free_spot = max(free_spots) 
-    
-                            else:
-                                continue #if the random switch_on falls somewhere where the App has been already turned on, tries again from beginning of the while cycle
                     Us.load = Us.load + App.daily_use #adds the App profile to the User load
             Tot_Classes = Tot_Classes + Us.load #adds the User load to the total load of all User classes
         Profile.append(Tot_Classes) #appends the total load to the list that will contain all the generated profiles
