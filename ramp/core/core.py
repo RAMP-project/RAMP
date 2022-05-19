@@ -286,7 +286,7 @@ class User:
             # random variability is applied to the total functioning time and to the duration
             # of the duty cycles provided they have been specified
             # step 2a of [1]
-            rand_time = App.rand_total_time_of_use(*rand_windows)
+            rand_time = App.rand_total_time_of_use(rand_window_1, rand_window_2, rand_window_3)
 
             # redefines functioning windows based on the previous randomisation of the boundaries
             # step 2b of [1]
@@ -310,7 +310,7 @@ class User:
             App.assign_random_cycles()
 
             # steps 2c-2e repeated until the sum of the durations of all the switch-on events equals rand_time
-            App.generate_load_profile(rand_time, peak_time_range, *rand_windows, power=App.power[prof_i])
+            App.generate_load_profile(rand_time, peak_time_range, rand_window_1, rand_window_2, rand_window_3, power=App.power[prof_i])
 
             single_load = single_load + App.daily_use  # adds the Appliance load profile to the single User load profile
         return single_load
@@ -673,7 +673,6 @@ class Appliance:
         self.cw31 = cw31 #same for cycle 3
         self.cw32 = cw32
 
-    @property
     def rand_total_time_of_use(self, rand_window_1, rand_window_2, rand_window_3):
         """Randomised total time of use of the Appliance instance
 
@@ -781,12 +780,11 @@ class Appliance:
             Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
         """
         max_free_spot = rand_time  # free spots are used to detect if there's still space for switch_ons. Before calculating actual free spots, the max free spot is set equal to the entire randomised func_time
-        rand_windows = [rand_window_1, rand_window_2, rand_window_3]
         tot_time = 0
         while tot_time <= rand_time:
             # Identifies a random switch on time within the available functioning windows
             # step 2c of [1]
-            switch_on = self.switch_on(*rand_windows)
+            switch_on = self.switch_on(rand_window_1, rand_window_2, rand_window_3)
 
             if self.daily_use[switch_on] == 0.001:
                 # control to check if the Appliance instance is not already on
@@ -825,7 +823,7 @@ class Appliance:
                     self.update_daily_use(
                         coincidence,
                         power=power,
-                        index=indexes_adj
+                        indexes=indexes_adj
                     )
                     break  # exit cycle and go to next Appliance
 
@@ -840,7 +838,7 @@ class Appliance:
                     self.update_daily_use(
                         coincidence,
                         power=power,
-                        index=indexes
+                        indexes=indexes
                     )
 
                 free_spots = []  # calculate how many free spots remain for further switch_ons
