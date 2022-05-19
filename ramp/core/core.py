@@ -142,17 +142,14 @@ class User:
         return app
 
     @property
-    def windows_curve(self):
-        windows_curve = np.zeros(1440)
-        for App in self.App_list:
+    def maximum_profile(self):
+        """Aggregate the theoretical maximal profiles of each appliance of the user by switching the appliance always on"""
+        user_max_profile = np.zeros(1440)
+        for appliance in self.App_list:
             # Calculate windows curve, i.e. the theoretical maximum curve that can be obtained, for each app, by switching-on always all the 'n' apps altogether in any time-step of the functioning windows
-            single_wcurve = (
-                App.single_wcurve
-            )  # this computes the curve for the specific App
-            windows_curve = np.vstack(
-                [windows_curve, single_wcurve]
-            )  # this stacks the specific App curve in an overall curve comprising all the Apps within a User class
-        return np.transpose(np.sum(windows_curve, axis=0)) * self.num_users
+            app_max_profile = appliance.maximum_profile  # this computes the curve for the specific App
+            user_max_profile = np.vstack([user_max_profile, app_max_profile])  # this stacks the specific App curve in an overall curve comprising all the Apps within a User class
+        return np.transpose(np.sum(user_max_profile, axis=0)) * self.num_users
 
     def save(self, filename=None):
         answer = pd.concat([app.save() for app in self.App_list], ignore_index=True)
@@ -447,14 +444,20 @@ class Appliance:
         self.random_var_2 = int(random_var_w*np.diff(self.window_2)) #same as above
         self.random_var_3 = int(random_var_w*np.diff(self.window_3)) #same as above
         self.user.App_list.append(self) #automatically appends the appliance to the user's appliance list
-    @property
-    def single_wcurve(self):
-        return self.daily_use * np.mean(self.power) * self.number
-
 
         if self.fixed_cycle == 1:
             self.cw11 = self.window_1
             self.cw12 = self.window_2
+
+    @property
+    def maximum_profile(self):
+        """Virtual maximum load profile of the appliance
+
+            It assumes the appliance is always switched-on with maximum power and
+            numerosity during all of its potential windows of use
+        """
+        return self.daily_use * np.mean(self.power) * self.number
+
 
     def specific_cycle(self, cycle_num, **kwargs):
         if cycle_num == 1:
