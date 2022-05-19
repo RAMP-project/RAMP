@@ -148,61 +148,34 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                     while tot_time <= rand_time: #this is the key cycle, which runs for each App until the switch_ons and their duration equals the randomised total time of use of the App
                             #check how many windows to consider
                             switch_on = App.switch_on(*rand_windows)
+
                             #Identifies a random switch on time within the available functioning windows
                             if App.daily_use[switch_on] == 0.001: #control to check if the app is not already on at the randomly selected switch-on time
                                 if switch_on in range(rand_window_1[0],rand_window_1[1]):
-                                    if np.any(App.daily_use[switch_on:rand_window_1[1]]!=0.001): #control to check if there are any other switch on times after the current one    
-                                        next_switch = [switch_on + k[0] for k in np.where(App.daily_use[switch_on:]!=0.001)] #identifies the position of next switch on time and sets it as a limit for the duration of the current switch on
-                                        if (next_switch[0] - switch_on) >= App.func_cycle and max_free_spot >= App.func_cycle:
-                                            upper_limit = min((next_switch[0]-switch_on),min(rand_time,rand_window_1[1]-switch_on))
-                                        elif (next_switch[0] - switch_on) < App.func_cycle and max_free_spot >= App.func_cycle: #if next switch_on event does not allow for a minimum functioning cycle without overlapping, but there are other larger free spots, the cycle tries again from the beginning
-                                            continue
-                                        else:
-                                            upper_limit = next_switch[0]-switch_on #if there are no other options to reach the total time of use, empty spaces are filled without minimum cycle restrictions until reaching the limit                                              
-                                    else:
-                                        upper_limit = min(rand_time,rand_window_1[1]-switch_on) #if there are no other switch-on events after the current one, the upper duration limit is set this way
-                                    
-                                    if upper_limit >= App.func_cycle: #if the upper limit is higher than minimum functioning time, an array of indexes is created to be later put in the profile
-                                        indexes = np.arange(switch_on,switch_on+(int(random.uniform(App.func_cycle,upper_limit)))) #a random duration is chosen between the upper limit and the minimum cycle
-                                    else:
-                                        indexes = np.arange(switch_on,switch_on+upper_limit) #this is the case in which empty spaces need to be filled without constraints to reach the total time goal
-                                        
+                                    indexes = App.calc_indexes_for_rand_switch_on(
+                                        switch_on=switch_on,
+                                        rand_time=rand_time,
+                                        max_free_spot=max_free_spot,
+                                        rand_window=rand_window_1
+                                    )
                                 elif switch_on in range(rand_window_2[0],rand_window_2[1]): #if random switch_on happens in windows2, same code as above is repeated for windows2
-                                    if np.any(App.daily_use[switch_on:rand_window_2[1]]!=0.001):
-                                        next_switch = [switch_on + k[0] for k in np.where(App.daily_use[switch_on:]!=0.001)]
-                                        if (next_switch[0] - switch_on) >= App.func_cycle and max_free_spot >= App.func_cycle:
-                                            upper_limit = min((next_switch[0]-switch_on),min(rand_time,rand_window_2[1]-switch_on))
-                                        elif (next_switch[0] - switch_on) < App.func_cycle and max_free_spot >= App.func_cycle:
-                                            continue
-                                        else:
-                                            upper_limit = next_switch[0]-switch_on
-                                    
-                                    else:
-                                        upper_limit = min(rand_time,rand_window_2[1]-switch_on)
-                                    
-                                    if upper_limit >= App.func_cycle:
-                                        indexes = np.arange(switch_on,switch_on+(int(random.uniform(App.func_cycle,upper_limit))))
-                                    else:    
-                                        indexes = np.arange(switch_on,switch_on+upper_limit)
+                                    indexes = App.calc_indexes_for_rand_switch_on(
+                                        switch_on=switch_on,
+                                        rand_time=rand_time,
+                                        max_free_spot=max_free_spot,
+                                        rand_window=rand_window_2
+                                    )
                                         
                                 else: #if switch_on is not in window1 nor in window2, it shall be in window3. Same code is repreated
-                                    if np.any(App.daily_use[switch_on:rand_window_3[1]]!=0.001):
-                                        next_switch = [switch_on + k[0] for k in np.where(App.daily_use[switch_on:]!=0.001)]
-                                        if (next_switch[0] - switch_on) >= App.func_cycle and max_free_spot >= App.func_cycle:
-                                            upper_limit = min((next_switch[0]-switch_on),min(rand_time,rand_window_3[1]-switch_on))
-                                        elif (next_switch[0] - switch_on) < App.func_cycle and max_free_spot >= App.func_cycle:
-                                            continue
-                                        else:
-                                            upper_limit = next_switch[0]-switch_on
-                                    
-                                    else:
-                                        upper_limit = min(rand_time,rand_window_3[1]-switch_on)
-                                    
-                                    if upper_limit >= App.func_cycle:
-                                        indexes = np.arange(switch_on,switch_on+(int(random.uniform(App.func_cycle,upper_limit))))
-                                    else:    
-                                        indexes = np.arange(switch_on,switch_on+upper_limit)
-                                        
+                                    indexes = App.calc_indexes_for_rand_switch_on(
+                                        switch_on=switch_on,
+                                        rand_time=rand_time,
+                                        max_free_spot=max_free_spot,
+                                        rand_window=rand_window_3
+                                    )
+
+                                if indexes is None:
+                                    continue
                                 tot_time = tot_time + indexes.size #the count of total time is updated with the size of the indexes array
                                 
                                 if tot_time > rand_time: #control to check when the total functioning time is reached. It will be typically overcome, so a correction is applied to avoid this

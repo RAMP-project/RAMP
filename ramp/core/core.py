@@ -540,3 +540,20 @@ class Appliance:
         else:
             return int(random.choice(np.concatenate((np.arange(rand_window_1[0], rand_window_1[1]), np.arange(rand_window_2[0], rand_window_2[1]), np.arange(rand_window_3[0], rand_window_3[1]),), axis=0)))
 
+    def calc_indexes_for_rand_switch_on(self, switch_on, rand_time, max_free_spot, rand_window):
+        """Identifies a random switch on time within the available functioning windows"""
+        if np.any(self.daily_use[switch_on:rand_window[1]] != 0.001):  # control to check if there are any other switch on times after the current one
+            next_switch = [switch_on + k[0] for k in np.where(self.daily_use[switch_on:] != 0.001)]  # identifies the position of next switch on time and sets it as a limit for the duration of the current switch on
+            if (next_switch[0] - switch_on) >= self.func_cycle and max_free_spot >= self.func_cycle:
+                upper_limit = min((next_switch[0] - switch_on), min(rand_time, rand_window[1] - switch_on))
+            elif (next_switch[0] - switch_on) < self.func_cycle and max_free_spot >= self.func_cycle:  # if next switch_on event does not allow for a minimum functioning cycle without overlapping, but there are other larger free spots, the cycle tries again from the beginning
+                return None # this will trigger a continue in the loop
+            else:
+                upper_limit = next_switch[0] - switch_on  # if there are no other options to reach the total time of use, empty spaces are filled without minimum cycle restrictions until reaching the limit
+        else:
+            upper_limit = min(rand_time, rand_window[1] - switch_on)  # if there are no other switch-on events after the current one, the upper duration limit is set this way
+        if upper_limit >= self.func_cycle:
+            indexes = np.arange(switch_on, switch_on + (int(random.uniform(self.func_cycle, upper_limit))))
+        else:
+            indexes = np.arange(switch_on, switch_on + upper_limit)
+        return indexes
