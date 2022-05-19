@@ -553,8 +553,39 @@ class Appliance:
         self.cw31 = cw31 #same for cycle 3
         self.cw32 = cw32
 
-    def switch_on(self, rand_window_1, rand_window_2, rand_window_3):
+    @property
+    def rand_total_time_of_use(self, rand_window_1, rand_window_2, rand_window_3):
+        """Randomised total time of use of the Appliance instance
 
+            This corresponds to step 2a. of [1]
+
+        Notes
+        -----
+        [1] F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo,
+            Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
+            Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
+        """
+        random_var_t = random.uniform((1 - self.time_fraction_random_variability),
+                                      (1 + self.time_fraction_random_variability))
+        rand_time = round(random.uniform(self.func_time, int(self.func_time * random_var_t)))
+
+        # check that the total randomised time of use does not exceed the total space available in the windows
+        if rand_time > 0.99 * (np.diff(rand_window_1) + np.diff(rand_window_2) + np.diff(rand_window_3)):
+            rand_time = int(0.99 * (np.diff(rand_window_1) + np.diff(rand_window_2) + np.diff(rand_window_3)))
+        return rand_time
+
+
+    def switch_on(self, rand_window_1, rand_window_2, rand_window_3):
+        """Return a random switch-on time of the Appliance instance
+
+            This corresponds to step 2c. of [1]
+
+        Notes
+        -----
+        [1] F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo,
+            Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
+            Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
+        """
         # check how many windows to consider
         if self.num_windows == 1:
             return int(random.choice([random.uniform(rand_window_1[0], (rand_window_1[1]))]))
