@@ -9,7 +9,7 @@ RAMP is a bottom-up stochastic model for the generation of high-resolution multi
 
 <img src="/docs/figures/Example_output.jpg" width="700">
 
-The source-code is currently released as v0.3.1. It is not yeat accompained by a detailed documentation, but the Python code is fully commented in each line to allow a complete understanding of it. Further details about the conceptual and mathematical model formulation are provided in the related Journal publication (https://doi.org/10.1016/j.energy.2019.04.097). Check out also the [release history](CHANGELOG.md) to see how the code evolved over time.
+The source-code is currently released as v0.3.1. It is not yeat accompained by a detailed documentation, but the Python code is fully commented in each line to allow a complete understanding of it. Further details about the conceptual and mathematical model formulation are provided in the related Journal publication (https://doi.org/10.1016/j.energy.2019.04.097). A brief description of the algorithm is provided also [here](https://github.com/RAMP-project/RAMP/blob/master/docs/algorithm.md) on this repository. Check out also the [release history](CHANGELOG.md) to see how the code evolved over time.
 
 Furthermore, you can join our **[Gitter chat](https://gitter.im/RAMP-project/community)** to discuss doubts and make questions about the code!
 
