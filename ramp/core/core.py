@@ -745,8 +745,8 @@ class Appliance:
             indexes = np.arange(switch_on, switch_on + upper_limit)
         return indexes
 
-    def calc_coincident_switch_on(self, peak_time_range, indexes):
-        """Computes how many of the 'n' of the Appliance instance are switched on simultaneously
+    def calc_coincident_switch_on(self, inside_peak_window=True):
+        """Computes how many of the 'n' Appliance instance are switched on simultaneously
 
             Implement eqs. 3 and 4 of [1]
 
@@ -758,13 +758,13 @@ class Appliance:
         """
         s_peak, mu_peak, op_factor = switch_on_parameters()
 
-        # check if indexes are in peak window
-        if np.in1d(peak_time_range, indexes).any() is True and self.fixed == 'no':
+        # check if indexes are within peak window
+        if inside_peak_window is True and self.fixed == 'no':
             # calculates coincident behaviour within the peak time range
             # eq. 4 of [1]
             coincidence = min(self.number, max(1, math.ceil(random.gauss(mu=(self.number * mu_peak + 0.5), sigma=(s_peak * self.number * mu_peak)))))
         # check if indexes are off-peak
-        elif np.in1d(peak_time_range, indexes).any() is False and self.fixed == 'no':
+        elif inside_peak_window is False and self.fixed == 'no':
             # calculates probability of coincident switch_ons off-peak
             # eq. 3 of [1]
             prob = random.uniform(0, (self.number - op_factor) / self.number)
@@ -829,10 +829,10 @@ class Appliance:
                 if tot_time > rand_time:
                     # the total functioning time is reached, a correction is applied to avoid overflow of indexes
                     indexes_adj = indexes[:-(tot_time - rand_time)]
+                    inside_peak_window = np.in1d(peak_time_range, indexes_adj).any()
                     # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
                     coincidence = self.calc_coincident_switch_on(
-                        peak_time_range=peak_time_range,
-                        indexes=indexes_adj,
+                        inside_peak_window
                     )
                     # Update the daily use depending on existence of duty cycles of the Appliance instance
                     self.update_daily_use(
@@ -845,9 +845,9 @@ class Appliance:
                 else:
                     # the total functioning time has not yet exceeded the rand_time
                     # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
+                    inside_peak_window = np.in1d(peak_time_range, indexes).any()
                     coincidence = self.calc_coincident_switch_on(
-                        peak_time_range=peak_time_range,
-                        indexes=indexes,
+                        inside_peak_window
                     )
                     # Update the daily use depending on existence of duty cycles of the Appliance instance
                     self.update_daily_use(
