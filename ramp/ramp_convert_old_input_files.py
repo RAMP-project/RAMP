@@ -1,11 +1,14 @@
 #%% Import required modules
-import sys,os, importlib
-sys.path.append('../')
+
+import sys, os, importlib
+
+sys.path.append("../")
 import argparse
-from core.core import UseCase
+from ramp.core.core import UseCase
 
 parser = argparse.ArgumentParser(
-    prog="python ramp_convert_old_input_files.py", description="Convert old python input files to xlsx ones"
+    prog="python ramp_convert_old_input_files.py",
+    description="Convert old python input files to xlsx ones",
 )
 parser.add_argument(
     "-i",
@@ -13,6 +16,20 @@ parser.add_argument(
     nargs="+",
     type=str,
     help="path to the input file (including filename)",
+)
+parser.add_argument(
+    "-o",
+    dest="output_path",
+    nargs=1,
+    type=str,
+    help="path where to save the converted filename",
+)
+parser.add_argument(
+    "--suffix",
+    dest="suffix",
+    nargs=1,
+    type=str,
+    help="suffix appended to the converted filename",
 )
 
 
@@ -25,7 +42,9 @@ for i, a in local_var_names:
 """
 
 
-def convert_old_user_input_file(fname_path, keep_names=True):
+def convert_old_user_input_file(
+    fname_path, output_path=None, suffix="", keep_names=True
+):
     """
     Imports an input file from a path and returns a processed User_list
     """
@@ -42,7 +61,14 @@ def convert_old_user_input_file(fname_path, keep_names=True):
             fp.write(convert_names)
 
     fname = fname_path.replace(".py", "").replace(os.path.sep, ".")
-    output_fname = fname_path.replace(".py", "")
+
+    if output_path is None:
+        output_path = os.path.dirname(fname_path)
+    output_fname = fname_path.split(os.path.sep)[-1].replace(".py", suffix)
+    output_fname = os.path.join(output_path, output_fname)
+
+    if "ramp" not in fname:
+        fname = f"ramp.{fname}"
     file_module = importlib.import_module(fname)
 
     User_list = file_module.User_list
@@ -54,12 +80,25 @@ if __name__ == "__main__":
 
     args = vars(parser.parse_args())
     fname = args["fname_path"]
+    output_path = args.get("output_path")
+    suffix = args.get("suffix")
+
+    if output_path is not None:
+        output_path = output_path[0]
+
+    if suffix is None:
+        suffix = ""
+    else:
+        suffix = suffix[0]
+
     if fname is None:
         print("Please provide path to input file with option -i")
     else:
         if isinstance(fname, list):
             fnames = fname
             for fname in fnames:
-                convert_old_user_input_file(fname)
+                convert_old_user_input_file(
+                    fname, output_path=output_path, suffix=suffix
+                )
         else:
-            convert_old_user_input_file(fname)
+            convert_old_user_input_file(fname, output_path=output_path, suffix=suffix)
