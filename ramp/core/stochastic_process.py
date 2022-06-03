@@ -52,6 +52,7 @@ def calc_peak_time_range(user_list, peak_enlarge=0.15):
     # The peak_time is randomly enlarged based on the calibration parameter peak_enlarge
     return np.arange(peak_time - rand_peak_enlarge, peak_time + rand_peak_enlarge)
 
+
 def Stochastic_Process(j=None, fname=None, num_profiles=None):
     Profile, num_profiles = Initialise_model(num_profiles)
     peak_enlarge, Year_behaviour, User_list = Initialise_inputs(j, fname)
@@ -65,10 +66,7 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
     for prof_i in range(num_profiles): #the whole code is repeated for each profile that needs to be generated
         Tot_Classes = np.zeros(1440) #initialise an empty daily profile that will be filled with the sum of the hourly profiles of each User instance
         for Us in User_list: #iterates for each User instance (i.e. for each user class)
-            Us.load = np.zeros(1440) #initialise empty load for User instance
-            for i in range(Us.num_users): #iterates for every single user within a User class. Each single user has its own separate randomisation
-                single_user_load = Us.generate_single_load_profile(prof_i, peak_time_range, Year_behaviour)
-                Us.load = Us.load + single_user_load
+            Us.generate_aggregated_load_profile(prof_i, peak_time_range, Year_behaviour)
             Tot_Classes = Tot_Classes + Us.load #adds the User load to the total load of all User classes
         Profile.append(Tot_Classes) #appends the total load to the list that will contain all the generated profiles
         print('Profile',prof_i+1,'/',num_profiles,'completed') #screen update about progress of computation

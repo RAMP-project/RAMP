@@ -316,6 +316,31 @@ class User:
             single_load = single_load + App.daily_use  # adds the Appliance load profile to the single User load profile
         return single_load
 
+    def generate_aggregated_load_profile(self, prof_i, peak_time_range, Year_behaviour):
+        """Generates an aggregated load profile from single load profile of each user
+
+            Each single load profile has its own separate randomisation
+
+        Parameters
+        ----------
+        prof_i: int
+            ith profile requested by the user
+        peak_time_range: numpy array
+            randomised peak time range calculated using calc_peak_time_range function
+        Year_behaviour: numpy array
+            array consisting of a yearly pattern of weekends and weekdays peak_time_range
+
+        Returns
+        -------
+        User.load : numpy array
+            the aggregate load profile of all the users within a user class
+        """
+
+        self.load = np.zeros(1440)  # initialise empty load for User instance
+        for _ in range(self.num_users):
+            # iterates for every single user within a User class.
+            self.load = self.load + self.generate_single_load_profile(prof_i, peak_time_range, Year_behaviour)
+
 
 class Appliance:
     def __init__(
