@@ -25,7 +25,7 @@ def user_defined_inputs(j=None, fname=None):
     '''
     # Back compatibility with old code
     if j is not None:
-        file_module = importlib.import_module(f'input_files.input_file_{j}')
+        file_module = importlib.import_module(f'ramp.input_files.input_file_{j}')
         User_list = file_module.User_list
 
     if fname is not None:
