@@ -4,7 +4,7 @@
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
-from ramp.core.constants import NEW_TO_OLD_MAPPING, OLD_TO_NEW_MAPPING
+from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES
 from ramp.core.utils import read_input_file
 
 #%% Definition of Python classes that constitute the model architecture
@@ -137,6 +137,48 @@ class User:
         else:
             return answer
 
+    def __eq__(self, other_user):
+        """Compare two users
+
+        ensure they have the same properties
+        ensure they have the same appliances
+        """
+        answer = np.array([])
+        for attribute in ("user_name", "num_users", "user_preference"):
+            if hasattr(self, attribute) and hasattr(other_user, attribute):
+                np.append(
+                    answer, [getattr(self, attribute) == getattr(other_user, attribute)]
+                )
+            else:
+                print(f"Problem with {attribute} of user")
+                np.append(answer, False)
+        answer = answer.all()
+
+        if answer is True:
+            # user attributes match, continue to compare each appliance
+            if len(self.App_list) == len(other_user.App_list):
+                answer = np.array([])
+                for my_appliance, their_appliance in zip(
+                    self.App_list, other_user.App_list
+                ):
+                    temp = my_appliance == their_appliance
+                    answer = np.append(answer, temp)
+                if len(answer) > 0:
+                    answer = answer.all()
+                else:
+
+                    if len(self.App_list) > 0:
+                        answer = False
+                    else:
+                        # both users have no appliances
+                        answer = True
+            else:
+                print(
+                    f"The user {self.user_name} and {other_user.user_name} do not have the same number of appliances"
+                )
+                answer = False
+        return answer
+
     def export_to_dataframe(self):
         return self.save()
 
@@ -177,6 +219,8 @@ class User:
             p_series=P_series,
             name=name,
         )
+
+
 class Appliance:
     def __init__(
         self,
@@ -262,47 +306,7 @@ class Appliance:
         dm = {}
         for user_attribute in ("user_name", "num_users", "user_preference"):
             dm[user_attribute] = getattr(self.user, user_attribute)
-        for attribute in (
-            "name",
-            "number",
-            "power",
-            "num_windows",
-            "func_time",
-            "time_fraction_random_variability",
-            "func_cycle",
-            "fixed",
-            "fixed_cycle",
-            "occasional_use",
-            "flat",
-            "thermal_p_var",
-            "pref_index",
-            "wd_we_type",
-            "p_11",
-            "t_11",
-            "cw11",
-            "p_12",
-            "t_12",
-            "cw12",
-            "r_c1",
-            "p_21",
-            "t_21",
-            "cw21",
-            "p_22",
-            "t_22",
-            "cw22",
-            "r_c2",
-            "p_31",
-            "t_31",
-            "cw31",
-            "p_32",
-            "t_32",
-            "cw32",
-            "r_c3",
-            "window_1",
-            "window_2",
-            "window_3",
-            "random_var_w",
-        ):
+        for attribute in APPLIANCE_ATTRIBUTES:
 
             if hasattr(self, attribute):
                 if "window_" in attribute or "cw" in attribute:
@@ -345,6 +349,34 @@ class Appliance:
 
     def export_to_dataframe(self):
         return self.save()
+
+    def __eq__(self, other_appliance):
+        """Compare two appliances
+
+        ensure they have the same attributes
+        ensure all their attributes have the same value
+        """
+        answer = np.array([])
+        for attribute in APPLIANCE_ATTRIBUTES:
+            if hasattr(self, attribute) and hasattr(other_appliance, attribute):
+                np.append(
+                    answer,
+                    [getattr(self, attribute) == getattr(other_appliance, attribute)],
+                )
+            elif (
+                hasattr(self, attribute) is False
+                and hasattr(other_appliance, attribute) is False
+            ):
+                np.append(answer, True)
+            else:
+                if hasattr(self, attribute) is False:
+                    print(f"{attribute} of appliance {self.name} is not assigned")
+                else:
+                    print(
+                        f"{attribute} of appliance {other_appliance.name} is not assigned"
+                    )
+                np.append(answer, False)
+        return answer.all()
 
     def windows(self, window_1 = np.array([0,0]), window_2 = np.array([0,0]),random_var_w = 0, window_3 = np.array([0,0])):
         self.window_1 = window_1 #array of start and ending time for window of use #1
