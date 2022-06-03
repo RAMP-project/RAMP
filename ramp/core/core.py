@@ -9,6 +9,7 @@ import random
 import math
 from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, MAX_WINDOWS, DUTY_CYCLE_PARAMETERS
 from ramp.core.utils import read_input_file
+from ramp.core.initialise import switch_on_parameters
 
 #%% Definition of Python classes that constitute the model architecture
 """
@@ -638,15 +639,28 @@ class Appliance:
             indexes = np.arange(switch_on, switch_on + upper_limit)
         return indexes
 
-    def calc_coincident_switch_on(self, peak_time_range, indexes, s_peak, mu_peak, op_factor):
-        """Computes how many of the 'n' of the Appliance instance are switched on simultaneously"""
+    def calc_coincident_switch_on(self, peak_time_range, indexes):
+        """Computes how many of the 'n' of the Appliance instance are switched on simultaneously
+
+            Implement eqs. 3 and 4 of [1]
+
+        Notes
+        -----
+        [1] F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo,
+            Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
+            Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
+        """
+        s_peak, mu_peak, op_factor = switch_on_parameters()
+
         # check if indexes are in peak window
         if np.in1d(peak_time_range, indexes).any() is True and self.fixed == 'no':
             # calculates coincident behaviour within the peak time range
+            # eq. 4 of [1]
             coincidence = min(self.number, max(1, math.ceil(random.gauss(mu=(self.number * mu_peak + 0.5), sigma=(s_peak * self.number * mu_peak)))))
         # check if indexes are off-peak
         elif np.in1d(peak_time_range, indexes).any() is False and self.fixed == 'no':
             # calculates probability of coincident switch_ons off-peak
+            # eq. 3 of [1]
             prob = random.uniform(0, (self.number - op_factor) / self.number)
 
             # randomly selects how many appliances are on at the same time
