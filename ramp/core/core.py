@@ -5,6 +5,7 @@ import numpy as np
 import numpy.ma as ma
 import pandas as pd
 from ramp.core.constants import NEW_TO_OLD_MAPPING, OLD_TO_NEW_MAPPING
+from ramp.core.utils import read_input_file
 
 #%% Definition of Python classes that constitute the model architecture
 """
@@ -43,6 +44,7 @@ class UseCase:
             "name",
             "number",
             "power",
+            "p_series",
             "num_windows",
             "func_time",
             "time_fraction_random_variability",
@@ -62,7 +64,7 @@ class UseCase:
             ("p_31", "t_31", "cw31", "p_32", "t_32", "cw32", "r_c3"),
         )
 
-        df = pd.read_excel(filename)
+        df = read_input_file(filename=filename)
         for user_name in df.user_name.unique():
             user_df = df.loc[df.user_name == user_name]
             num_users = user_df.num_users.unique()
@@ -213,18 +215,14 @@ class Appliance:
         )
         self.pref_index = pref_index  #defines preference index for association with random User daily preference behaviour
         self.wd_we_type = wd_we_type  #defines if the App is associated with weekdays or weekends | 0 is wd 1 is we 2 is all week
-        #TODO detect if power is a timeseries or a constant and get rid of P_series altogether
-        if (
-            p_series is False and isinstance(power, pd.DataFrame) is False
-        ):  #check if the user defined P as timeseries
-
-            self.power = power * np.ones(
-                365
-            )  #treat the power as single value for the entire year
+        if p_series is True:
+            if isinstance(power, str):
+                power = pd.read_json(power)
+            if not isinstance(power, pd.DataFrame):
+                raise(ValueError("The input power is excepted to be a series but it is not recognized as such"))
+            self.power = power.values[:, 0]  #if a timeseries is given the power is treated as so
         else:
-            self.power = power.values[
-                :, 0
-            ]  #if a timeseries is given the power is treated as so
+            self.power = power * np.ones(365)  # treat the power as single value for the entire year
 
         # attributes initialized by self.windows
         self.random_var_w = None
