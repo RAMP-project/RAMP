@@ -24,7 +24,7 @@ def calc_peak_time_range(user_list, peak_enlarge=0.15):
         list containing all the user types
     peak_enlarge: float
         percentage random enlargement or reduction of peak time range length
-        corresponds to \delta_{peak} in [1]
+        corresponds to \delta_{peak} in [1], p.7
 
     Notes
     -----
@@ -54,7 +54,7 @@ def calc_peak_time_range(user_list, peak_enlarge=0.15):
 
 def Stochastic_Process(j=None, fname=None, num_profiles=None):
     Profile, num_profiles = Initialise_model(num_profiles)
-    peak_enlarge, mu_peak, s_peak, op_factor, Year_behaviour, User_list = Initialise_inputs(j, fname)
+    peak_enlarge, Year_behaviour, User_list = Initialise_inputs(j, fname)
     # Calculation of the peak time range, which is used to discriminate between off-peak and on-peak coincident switch-on probability
     peak_time_range = calc_peak_time_range(User_list, peak_enlarge)
 
@@ -120,9 +120,7 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
 
                     App.daily_use_masked = np.zeros_like(ma.masked_not_equal(App.daily_use,0.001))
 
-
                     App.assign_random_cycles()
-
 
                     while tot_time <= rand_time: #this is the key cycle, which runs for each App until the switch_ons and their duration equals the randomised total time of use of the App
                             #check how many windows to consider
@@ -164,9 +162,6 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                                     coincidence = App.calc_coincident_switch_on(
                                         peak_time_range=peak_time_range,
                                         indexes=indexes_adj,
-                                        s_peak=s_peak,
-                                        mu_peak=mu_peak,
-                                        op_factor=op_factor
                                     )
                                     # Update the daily use depending on existence of duty cycles of the Appliance instance
                                     App.update_daily_use(
@@ -181,9 +176,6 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                                     coincidence = App.calc_coincident_switch_on(
                                         peak_time_range=peak_time_range,
                                         indexes=indexes,
-                                        s_peak=s_peak,
-                                        mu_peak=mu_peak,
-                                        op_factor=op_factor
                                     )
                                     # Update the daily use depending on existence of duty cycles of the Appliance instance
                                     App.update_daily_use(

@@ -36,6 +36,28 @@ def user_defined_inputs(j=None, fname=None):
     return(User_list)
 
 
+def switch_on_parameters():
+    """
+    Calibration parameters. These can be changed in case the user has some real data against which the model can be calibrated
+    They regulate the probability of coincident switch-on within the peak window
+
+    mu_peak corresponds to \mu_{%} in [1], p.8
+    s_peak corresponds to \sigma_{%} in [1], p.8
+
+    Notes
+    -----
+    [1] F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo,
+        Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
+        Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
+    """
+
+    mu_peak = 0.5  # median value of gaussian distribution [0,1] by which the number of coincident switch_ons is randomly selected
+    s_peak = 0.5  # standard deviation (as percentage of the median value) of the gaussian distribution [0,1] above mentioned
+    op_factor = 0.5  # off-peak coincidence calculation parameter
+
+    return mu_peak, s_peak, op_factor
+
+
 def Initialise_model(num_profiles):
     '''
     The model is ready to be initialised
@@ -51,16 +73,7 @@ def Initialise_model(num_profiles):
 def Initialise_inputs(j=None, fname=None):
     Year_behaviour = yearly_pattern()
     user_list = user_defined_inputs(j, fname)
-    
-    # Calibration parameters
-    '''
-    Calibration parameters. These can be changed in case the user has some real data against which the model can be calibrated
-    They regulate the probabilities defining the largeness of the peak window and the probability of coincident switch-on within the peak window
-    '''
-    peak_enlarg = 0.15 #percentage random enlargement or reduction of peak time range length
-    mu_peak = 0.5 #median value of gaussian distribution [0,1] by which the number of coincident switch_ons is randomly selected
-    s_peak = 0.5 #standard deviation (as percentage of the median value) of the gaussian distribution [0,1] above mentioned
-    op_factor = 0.5 #off-peak coincidence calculation parameter
 
-    return (peak_enlarg, mu_peak, s_peak, op_factor, Year_behaviour, user_list)
+    peak_enlarge = 0.15  # percentage random enlargement or reduction of peak time range length, corresponds to \delta_{peak} in [1], p.7
+    return (peak_enlarge, Year_behaviour, user_list)
 
