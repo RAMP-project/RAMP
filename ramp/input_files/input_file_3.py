@@ -2,7 +2,7 @@
 
 #%% Definition of the inputs
 '''
-Input data definition 
+Input data definition
 '''
 
 from ramp.core.core import User, np, pd
@@ -11,7 +11,7 @@ User_list = []
 
 '''
 This example input file represents a single household user whose only loads
-are the "cooking" activities. The example showcases how to model electric cooking loads by means of 
+are the "cooking" activities. The example showcases how to model electric cooking loads by means of
 the Prefence Index and User Preference attributes.
 '''
 
@@ -72,4 +72,3 @@ HH_breakfast_coffee.windows([6*60,9*60],[0,0],0.15)
 
 HH_mate = HH.Appliance(HH,1,1800,1,30,0.3,2, thermal_P_var = 0.2, pref_index =0)
 HH_mate.windows([7*60,20*60],[0,0],0.15)
-

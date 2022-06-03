@@ -24,7 +24,3 @@ HH_shower_P = pd.read_csv('input_files/time_series/shower_P.csv')
 #High-Income
 HH_shower = HH.Appliance(HH,1,HH_shower_P,2,15,0.1,3, thermal_P_var = 0.2, P_series=True)
 HH_shower.windows([390,540],[1080,1200],0.2)
-
-
-
-
