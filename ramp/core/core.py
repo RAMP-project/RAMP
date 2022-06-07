@@ -30,7 +30,7 @@ class UseCase:
     def save(self, filename=None):
         answer = pd.concat([user.save() for user in self.users], ignore_index=True)
         if filename is not None:
-            answer.to_excel(f"{filename}.xlsx", index=False)
+            answer.to_excel(f"{filename}.xlsx", index=False, engine="openpyxl")
         else:
             return answer
 
@@ -133,7 +133,7 @@ class User:
     def save(self, filename=None):
         answer = pd.concat([app.save() for app in self.App_list], ignore_index=True)
         if filename is not None:
-            answer.to_excel(f"{filename}.xlsx")
+            answer.to_excel(f"{filename}.xlsx", engine="openpyxl")
         else:
             return answer
 
