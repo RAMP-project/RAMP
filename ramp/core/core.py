@@ -28,6 +28,17 @@ class User:
     def add_appliance(self, *args, **kwargs):
         # I would add the appliance explicitely here, unless the appliance works only if a windows is defined
         return Appliance(self, *args, **kwargs)
+
+    def save(self, filename=None):
+        answer = pd.concat([app.save() for app in self.App_list], ignore_index=True)
+        if filename is not None:
+            answer.to_excel(f"{filename}.xlsx")
+        else:
+            return answer
+
+    def export_to_dataframe(self):
+        return self.save()
+
     def Appliance(
         self,
         user,
@@ -150,7 +161,82 @@ class Appliance:
         self.random_cycle2 = np.array([])
         self.random_cycle3 = np.array([])
 
+    def save(self):
+        dm = {}
+        for user_attribute in ("user_name", "num_users", "user_preference"):
+            dm[user_attribute] = getattr(self.user, user_attribute)
+        for attribute in (
+            "number",
+            "power",
+            "num_windows",
+            "func_time",
+            "time_fraction_random_variability",
+            "func_cycle",
+            "fixed",
+            "fixed_cycle",
+            "occasional_use",
+            "flat",
+            "thermal_p_var",
+            "pref_index",
+            "wd_we_type",
+            "p_11",
+            "t_11",
+            "p_12",
+            "t_12",
+            "r_c1",
+            "p_21",
+            "t_21",
+            "p_22",
+            "t_22",
+            "r_c2",
+            "p_31",
+            "t_31",
+            "p_32",
+            "t_32",
+            "r_c3",
+            "window_1",
+            "window_2",
+            "window_3",
+            "random_var_w",
+        ):
+
+            if hasattr(self, attribute):
+                if "window_" in attribute:
+                    window_value = getattr(self, attribute)
+                    dm[attribute + "_start"] = window_value[0]
+                    dm[attribute + "_end"] = window_value[1]
+                elif attribute == "power":
+                    power_values = getattr(self, attribute)
+                    if np.diff(power_values).sum() == 0:
+                        power_values = power_values[0]
+                    else:
+                        power_values = power_values.tolist()
+                    dm[attribute] = power_values
+                else:
+                    dm[attribute] = getattr(self, attribute)
             else:
+                # this is for legacy purpose, so that people can export their old models to new format
+                old_attribute = NEW_TO_OLD_MAPPING[attribute]
+                if hasattr(self, old_attribute):
+                    if "window_" in old_attribute:
+                        window_value = getattr(self, old_attribute)
+                        dm[attribute + "_start"] = window_value[0]
+                        dm[attribute + "_end"] = window_value[1]
+                    elif old_attribute == "POWER":
+                        power_values = getattr(self, old_attribute)
+                        if np.diff(power_values).sum() == 0:
+                            power_values = power_values[0]
+                        else:
+                            power_values = power_values.tolist()
+                        dm[attribute] = power_values
+                    else:
+                        dm[attribute] = getattr(self, old_attribute)
+                else:
+                    dm[attribute] = None
+        return pd.DataFrame.from_records([dm])
+
+    def export_to_dataframe(self):
+        return self.save()
 
     def windows(self, window_1 = np.array([0,0]), window_2 = np.array([0,0]),random_var_w = 0, window_3 = np.array([0,0])):
         self.window_1 = window_1 #array of start and ending time for window of use #1
