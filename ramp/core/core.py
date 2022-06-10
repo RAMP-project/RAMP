@@ -4,7 +4,7 @@
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
-from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES
+from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, MAX_WINDOWS, DUTY_CYCLE_PARAMETERS
 from ramp.core.utils import read_input_file
 
 #%% Definition of Python classes that constitute the model architecture
@@ -40,30 +40,6 @@ class UseCase:
     def load(self, filename):
         """Open an .xlsx file which was produces via the save method and create instances of Users and Appliances"""
 
-        appliance_args = (
-            "name",
-            "number",
-            "power",
-            "p_series",
-            "num_windows",
-            "func_time",
-            "time_fraction_random_variability",
-            "func_cycle",
-            "fixed",
-            "fixed_cycle",
-            "occasional_use",
-            "flat",
-            "thermal_p_var",
-            "pref_index",
-            "wd_we_type",
-        )
-        windows_args = ("window_1", "window_2", "window_3", "random_var_w")
-        cycle_args = (
-            ("p_11", "t_11", "cw11", "p_12", "t_12", "cw12", "r_c1"),
-            ("p_21", "t_21", "cw21", "p_22", "t_22", "cw22", "r_c2"),
-            ("p_31", "t_31", "cw31", "p_32", "t_32", "cw32", "r_c3"),
-        )
-
         df = read_input_file(filename=filename)
         for user_name in df.user_name.unique():
             user_df = df.loc[df.user_name == user_name]
@@ -90,12 +66,12 @@ class UseCase:
                 :, ~user_df.columns.isin(["user_name", "num_users", "user_preference"])
             ].to_dict(orient="records"):
                 # assign Appliance arguments
-                appliance_parameters = {k: row[k] for k in appliance_args}
                 appliance = user.add_appliance(**appliance_parameters)
+                appliance_parameters = {k: row[k] for k in APPLIANCE_ARGS}
 
                 # assign windows arguments
                 windows_parameters = {}
-                for k in windows_args:
+                for k in WINDOWS_PARAMETERS:
                     if "window" in k:
                         windows_parameters[k] = np.array(
                             [row.get(k + "_start"), row.get(k + "_end")]
