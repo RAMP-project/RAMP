@@ -1,6 +1,8 @@
 import os
 import pytest
+import numpy as np
 
+from ramp.core.core import User, Appliance
 from ramp.core.initialise import Initialise_inputs
 from ramp.ramp_convert_old_input_files import convert_old_user_input_file
 
@@ -17,7 +19,7 @@ def load_usecase(j=None, fname=None):
     return User_list
 
 
-class TestTransformerClass:
+class TestConversion:
     def setup_method(self):
         self.input_files_to_run = [1, 2, 3]
         self.file_suffix = "_test"
@@ -64,3 +66,40 @@ class TestTransformerClass:
             for old_user, new_user in zip(old_user_list, new_user_list):
                 if old_user != new_user:
                     pytest.fail()
+
+
+def test_define_appliance_window_directly_equivalent_to_use_windows_method():
+    user = User("test user", 1)
+
+    params = dict(number=1, power=200, num_windows=1, func_time=0)
+    win_start = 390
+    win_stop = 540
+    appliance1 = user.add_appliance(**params)
+    appliance1.windows(window_1=[win_start, win_stop])
+
+    params.update({"window_1": np.array([win_start, win_stop])})
+    appliance2 = user.add_appliance(**params)
+
+    assert appliance1 == appliance2
+
+
+def test_define_appliance_duty_cycle_directly_equivalent_to_use_specific_cycle_method():
+    user = User("test user", 1)
+
+    params = dict(
+        number=1,
+        power=200,
+        num_windows=1,
+        func_time=0,
+        window_1=[390, 540],
+        fixed_cycle=1,
+    )
+
+    appliance1 = user.add_appliance(**params)
+    cycle_params = {"p_11": 20, "t_11": 10, "cw11": np.array([400, 500])}
+    appliance1.specific_cycle_1(**cycle_params)
+
+    params.update(cycle_params)
+    appliance2 = user.add_appliance(**params)
+
+    assert appliance1 == appliance2
