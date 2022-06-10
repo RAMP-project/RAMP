@@ -271,26 +271,26 @@ class Appliance:
             self.power = power * np.ones(365)  # treat the power as single value for the entire year
 
         # attributes initialized by self.windows
-        self.random_var_w = None
+        self.random_var_w = 0
         self.daily_use = None
         self.daily_use_masked = None
 
         # attributes used for specific fixed and random cycles
-        self.p_11 = None
-        self.p_12 = None
-        self.t_11 = None
-        self.t_12 = None
-        self.r_c1 = None
-        self.p_21 = None
-        self.p_22 = None
-        self.t_21 = None
-        self.t_22 = None
-        self.r_c2 = None
-        self.p_31 = None
-        self.p_32 = None
-        self.t_31 = None
-        self.t_32 = None
-        self.r_c3 = None
+        self.p_11 = 0
+        self.p_12 = 0
+        self.t_11 = 0
+        self.t_12 = 0
+        self.r_c1 = 0
+        self.p_21 = 0
+        self.p_22 = 0
+        self.t_21 = 0
+        self.t_22 = 0
+        self.r_c2 = 0
+        self.p_31 = 0
+        self.p_32 = 0
+        self.t_31 = 0
+        self.t_32 = 0
+        self.r_c3 = 0
 
         # attribute used for cycle_behaviour
         self.cw11 = np.array([0, 0])
