@@ -66,31 +66,29 @@ class UseCase:
                 :, ~user_df.columns.isin(["user_name", "num_users", "user_preference"])
             ].to_dict(orient="records"):
                 # assign Appliance arguments
-                appliance = user.add_appliance(**appliance_parameters)
                 appliance_parameters = {k: row[k] for k in APPLIANCE_ARGS}
 
                 # assign windows arguments
-                windows_parameters = {}
                 for k in WINDOWS_PARAMETERS:
                     if "window" in k:
-                        windows_parameters[k] = np.array(
+                        appliance_parameters[k] = np.array(
                             [row.get(k + "_start"), row.get(k + "_end")]
                         )
                     else:
-                        windows_parameters[k] = row.get(k)
-                appliance.windows(**windows_parameters)
+                        appliance_parameters[k] = row.get(k)
 
-                # assign cycles arguments
-                for i in range(appliance.fixed_cycle):
-                    cycle_parameters ={}
-                    for k in cycle_args[i]:
+                # assign duty cycles arguments
+                for duty_cycle_params in DUTY_CYCLE_PARAMETERS:
+                    for k in duty_cycle_params:
                         if "cw" in k:
-                            cycle_parameters[k] = np.array(
-                                [row.get(k + "_start"), row.get(k + "_end")],dtype=np.intc
+                            appliance_parameters[k] = np.array(
+                                [row.get(k + "_start"), row.get(k + "_end")], dtype=np.intc
                             )
                         else:
-                            cycle_parameters[k] = row.get(k)
-                    appliance.specific_cycle(cycle_num=i+1, **cycle_parameters)
+                            appliance_parameters[k] = row.get(k)
+
+                user.add_appliance(**appliance_parameters)
+
 
 
 class User:
@@ -103,8 +101,36 @@ class User:
         )  # each instance of User (i.e. each user class) has its own list of Appliances
 
     def add_appliance(self, *args, **kwargs):
-        # I would add the appliance explicitely here, unless the appliance works only if a windows is defined
-        return Appliance(self, *args, **kwargs)
+
+        # parse the args into the kwargs
+        if len(args) > 0:
+            for a_name, a_val in zip(APPLIANCE_ARGS, args):
+                kwargs[a_name] = a_val
+
+        # collects windows arguments
+        windows_args = {}
+        for k in WINDOWS_PARAMETERS:
+            if k in kwargs:
+                windows_args[k] = kwargs.pop(k)
+
+        # collects duty cycles arguments
+        duty_cycle_parameters = {}
+        for i, duty_cycle_params in enumerate(DUTY_CYCLE_PARAMETERS):
+            cycle_parameters = {}
+            for k in duty_cycle_params:
+                if k in kwargs:
+                    cycle_parameters[k] = kwargs.pop(k)
+            if cycle_parameters:
+                duty_cycle_parameters[i+1] = cycle_parameters
+
+        app = Appliance(self, **kwargs)
+
+        if windows_args:
+            app.windows(**windows_args)
+        for i in duty_cycle_parameters:
+            app.specific_cycle(i, **duty_cycle_parameters[i])
+
+        return app
 
     def save(self, filename=None):
         answer = pd.concat([app.save() for app in self.App_list], ignore_index=True)
