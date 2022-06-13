@@ -4,6 +4,7 @@
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
+import warnings
 from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, MAX_WINDOWS, DUTY_CYCLE_PARAMETERS
 from ramp.core.utils import read_input_file
 
@@ -71,21 +72,31 @@ class UseCase:
                 # assign windows arguments
                 for k in WINDOWS_PARAMETERS:
                     if "window" in k:
-                        appliance_parameters[k] = np.array(
-                            [row.get(k + "_start"), row.get(k + "_end")]
-                        )
+                        w_start = row.get(k + "_start")
+                        w_end = row.get(k + "_end")
+                        if w_start is not None and w_end is not None:
+                            appliance_parameters[k] = np.array(
+                                [w_start, w_end], dtype=np.intc
+                            )
                     else:
-                        appliance_parameters[k] = row.get(k)
+                        val = row.get(k)
+                        if val is not None:
+                            appliance_parameters[k] = val
 
                 # assign duty cycles arguments
                 for duty_cycle_params in DUTY_CYCLE_PARAMETERS:
                     for k in duty_cycle_params:
                         if "cw" in k:
-                            appliance_parameters[k] = np.array(
-                                [row.get(k + "_start"), row.get(k + "_end")], dtype=np.intc
-                            )
+                            cw_start= row.get(k + "_start")
+                            cw_end = row.get(k + "_end")
+                            if cw_start is not None and cw_end is not None:
+                                appliance_parameters[k] = np.array(
+                                    [cw_start, cw_end], dtype=np.intc
+                                )
                         else:
-                            appliance_parameters[k] = row.get(k)
+                            val = row.get(k)
+                            if val is not None:
+                                appliance_parameters[k] = val
 
                 user.add_appliance(**appliance_parameters)
 
@@ -272,6 +283,12 @@ class Appliance:
 
         # attributes initialized by self.windows
         self.random_var_w = 0
+        self.window_1 = np.array([0, 0])
+        self.window_2 = np.array([0, 0])
+        self.window_3 = np.array([0, 0])
+        self.random_var_1 = 0
+        self.random_var_2 = 0
+        self.random_var_3 = 0
         self.daily_use = None
         self.daily_use_masked = None
 
@@ -380,19 +397,35 @@ class Appliance:
                 np.append(answer, False)
         return answer.all()
 
-    def windows(self, window_1 = np.array([0,0]), window_2 = np.array([0,0]),random_var_w = 0, window_3 = np.array([0,0])):
-        self.window_1 = window_1 #array of start and ending time for window of use #1
-        self.window_2 = window_2 #array of start and ending time for window of use #2
-        self.window_3 = window_3 #array of start and ending time for window of use #3
+    def windows(self, window_1=None, window_2=None, random_var_w=0, window_3=None):
+        print(window_1, window_2, window_3)
+        if window_1 is None:
+            warnings.warn(UserWarning("No windows is declared, default window of 24 hours is selected"))
+            self.window_1 = np.array([0, 1440])
+        else:
+            self.window_1 = window_1
+
+        if window_2 is None:
+            if self.num_windows >= 2:
+                raise ValueError("Windows 2 is not provided although 2 windows were declared")
+        else:
+            self.window_2 = window_2
+
+        if window_3 is None:
+            if self.num_windows == 3:
+                raise ValueError("Windows 3 is not provided although 3 windows were declared")
+        else:
+            self.window_3 = window_3
+        print(self.window_1, self.window_2, self.window_3)
         self.random_var_w = random_var_w #percentage of variability in the start and ending times of the windows
         self.daily_use = np.zeros(1440) #create an empty daily use profile
-        self.daily_use[window_1[0]:(window_1[1])] = np.full(np.diff(window_1),0.001) #fills the daily use profile with infinitesimal values that are just used to identify the functioning windows
-        self.daily_use[window_2[0]:(window_2[1])] = np.full(np.diff(window_2),0.001) #same as above for window2
-        self.daily_use[window_3[0]:(window_3[1])] = np.full(np.diff(window_3),0.001) #same as above for window3
+        self.daily_use[self.window_1[0]:(self.window_1[1])] = np.full(np.diff(self.window_1),0.001) #fills the daily use profile with infinitesimal values that are just used to identify the functioning windows
+        self.daily_use[self.window_2[0]:(self.window_2[1])] = np.full(np.diff(self.window_2),0.001) #same as above for window2
+        self.daily_use[self.window_3[0]:(self.window_3[1])] = np.full(np.diff(self.window_3),0.001) #same as above for window3
         self.daily_use_masked = np.zeros_like(ma.masked_not_equal(self.daily_use,0.001)) #apply a python mask to the daily_use array to make only functioning windows 'visibile'
-        self.random_var_1 = int(random_var_w*np.diff(window_1)) #calculate the random variability of window1, i.e. the maximum range of time they can be enlarged or shortened
-        self.random_var_2 = int(random_var_w*np.diff(window_2)) #same as above
-        self.random_var_3 = int(random_var_w*np.diff(window_3)) #same as above
+        self.random_var_1 = int(random_var_w*np.diff(self.window_1)) #calculate the random variability of window1, i.e. the maximum range of time they can be enlarged or shortened
+        self.random_var_2 = int(random_var_w*np.diff(self.window_2)) #same as above
+        self.random_var_3 = int(random_var_w*np.diff(self.window_3)) #same as above
         self.user.App_list.append(self) #automatically appends the appliance to the user's appliance list
 
         if self.fixed_cycle == 1:
