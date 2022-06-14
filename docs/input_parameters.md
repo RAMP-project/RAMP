@@ -48,7 +48,7 @@ A new instance of class `User` need the parameters `user_name`, `num_users`, `us
 To add an appliance use the method `add_appliance` with at least the mandatory parameters listed in the table above (except the 3 first parameters which belong to the user class and are already assigned in this case)
 and with any of the non-mandatory ones.
 
-If no window parameter (`window_j_start`, `window_j_end`) is provided to the `add_appliance` method of the user, then one must then call the `window` method of the appliance to provide up to 3 windows : `window_1`, `window_2`, `window_3` as well as `random_var_w`
+If no window parameter (`window_j_start`, `window_j_end`) is provided to the `add_appliance` method of the user, then one must then call the `windows` method of the appliance to provide up to 3 windows : `window_1`, `window_2`, `window_3` as well as `random_var_w`
 The parameters to describe a window of time should simply directly be provided as a numpy array ( for example `window_j = np.array([window_j_start, window_j_end])`) (where j is an integer smaller or equal to the provided value of `num_windows`).
 
 If no duty cycle parameter is provided to the `add_appliance` method of the user, then one can then enable up to 3 duty cycle by calling the method `specific_cycle_i` of the appliance (where i is an integer smaller or equal to the provided value of `fixed_cycle`) 
@@ -56,6 +56,6 @@ The parameters to describe the ith duty cycle are the following: `p_i1`, `t_i1`,
 It is also possible to provide the parameters `cwi1` and `cwi2` using the method `cycle_behaviour` of the appliance.
 
 The legacy way to create an appliance instance is by using the `Appliance` method of the user (note that the names of input parameters are the old ones). This way of creating an appliance is to keep a back compatibility of the legacy input files, using the `add_appliance` method of the user should be preferred
-Note that with the legacy way, one must then call the `window` method of the appliance to provide at least one windows. And one can add duty cycles only via the method `specific_cycle_i` of the appliance.
+Note that with the legacy way, one must then call the `windows` method of the appliance to provide at least one windows. And one can add duty cycles only via the method `specific_cycle_i` of the appliance.
 
  
