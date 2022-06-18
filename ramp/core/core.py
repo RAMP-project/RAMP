@@ -72,30 +72,30 @@ class UseCase:
                 # assign windows arguments
                 for k in WINDOWS_PARAMETERS:
                     if "window" in k:
-                        w_start = row.get(k + "_start")
-                        w_end = row.get(k + "_end")
-                        if w_start is not None and w_end is not None:
+                        w_start = row.get(k + "_start", np.NaN)
+                        w_end = row.get(k + "_end", np.NaN)
+                        if not np.isnan(w_start) and not np.isnan(w_end):
                             appliance_parameters[k] = np.array(
                                 [w_start, w_end], dtype=np.intc
                             )
                     else:
-                        val = row.get(k)
-                        if val is not None:
+                        val = row.get(k, np.NaN)
+                        if not np.isnan(val):
                             appliance_parameters[k] = val
 
                 # assign duty cycles arguments
                 for duty_cycle_params in DUTY_CYCLE_PARAMETERS:
                     for k in duty_cycle_params:
                         if "cw" in k:
-                            cw_start= row.get(k + "_start")
-                            cw_end = row.get(k + "_end")
-                            if cw_start is not None and cw_end is not None:
+                            cw_start = row.get(k + "_start", np.NaN)
+                            cw_end = row.get(k + "_end", np.NaN)
+                            if not np.isnan(cw_start) and not np.isnan(cw_end):
                                 appliance_parameters[k] = np.array(
                                     [cw_start, cw_end], dtype=np.intc
                                 )
                         else:
-                            val = row.get(k)
-                            if val is not None:
+                            val = row.get(k, np.NaN)
+                            if not np.isnan(val):
                                 appliance_parameters[k] = val
 
                 user.add_appliance(**appliance_parameters)
