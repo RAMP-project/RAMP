@@ -41,7 +41,7 @@ The `user preference` defines how many types of meal are available for each user
 This input file is used in [this publication](https://doi.org/10.1109/PTC.2019.8810571)
 
 ### Spreadsheet input files
-It is also possible to use spreadsheets as input files with the option `-i`: `python ramp_run.py -i <path to .xlsx input file>`. If you already know how many profile you want to simulate you can indicate it with the `-n` option: `python ramp_run.py -i <path to .xlsx input file> -n 10` will simulate 10 profiles. Note that you can use this option without providing a `.xlsx` input file, this will then be equivalent to running `python ramp_run.py` without being prompted for the number of profile within the console.
+It is also possible to use spreadsheets as input files. To do so you need to run the `ramp.py` file which is at the root of the repository with the option `-i`: `python ramp.py -i <path to .xlsx input file>`. If you already know how many profile you want to simulate you can indicate it with the `-n` option: `python ramp.py -i <path to .xlsx input file> -n 10` will simulate 10 profiles. Note that you can use this option without providing a `.xlsx` input file with the `-i` option, this will then be equivalent to running `python ramp_run.py` from the `ramp` folder without being prompted for the number of profile within the console.
 
 ### Convert python input files to xlsx
 If you have existing python input files, you can convert them to spreadsheet. To do so, go to `ramp` folder and run
