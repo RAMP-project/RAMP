@@ -1,8 +1,6 @@
 ## Excel input file parameter description
 The table below displays the input parameters of RAMP. If NA is displayed in the table below, it means that the corresponding column is not applicable to the parameter.
 
-TODO: specify difference between xlsx and python input (future also pack the windows param in the add, appliance method)
-
 When filling .xlsx input file, you can simply leave the cell empty if the parameter is not mandatory and the default value will be automatically used.
 
 The "allowed values" column provide information about the format one should provide when:

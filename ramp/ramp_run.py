@@ -47,11 +47,11 @@ def run_usecase(j=None, fname=None, num_profiles=None):
     if len(Profiles_list) > 1:  # if more than one daily profile is generated, also cloud plots are shown
         pp.Profile_cloud_plot(Profiles_list, Profiles_avg)
 
+
 input_files_to_run = [1, 2, 3]
 
+
 if __name__ == "__main__":
-
-
 
     for i, j in enumerate(input_files_to_run):
         run_usecase(j=j)
