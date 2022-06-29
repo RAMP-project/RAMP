@@ -398,7 +398,6 @@ class Appliance:
         return answer.all()
 
     def windows(self, window_1=None, window_2=None, random_var_w=0, window_3=None):
-        print(window_1, window_2, window_3)
         if window_1 is None:
             warnings.warn(UserWarning("No windows is declared, default window of 24 hours is selected"))
             self.window_1 = np.array([0, 1440])

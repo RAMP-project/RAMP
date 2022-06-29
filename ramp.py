@@ -29,7 +29,6 @@ if __name__ == "__main__":
     num_profiles = args["num_profiles"]
     # Define which input files should be considered and run.
 
-
     if fnames is None:
         print("Please provide path to input file with option -i, \n\nDefault to old version of RAMP input files\n")
         # Files are specified as numbers in a list (e.g. [1,2] will consider input_file_1.py and input_file_2.py)
@@ -59,7 +58,3 @@ if __name__ == "__main__":
 
         for i, fname in enumerate(fnames):
             run_usecase(fname=fname, num_profiles=num_profiles[i])
-
-
-
-
