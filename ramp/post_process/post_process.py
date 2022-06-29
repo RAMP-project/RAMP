@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 #%% Post-processing
 '''
 Just some additional code lines to calculate useful indicators and generate plots
@@ -69,6 +71,6 @@ for i in range (len(Profile)):
 def export_series(stoch_profiles_series, j=None, fname=None):
     series_frame = pd.DataFrame(stoch_profiles_series)
     if j is not None:
-        series_frame.to_csv('results/output_file_%d.csv' % (j))
+        series_frame.to_csv(os.path.join(BASE_PATH, 'results', 'output_file_%d.csv' % (j)))
     if fname is not None:
-        series_frame.to_csv(f'results/output_file_{os.path.split(fname)[-1]}.csv')
+        series_frame.to_csv(os.path.join(BASE_PATH, 'results', f'output_file_{os.path.split(fname)[-1]}.csv'))
