@@ -1,4 +1,5 @@
 import json
+import random
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.worksheet.cell_range import CellRange
@@ -82,3 +83,20 @@ def read_input_file(filename):
             df.loc[i, "power"] = ts
             df.loc[i, "p_series"] = True
     return df
+
+
+def random_variation(var, norm=1):
+    """Pick a random variable within a uniform distribution of range [1-var, 1+var]
+
+    Parameters
+    ----------
+    var: float
+        sets the range of the uniform distribution around one
+    norm: float
+        multiplication factor of the random variable, default = 1
+
+    Returns
+    -------
+    random number close to norm
+    """
+    return norm * random.uniform((1 - var), (1 + var))
