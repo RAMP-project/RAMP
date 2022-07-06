@@ -111,6 +111,7 @@ class User:
         self.load = None
         self.App_list = []  # each instance of User (i.e. each user class) has its own list of Appliances
 
+    def add_appliance(self, *args, **kwargs):
 
         # parse the args into the kwargs
         if len(args) > 0:
@@ -204,9 +205,6 @@ class User:
     def export_to_dataframe(self):
         return self.save()
 
-    def add_appliance(self, *args, **kwargs):
-        # I would add the appliance explicitely here, unless the appliance works only if a windows is defined
-        return Appliance(self, *args, **kwargs)
 
     def Appliance(
         self,
@@ -563,13 +561,28 @@ class Appliance:
                     (p_21 * np.ones(int(random_variation(var=-self.r_c2, norm=self.t_21)))),
                     (p_22 * np.ones(int(random_variation(var=-self.r_c2, norm=self.t_22))))
                 )) #randomise also the fixed cycle
+
                 if self.fixed_cycle >= 3:
                     p_31 = random_variation(var=self.thermal_p_var, norm=self.p_31) #randomly variates the power of thermal apps, otherwise variability is 0
                     p_32 = random_variation(var=self.thermal_p_var, norm=self.p_32) #randomly variates the power of thermal apps, otherwise variability is 0
-                    self.random_cycle3 = np.concatenate((
-                        (p_31 * np.ones(int(random_variation(var=-self.r_c3, norm=self.t_31)))),
-                        (p_32 * np.ones(int(random_variation(var=-self.r_c3, norm=self.t_32))))
-                    )) #randomise also the fixed cycle
+                    self.random_cycle1 = random.choice([np.concatenate(((np.ones(
+                        int(random_variation(var=-self.r_c1, norm=self.t_11))) * p_11), (np.ones(
+                        int(random_variation(var=-self.r_c1, norm=self.t_12))) * p_12))), np.concatenate(
+                        ((np.ones(int(random_variation(var=-self.r_c1, norm=self.t_12))) * p_12), (
+                                np.ones(int(random_variation(var=-self.r_c1, norm=self.t_11))) * p_11)))])
+
+                    self.random_cycle2 = random.choice([np.concatenate(((np.ones(
+                        int(random_variation(var=-self.r_c2, norm=self.t_21))) * p_21), (np.ones(
+                        int(random_variation(var=-self.r_c2, norm=self.t_22))) * p_22))), np.concatenate(
+                        ((np.ones(int(random_variation(var=-self.r_c2, norm=self.t_12))) * p_22), (
+                                np.ones(int(random_variation(var=-self.r_c2, norm=self.t_21))) * p_21)))])
+
+                    self.random_cycle3 = random.choice([np.concatenate(((np.ones(
+                        int(random_variation(var=-self.r_c3, norm=self.t_31))) * p_31), (np.ones(
+                        int(random_variation(var=-self.r_c3, norm=self.t_32))) * p_32))), np.concatenate(
+                        ((np.ones(int(random_variation(var=-self.r_c3, norm=self.t_32))) * p_32), (
+                                np.ones(int(random_variation(var=-self.r_c3, norm=self.t_31))) * p_31)))])
+
 
     def update_daily_use(self, coincidence, power, indexes):
         """Update the daily use depending on existence of duty cycles of the Appliance instance
