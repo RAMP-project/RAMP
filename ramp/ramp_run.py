@@ -27,16 +27,16 @@ import sys,os
 sys.path.append('../')
 
 try:
-    from .core.stochastic_process import Stochastic_Process
+    from .core.stochastic_process import stochastic_process
     from .post_process import post_process as pp
 except ImportError:
-    from core.stochastic_process import Stochastic_Process
+    from core.stochastic_process import stochastic_process
     from post_process import post_process as pp
 
 
 def run_usecase(j=None, fname=None, num_profiles=None):
     # Calls the stochastic process and saves the result in a list of stochastic profiles
-    Profiles_list = Stochastic_Process(j=j, fname=fname, num_profiles=num_profiles)
+    Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=num_profiles)
 
     # Post-processes the results and generates plots
     Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)
@@ -55,7 +55,3 @@ if __name__ == "__main__":
 
     for i, j in enumerate(input_files_to_run):
         run_usecase(j=j)
-
-
-
-
