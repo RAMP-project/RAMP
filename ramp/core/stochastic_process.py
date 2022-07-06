@@ -180,18 +180,14 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                                 
                                 if tot_time > rand_time: #control to check when the total functioning time is reached. It will be typically overcome, so a correction is applied to avoid this
                                     indexes_adj = indexes[:-(tot_time-rand_time)] #correctes indexes size to avoid overcoming total time
-                                    if np.in1d(peak_time_range,indexes_adj).any() and App.fixed == 'no': #check if indexes are in peak window and if the coincident behaviour is locked by the "fixed" attribute
-                                        coincidence = min(App.number,max(1,math.ceil(random.gauss((App.number*mu_peak+0.5),(s_peak*App.number*mu_peak))))) #calculates coincident behaviour within the peak time range
-                                    elif np.in1d(peak_time_range,indexes_adj).any()== False and App.fixed == 'no': #check if indexes are off-peak and if coincident behaviour is locked or not
-                                        Prob = random.uniform(0,(App.number-op_factor)/App.number) #calculates probability of coincident switch_ons off-peak
-                                        array = np.arange(0,App.number)/App.number
-                                        try:
-                                            on_number = np.max(np.where(Prob>=array))+1
-                                        except ValueError:
-                                            on_number = 1 
-                                        coincidence = on_number #randomly selects how many apps are on at the same time for each app type based on the above probabilistic algorithm
-                                    else:
-                                        coincidence = App.number #this is the case when App.fixed is activated. All 'n' apps of an App instance are switched_on altogether
+                                    # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
+                                    coincidence = App.calc_coincident_switch_on(
+                                        peak_time_range=peak_time_range,
+                                        indexes=indexes_adj,
+                                        s_peak=s_peak,
+                                        mu_peak=mu_peak,
+                                        op_factor=op_factor
+                                    )
                                     if App.fixed_cycle > 0: #evaluates if the app has some duty cycles to be considered
                                         if indexes_adj.size > 0:
                                             evaluate = round(np.mean(indexes_adj)) #calculates the mean time position of the current switch_on event, to later select the proper duty cycle
@@ -214,18 +210,15 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                                     tot_time = (tot_time - indexes.size) + indexes_adj.size #updates the total time correcting the previous value
                                     break #exit cycle and go to next App
                                 else: #if the tot_time has not yet exceeded the App total functioning time, the cycle does the same without applying corrections to indexes size
-                                    if np.in1d(peak_time_range,indexes).any() and App.fixed == 'no':
-                                        coincidence = min(App.number,max(1,math.ceil(random.gauss((App.number*mu_peak+0.5),(s_peak*App.number*mu_peak)))))
-                                    elif np.in1d(peak_time_range,indexes).any() == False and App.fixed == 'no':
-                                        Prob = random.uniform(0,(App.number-op_factor)/App.number)
-                                        array = np.arange(0,App.number)/App.number
-                                        try:
-                                            on_number = np.max(np.where(Prob>=array))+1
-                                        except ValueError:
-                                            on_number = 1
-                                        coincidence = on_number
-                                    else:
-                                        coincidence = App.number
+                                    # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
+                                    coincidence = App.calc_coincident_switch_on(
+                                        peak_time_range=peak_time_range,
+                                        indexes=indexes,
+                                        s_peak=s_peak,
+                                        mu_peak=mu_peak,
+                                        op_factor=op_factor
+                                    )
+
                                     if App.fixed_cycle > 0:
                                         if indexes.size > 0:
                                             evaluate = round(np.mean(indexes))

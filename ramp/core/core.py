@@ -6,6 +6,7 @@ import numpy.ma as ma
 import pandas as pd
 import warnings
 import random
+import math
 from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, MAX_WINDOWS, DUTY_CYCLE_PARAMETERS
 from ramp.core.utils import read_input_file
 
@@ -557,3 +558,27 @@ class Appliance:
         else:
             indexes = np.arange(switch_on, switch_on + upper_limit)
         return indexes
+
+    def calc_coincident_switch_on(self, peak_time_range, indexes, s_peak, mu_peak, op_factor):
+        """Computes how many of the 'n' of the Appliance instance are switched on simultaneously"""
+        # check if indexes are in peak window
+        if np.in1d(peak_time_range, indexes).any() is True and self.fixed == 'no':
+            # calculates coincident behaviour within the peak time range
+            coincidence = min(self.number, max(1, math.ceil(random.gauss(mu=(self.number * mu_peak + 0.5), sigma=(s_peak * self.number * mu_peak)))))
+        # check if indexes are off-peak
+        elif np.in1d(peak_time_range, indexes).any() is False and self.fixed == 'no':
+            # calculates probability of coincident switch_ons off-peak
+            prob = random.uniform(0, (self.number - op_factor) / self.number)
+
+            # randomly selects how many appliances are on at the same time
+            array = np.arange(0, self.number) / self.number
+            try:
+                on_number = np.max(np.where(prob >= array)) + 1
+            except ValueError:
+                on_number = 1
+
+            coincidence = on_number
+        else:
+            # All 'n' copies of an Appliance instance are switched on altogether
+            coincidence = self.number
+        return coincidence
