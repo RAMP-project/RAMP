@@ -5,6 +5,7 @@ import numpy as np
 import numpy.ma as ma
 import pandas as pd
 import warnings
+import random
 from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, MAX_WINDOWS, DUTY_CYCLE_PARAMETERS
 from ramp.core.utils import read_input_file
 
@@ -448,6 +449,18 @@ class Appliance:
         if self.fixed_cycle == 1:
             self.cw11 = self.window_1
             self.cw12 = self.window_2
+
+    def calc_rand_window(self, window_idx=1, window_range_limits=np.array([0, 1440])):
+        _window = self.__getattribute__(f'window_{window_idx}')
+        _random_var = self.__getattribute__(f'random_var_{window_idx}')
+        rand_window = np.array([int(random.uniform(_window[0] - _random_var, _window[0] + _random_var)),
+                                int(random.uniform(_window[1] - _random_var, _window[1] + _random_var))])
+        if rand_window[0] < window_range_limits[0]:
+            rand_window[0] = window_range_limits[0]
+        if rand_window[1] > window_range_limits[1]:
+            rand_window[1] = window_range_limits[1]
+
+        return rand_window
 
     @property
     def maximum_profile(self):
