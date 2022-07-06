@@ -147,6 +147,7 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                            
                     while tot_time <= rand_time: #this is the key cycle, which runs for each App until the switch_ons and their duration equals the randomised total time of use of the App
                             #check how many windows to consider
+                            # step 2c of [1]
                             switch_on = App.switch_on(*rand_windows)
 
                             #Identifies a random switch on time within the available functioning windows
@@ -188,27 +189,17 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                                         mu_peak=mu_peak,
                                         op_factor=op_factor
                                     )
-                                    if App.fixed_cycle > 0: #evaluates if the app has some duty cycles to be considered
-                                        if indexes_adj.size > 0:
-                                            evaluate = round(np.mean(indexes_adj)) #calculates the mean time position of the current switch_on event, to later select the proper duty cycle
-                                        else:
-                                            evaluate = 0 
-                                        #based on the evaluate value, selects the proper duty cycle and puts the corresponding power values in the indexes range
-                                        if evaluate in range(App.cw11[0],App.cw11[1]) or evaluate in range(App.cw12[0],App.cw12[1]):
-                                            np.put(App.daily_use,indexes_adj,(random_cycle1*coincidence))
-                                            np.put(App.daily_use_masked,indexes_adj,(random_cycle1*coincidence),mode='clip')
-                                        elif evaluate in range(App.cw21[0],App.cw21[1]) or evaluate in range(App.cw22[0],App.cw22[1]):
-                                            np.put(App.daily_use,indexes_adj,(random_cycle2*coincidence))
-                                            np.put(App.daily_use_masked,indexes_adj,(random_cycle2*coincidence),mode='clip')
-                                        else:
-                                            np.put(App.daily_use,indexes_adj,(random_cycle3*coincidence))
-                                            np.put(App.daily_use_masked,indexes_adj,(random_cycle3*coincidence),mode='clip')
-                                    else: #if no duty cycles are specififed, a regular switch_on event is modelled
-                                        np.put(App.daily_use,indexes_adj,(App.power*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence)) #randomises also the App Power if thermal_p_var is on
-                                        np.put(App.daily_use_masked,indexes_adj,(App.power*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence),mode='clip')
-                                    App.daily_use_masked = np.zeros_like(ma.masked_greater_equal(App.daily_use_masked,0.001)) #updates the mask excluding the current switch_on event to identify the free_spots for the next iteration
+                                    # Update the daily use depending on existence of duty cycles of the Appliance instance
+                                    App.update_daily_use(
+                                        random_cycle1,
+                                        random_cycle2,
+                                        random_cycle3,
+                                        coincidence,
+                                        power=App.power[prof_i],
+                                        index=indexes_adj
+                                    )
                                     tot_time = (tot_time - indexes.size) + indexes_adj.size #updates the total time correcting the previous value
-                                    break #exit cycle and go to next App
+                                    break #exit cycle and go to next Appliance
                                 else: #if the tot_time has not yet exceeded the App total functioning time, the cycle does the same without applying corrections to indexes size
                                     # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
                                     coincidence = App.calc_coincident_switch_on(
@@ -218,25 +209,16 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                                         mu_peak=mu_peak,
                                         op_factor=op_factor
                                     )
+                                    # Update the daily use depending on existence of duty cycles of the Appliance instance
+                                    App.update_daily_use(
+                                        random_cycle1,
+                                        random_cycle2,
+                                        random_cycle3,
+                                        coincidence,
+                                        power=App.power[prof_i],
+                                        index=indexes
+                                    )
 
-                                    if App.fixed_cycle > 0:
-                                        if indexes.size > 0:
-                                            evaluate = round(np.mean(indexes))
-                                        else:
-                                            evaluate = 0
-                                        if evaluate in range(App.cw11[0],App.cw11[1]) or evaluate in range(App.cw12[0],App.cw12[1]):
-                                            np.put(App.daily_use,indexes,(random_cycle1*coincidence))
-                                            np.put(App.daily_use_masked,indexes,(random_cycle1*coincidence),mode='clip')
-                                        elif evaluate in range(App.cw21[0],App.cw21[1]) or evaluate in range(App.cw22[0],App.cw22[1]):
-                                            np.put(App.daily_use,indexes,(random_cycle2*coincidence))
-                                            np.put(App.daily_use_masked,indexes,(random_cycle2*coincidence),mode='clip')
-                                        else:
-                                            np.put(App.daily_use,indexes,(random_cycle3*coincidence))
-                                            np.put(App.daily_use_masked,indexes,(random_cycle3*coincidence),mode='clip')
-                                    else:
-                                        np.put(App.daily_use,indexes,(App.power*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence))
-                                        np.put(App.daily_use_masked,indexes,(App.power*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence),mode='clip')
-                                    App.daily_use_masked = np.zeros_like(ma.masked_greater_equal(App.daily_use_masked,0.001))
                                     tot_time = tot_time #no correction applied to previously calculated value
                                                     
                                 free_spots = [] #calculate how many free spots remain for further switch_ons

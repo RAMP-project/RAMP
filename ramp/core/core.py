@@ -451,6 +451,28 @@ class Appliance:
             self.cw11 = self.window_1
             self.cw12 = self.window_2
 
+    def update_daily_use(self, random_cycle1, random_cycle2, random_cycle3, coincidence, power, indexes):
+        """Update the daily use depending on existence of duty cycles of the Appliance instance"""
+
+        if self.fixed_cycle > 0:  # evaluates if the app has some duty cycles to be considered
+            evaluate = np.round(np.mean(indexes)) if indexes.size > 0 else 0
+            # selects the proper duty cycle and puts the corresponding power values in the indexes range
+            if evaluate in range(self.cw11[0], self.cw11[1]) or evaluate in range(self.cw12[0], self.cw12[1]):
+                np.put(self.daily_use, indexes, (random_cycle1 * coincidence))
+                np.put(self.daily_use_masked, indexes, (random_cycle1 * coincidence), mode='clip')
+            elif evaluate in range(self.cw21[0], self.cw21[1]) or evaluate in range(self.cw22[0], self.cw22[1]):
+                np.put(self.daily_use, indexes, (random_cycle2 * coincidence))
+                np.put(self.daily_use_masked, indexes, (random_cycle2 * coincidence), mode='clip')
+            else:
+                np.put(self.daily_use, indexes, (random_cycle3 * coincidence))
+                np.put(self.daily_use_masked, indexes, (random_cycle3 * coincidence), mode='clip')
+        else:  # if no duty cycles are specified, a regular switch_on event is modelled
+            # randomises also the App Power if thermal_p_var is on
+            np.put(self.daily_use, indexes, (coincidence * power * (random.uniform((1 - self.thermal_p_var), (1 + self.thermal_p_var)))))
+            np.put(self.daily_use_masked, indexes,(coincidence * power * (random.uniform((1 - self.thermal_p_var), (1 + self.thermal_p_var)))), mode='clip')
+        # updates the mask excluding the current switch_on event to identify the free_spots for the next iteration
+        self.daily_use_masked = np.zeros_like(ma.masked_greater_equal(self.daily_use_masked, 0.001))
+
     def calc_rand_window(self, window_idx=1, window_range_limits=np.array([0, 1440])):
         _window = self.__getattribute__(f'window_{window_idx}')
         _random_var = self.__getattribute__(f'random_var_{window_idx}')
