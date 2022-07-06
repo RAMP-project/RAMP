@@ -24,28 +24,50 @@ under the License.
 #%% Import required modules
 
 import sys,os
+
+import numpy as np
+
 sys.path.append('../')
 
 try:
+    from .core.utils import get_day_type
     from .core.stochastic_process import stochastic_process
     from .post_process import post_process as pp
 except ImportError:
+    from core.utils import get_day_type
     from core.stochastic_process import stochastic_process
     from post_process import post_process as pp
 
 
-def run_usecase(j=None, fname=None, num_profiles=None):
+def run_usecase(j=None, fname=None, num_profiles=None, days=None):
     # Calls the stochastic process and saves the result in a list of stochastic profiles
-    Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=num_profiles)
+    if days is None:
+        Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=0)
 
-    # Post-processes the results and generates plots
-    Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)
-    pp.Profile_series_plot(Profiles_series)  # by default, profiles are plotted as a series
+        # Post-processes the results and generates plots
+        Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)
+        pp.Profile_series_plot(Profiles_series)  # by default, profiles are plotted as a series
 
-    pp.export_series(Profiles_series, j, fname)
+        pp.export_series(Profiles_series, j, fname)
 
-    if len(Profiles_list) > 1:  # if more than one daily profile is generated, also cloud plots are shown
-        pp.Profile_cloud_plot(Profiles_list, Profiles_avg)
+        if len(Profiles_list) > 1:  # if more than one daily profile is generated, also cloud plots are shown
+            pp.Profile_cloud_plot(Profiles_list, Profiles_avg)
+    else:
+        Profiles_list = []
+        for day in days:
+            print("Day", day)
+            daily_profiles = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=get_day_type(day))
+
+            Profiles_list.append(np.mean(daily_profiles, axis=0))
+
+        # Post-processes the results and generates plots
+        Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)
+        pp.Profile_series_plot(Profiles_series)  # by default, profiles are plotted as a series
+
+        pp.export_series(Profiles_series, j, fname)
+
+        if len(Profiles_list) > 1:  # if more than one daily profile is generated, also cloud plots are shown
+            pp.Profile_cloud_plot(Profiles_list, Profiles_avg)
 
 
 input_files_to_run = [1, 2, 3]

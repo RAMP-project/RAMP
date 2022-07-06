@@ -52,10 +52,13 @@ def calc_peak_time_range(user_list, peak_enlarge=0.15):
     return np.arange(peak_time - rand_peak_enlarge, peak_time + rand_peak_enlarge)
 
 
-def stochastic_process(j=None, fname=None, num_profiles=None):
+def stochastic_process(j=None, fname=None, num_profiles=None, day_type=0):
     """Generate num_profiles load profile for the usecase
 
         Covers steps 1. and 2. of the algorithm described in [1], p.6-7
+
+    day_type: int
+        0 for a week day or 1 for a weekend day
 
     Notes
     -----
@@ -79,11 +82,11 @@ def stochastic_process(j=None, fname=None, num_profiles=None):
         # for each User instance generate a load profile, iterating through all user of this instance and
         # all appliances they own, corresponds to step 2. of [1], p.7
         for user in user_list:
-            user.generate_aggregated_load_profile(prof_i, peak_time_range, year_behaviour)
+            user.generate_aggregated_load_profile(prof_i, peak_time_range, day_type)
             # aggregate the user load to the usecase load
             usecase_load = usecase_load + user.load
         profiles.append(usecase_load)
         # screen update about progress of computation
         print('Profile', prof_i+1, '/', num_profiles, 'completed')
-    return(profiles)
+    return profiles
 

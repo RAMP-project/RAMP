@@ -163,3 +163,12 @@ def random_choice(var, t1, p1, t2, p2):
             duty_cycle(var, t1=t2, p1=p2, t2=t1, p2=p1),
         ]
     )
+
+
+def get_day_type(day):
+    """Given a datetime object return 0 for weekdays or 1 for weekends"""
+    if day.weekday() > 4:
+        answer = 1
+    else:
+        answer = 0
+    return answer

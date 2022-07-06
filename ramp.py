@@ -103,4 +103,4 @@ if __name__ == "__main__":
             num_profiles = [None] * len(fnames)
 
         for i, fname in enumerate(fnames):
-            run_usecase(fname=fname, num_profiles=num_profiles[i])
+            run_usecase(fname=fname, num_profiles=num_profiles[i], days=days)
