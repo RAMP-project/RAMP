@@ -9,7 +9,7 @@ from ramp.ramp_convert_old_input_files import convert_old_user_input_file
 
 
 def load_usecase(j=None, fname=None):
-    peak_enlarge, year_behaviour, user_list, num_profiles = initialise_inputs(
+    peak_enlarge, user_list, num_profiles = initialise_inputs(
         j, fname, num_profiles=1
     )
     return user_list

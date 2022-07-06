@@ -69,7 +69,7 @@ def stochastic_process(j=None, fname=None, num_profiles=None, day_type=0):
     # creates an empty list to store the results of each code run, i.e. each stochastically generated profile
     profiles = []
 
-    peak_enlarge, year_behaviour, user_list, num_profiles = initialise_inputs(j, fname, num_profiles)
+    peak_enlarge, user_list, num_profiles = initialise_inputs(j, fname, num_profiles)
 
     # Calculation of the peak time range, which is used to discriminate between off-peak
     # and on-peak coincident switch-on probability, corresponds to step 1. of [1], p.6
