@@ -7,8 +7,8 @@ import pandas as pd
 import warnings
 import random
 import math
-from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, MAX_WINDOWS, DUTY_CYCLE_PARAMETERS, switch_on_parameters
-from ramp.core.utils import random_variation, read_input_file
+from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, DUTY_CYCLE_PARAMETERS, switch_on_parameters
+from ramp.core.utils import random_variation, duty_cycle, random_choice, read_input_file
 
 #%% Definition of Python classes that constitute the model architecture
 """
@@ -548,40 +548,22 @@ class Appliance:
         if self.fixed_cycle >= 1:
             p_11 = random_variation(var=self.thermal_p_var, norm=self.p_11) #randomly variates the power of thermal apps, otherwise variability is 0
             p_12 = random_variation(var=self.thermal_p_var, norm=self.p_12) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.random_cycle1 = np.concatenate((
-                (p_11 * np.ones(int(random_variation(var=-self.r_c1, norm=self.t_11)))),
-                (p_12 * np.ones(int(random_variation(var=-self.r_c1, norm=self.t_12))))
-            )) #randomise also the fixed cycle
+            self.random_cycle1 = duty_cycle(var=self.r_c1, t1=self.t_11, p1=p_11, t2=self.t_12, p2=p_12) #randomise also the fixed cycle
             self.random_cycle2 = self.random_cycle1
             self.random_cycle3 = self.random_cycle1
             if self.fixed_cycle >= 2:
                 p_21 = random_variation(var=self.thermal_p_var, norm=self.p_21) #randomly variates the power of thermal apps, otherwise variability is 0
                 p_22 = random_variation(var=self.thermal_p_var, norm=self.p_22) #randomly variates the power of thermal apps, otherwise variability is 0
-                self.random_cycle2 = np.concatenate((
-                    (p_21 * np.ones(int(random_variation(var=-self.r_c2, norm=self.t_21)))),
-                    (p_22 * np.ones(int(random_variation(var=-self.r_c2, norm=self.t_22))))
-                )) #randomise also the fixed cycle
+                self.random_cycle2 = duty_cycle(var=self.r_c2, t1=self.t_21, p1=p_21, t2=self.t_22, p2=p_22) #randomise also the fixed cycle
 
                 if self.fixed_cycle >= 3:
                     p_31 = random_variation(var=self.thermal_p_var, norm=self.p_31) #randomly variates the power of thermal apps, otherwise variability is 0
                     p_32 = random_variation(var=self.thermal_p_var, norm=self.p_32) #randomly variates the power of thermal apps, otherwise variability is 0
-                    self.random_cycle1 = random.choice([np.concatenate(((np.ones(
-                        int(random_variation(var=-self.r_c1, norm=self.t_11))) * p_11), (np.ones(
-                        int(random_variation(var=-self.r_c1, norm=self.t_12))) * p_12))), np.concatenate(
-                        ((np.ones(int(random_variation(var=-self.r_c1, norm=self.t_12))) * p_12), (
-                                np.ones(int(random_variation(var=-self.r_c1, norm=self.t_11))) * p_11)))])
+                    self.random_cycle1 = random_choice(self.r_c1, t1=self.t_11, p1=p_11, t2=self.t_12, p2=p_12)
 
-                    self.random_cycle2 = random.choice([np.concatenate(((np.ones(
-                        int(random_variation(var=-self.r_c2, norm=self.t_21))) * p_21), (np.ones(
-                        int(random_variation(var=-self.r_c2, norm=self.t_22))) * p_22))), np.concatenate(
-                        ((np.ones(int(random_variation(var=-self.r_c2, norm=self.t_12))) * p_22), (
-                                np.ones(int(random_variation(var=-self.r_c2, norm=self.t_21))) * p_21)))])
+                    self.random_cycle2 = random_choice(self.r_c2, t1=self.t_21, p1=p_21, t2=self.t_22, p2=p_22)
 
-                    self.random_cycle3 = random.choice([np.concatenate(((np.ones(
-                        int(random_variation(var=-self.r_c3, norm=self.t_31))) * p_31), (np.ones(
-                        int(random_variation(var=-self.r_c3, norm=self.t_32))) * p_32))), np.concatenate(
-                        ((np.ones(int(random_variation(var=-self.r_c3, norm=self.t_32))) * p_32), (
-                                np.ones(int(random_variation(var=-self.r_c3, norm=self.t_31))) * p_31)))])
+                    self.random_cycle3 = random_choice(self.r_c3, t1=self.t_31, p1=p_31, t2=self.t_32, p2=p_32)
 
 
     def update_daily_use(self, coincidence, power, indexes):
