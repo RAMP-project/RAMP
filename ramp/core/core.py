@@ -109,9 +109,8 @@ class User:
         self.user_name = user_name
         self.num_users = num_users  # specifies the number of users within the class
         self.user_preference = user_preference  # allows to check if random number coincides with user preference, to distinguish between various appliance_use options (e.g. different cooking options)
-        self.App_list = (
-            []
-        )  # each instance of User (i.e. each user class) has its own list of Appliances
+        self.load = None
+        self.App_list = []  # each instance of User (i.e. each user class) has its own list of Appliances
 
 
         # parse the args into the kwargs
@@ -247,6 +246,76 @@ class User:
             p_series=P_series,
             name=name,
         )
+
+    def generate_single_load_profile(self, prof_i, peak_time_range, Year_behaviour):
+        """Generates a load profile for a single user taking all its appliances into consideration
+
+        Parameters
+        ----------
+        prof_i: int
+            ith profile requested by the user
+        peak_time_range: numpy array
+            randomised peak time range calculated using calc_peak_time_range function
+        Year_behaviour: numpy array
+            array consisting of a yearly pattern of weekends and weekdays peak_time_range
+        """
+
+        single_load = np.zeros(1440)
+        rand_daily_pref = 0 if self.user_preference == 0 else random.randint(1, self.user_preference)
+
+        for App in self.App_list:  # iterates for all the App types in the given User class
+            # initialises variables for the cycle
+            App.daily_use = np.zeros(1440)
+
+            # skip this appliance in any of the following applies
+            if (
+                    # evaluates if occasional use happens or not
+                    (random.uniform(0, 1) > App.occasional_use
+                     # evaluates if daily preference coincides with the randomised daily preference number
+                     or (App.pref_index != 0 and rand_daily_pref != App.pref_index)
+                     # checks if the app is allowed in the given yearly behaviour pattern
+                     or App.wd_we_type not in [Year_behaviour[prof_i], 2])
+            ):
+                continue
+
+            # recalculate windows start and ending times randomly, based on the inputs
+            rand_window_1 = App.calc_rand_window(window_idx=1)
+            rand_window_2 = App.calc_rand_window(window_idx=2)
+            rand_window_3 = App.calc_rand_window(window_idx=3)
+            rand_windows = [rand_window_1, rand_window_2, rand_window_3]
+
+            # random variability is applied to the total functioning time and to the duration
+            # of the duty cycles provided they have been specified
+            # step 2a of [1]
+            rand_time = App.rand_total_time_of_use(*rand_windows)
+
+            # redefines functioning windows based on the previous randomisation of the boundaries
+            # step 2b of [1]
+            if App.flat == 'yes':
+                # for "flat" appliances the algorithm stops right after filling the newly
+                # created windows without applying any further stochasticity
+                total_power_value = App.power[prof_i] * App.number
+                for rand_window in rand_windows:
+                    App.daily_use[rand_window[0]:rand_window[1]] = np.full(np.diff(rand_window),
+                                                                           total_power_value)
+                single_load = single_load + App.daily_use
+                continue
+            else:
+                # "non-flat" appliances a mask is applied on the newly defined windows and
+                # the algorithm goes further on
+                for rand_window in rand_windows:
+                    App.daily_use[rand_window[0]:rand_window[1]] = np.full(np.diff(rand_window), 0.001)
+            App.daily_use_masked = np.zeros_like(ma.masked_not_equal(App.daily_use, 0.001))
+
+            # calculates randomised cycles taking the random variability in the duty cycle duration
+            App.assign_random_cycles()
+
+            # steps 2c-2e repeated until the sum of the durations of all the switch-on events equals rand_time
+            App.generate_load_profile(rand_time, peak_time_range, *rand_windows, power=App.power[prof_i])
+
+            single_load = single_load + App.daily_use  # adds the Appliance load profile to the single User load profile
+        return single_load
+
 
 class Appliance:
     def __init__(
