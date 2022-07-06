@@ -97,7 +97,7 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                     rand_window_1 = App.calc_rand_window(window_idx=1)
                     rand_window_2 = App.calc_rand_window(window_idx=2)
                     rand_window_3 = App.calc_rand_window(window_idx=3)
-    
+                    rand_windows = [rand_window_1, rand_window_2, rand_window_3]
                     #redefines functioning windows based on the previous randomisation of the boundaries
                     if App.flat == 'yes': #if the app is "flat" the code stops right after filling the newly created windows without applying any further stochasticity
                         App.daily_use[rand_window_1[0]:rand_window_1[1]] = np.full(np.diff(rand_window_1),App.power[prof_i]*App.number)
@@ -147,18 +147,7 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                            
                     while tot_time <= rand_time: #this is the key cycle, which runs for each App until the switch_ons and their duration equals the randomised total time of use of the App
                             #check how many windows to consider
-                            if App.num_windows == 1:
-                                switch_on = int(random.choice([random.uniform(rand_window_1[0],(rand_window_1[1]))]))
-                            elif App.num_windows == 2:
-                                switch_on = int(random.choice(np.concatenate((np.arange(rand_window_1[0],rand_window_1[1]),np.arange(rand_window_2[0],rand_window_2[1])),axis=0)))
-                            else: 
-                                switch_on = int(random.choice(np.concatenate((np.arange(rand_window_1[0],
-                                                        rand_window_1[1]),
-                                              np.arange(rand_window_2[0],
-                                                        rand_window_2[1]),
-                                              np.arange(rand_window_3[0],
-                                                        rand_window_3[1]),
-                                              ), axis=0)))                            
+                            switch_on = App.switch_on(*rand_windows)
                             #Identifies a random switch on time within the available functioning windows
                             if App.daily_use[switch_on] == 0.001: #control to check if the app is not already on at the randomly selected switch-on time
                                 if switch_on in range(rand_window_1[0],rand_window_1[1]):
