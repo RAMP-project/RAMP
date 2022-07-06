@@ -1,5 +1,6 @@
 import argparse
-
+import datetime
+import pandas as pd
 from ramp.ramp_run import run_usecase
 
 
@@ -21,6 +22,27 @@ parser.add_argument(
     help="number of profiles to be generated",
 )
 
+parser.add_argument(
+    "-y",
+    dest="years",
+    nargs="+",
+    type=int,
+    help="Years for which one should generate demand profiles",
+)
+
+parser.add_argument(
+    "--start-date",
+    dest="date_start",
+    type=datetime.date.fromisoformat,
+    help="Date of start in YYYY-MM-DD format",
+)
+
+parser.add_argument(
+    "--end-date",
+    dest="date_end",
+    type=datetime.date.fromisoformat,
+    help="Date of end in YYYY-MM-DD format",
+)
 
 if __name__ == "__main__":
 
@@ -28,6 +50,29 @@ if __name__ == "__main__":
     fnames = args["fname_path"]
     num_profiles = args["num_profiles"]
     # Define which input files should be considered and run.
+    date_start = args["date_start"]
+    date_end = args["date_end"]
+
+    years = args["years"]
+
+    if date_start is None:
+        if date_end is not None:
+            date_start = datetime.date(date_end.year, 1, 1)
+    else:
+        if date_end is None:
+            date_end = datetime.date(date_start.year, 12, 31)
+
+    if years is not None:
+        if date_start is not None or date_end is not None:
+            raise ValueError("You cannot use the option -y in combinaison with --date-start and/or --date-end")
+        else:
+            date_start = datetime.date(years[0], 1, 1)
+            date_end = datetime.date(years[-1], 12, 31)
+
+    if date_start is not None and date_end is not None:
+        days = pd.date_range(start=date_start, end=date_end)
+    else:
+        days = None
 
     if fnames is None:
         print("Please provide path to input file with option -i, \n\nDefault to old version of RAMP input files\n")
