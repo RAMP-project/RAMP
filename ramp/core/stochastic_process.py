@@ -239,8 +239,8 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                                             np.put(App.daily_use,indexes_adj,(random_cycle3*coincidence))
                                             np.put(App.daily_use_masked,indexes_adj,(random_cycle3*coincidence),mode='clip')
                                     else: #if no duty cycles are specififed, a regular switch_on event is modelled
-                                        np.put(App.daily_use,indexes_adj,(App.power[prof_i]*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence)) #randomises also the App Power if thermal_p_var is on
-                                        np.put(App.daily_use_masked,indexes_adj,(App.power[prof_i]*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence),mode='clip')
+                                        np.put(App.daily_use,indexes_adj,(App.power*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence)) #randomises also the App Power if thermal_p_var is on
+                                        np.put(App.daily_use_masked,indexes_adj,(App.power*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence),mode='clip')
                                     App.daily_use_masked = np.zeros_like(ma.masked_greater_equal(App.daily_use_masked,0.001)) #updates the mask excluding the current switch_on event to identify the free_spots for the next iteration
                                     tot_time = (tot_time - indexes.size) + indexes_adj.size #updates the total time correcting the previous value
                                     break #exit cycle and go to next App
@@ -272,8 +272,8 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                                             np.put(App.daily_use,indexes,(random_cycle3*coincidence))
                                             np.put(App.daily_use_masked,indexes,(random_cycle3*coincidence),mode='clip')
                                     else:
-                                        np.put(App.daily_use,indexes,(App.power[prof_i]*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence))
-                                        np.put(App.daily_use_masked,indexes,(App.power[prof_i]*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence),mode='clip')
+                                        np.put(App.daily_use,indexes,(App.power*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence))
+                                        np.put(App.daily_use_masked,indexes,(App.power*(random.uniform((1-App.thermal_p_var),(1+App.thermal_p_var)))*coincidence),mode='clip')
                                     App.daily_use_masked = np.zeros_like(ma.masked_greater_equal(App.daily_use_masked,0.001))
                                     tot_time = tot_time #no correction applied to previously calculated value
                                                     

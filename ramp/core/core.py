@@ -101,7 +101,6 @@ class UseCase:
                 user.add_appliance(**appliance_parameters)
 
 
-
 class User:
     def __init__(self, user_name="", num_users=1, user_preference=0):
         self.user_name = user_name
@@ -111,7 +110,6 @@ class User:
             []
         )  # each instance of User (i.e. each user class) has its own list of Appliances
 
-    def add_appliance(self, *args, **kwargs):
 
         # parse the args into the kwargs
         if len(args) > 0:
@@ -195,6 +193,10 @@ class User:
     def export_to_dataframe(self):
         return self.save()
 
+    def add_appliance(self, *args, **kwargs):
+        # I would add the appliance explicitely here, unless the appliance works only if a windows is defined
+        return Appliance(self, *args, **kwargs)
+
     def Appliance(
         self,
         user,
@@ -232,7 +234,6 @@ class User:
             p_series=P_series,
             name=name,
         )
-
 
 class Appliance:
     def __init__(
@@ -496,4 +497,3 @@ class Appliance:
         self.cw22 = cw22
         self.cw31 = cw31 #same for cycle 3
         self.cw32 = cw32
-
