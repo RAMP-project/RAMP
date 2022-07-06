@@ -529,3 +529,14 @@ class Appliance:
         self.cw22 = cw22
         self.cw31 = cw31 #same for cycle 3
         self.cw32 = cw32
+
+    def switch_on(self, rand_window_1, rand_window_2, rand_window_3):
+
+        # check how many windows to consider
+        if self.num_windows == 1:
+            return int(random.choice([random.uniform(rand_window_1[0], (rand_window_1[1]))]))
+        elif self.num_windows == 2:
+            return int(random.choice(np.concatenate((np.arange(rand_window_1[0], rand_window_1[1]), np.arange(rand_window_2[0], rand_window_2[1])), axis=0)))
+        else:
+            return int(random.choice(np.concatenate((np.arange(rand_window_1[0], rand_window_1[1]), np.arange(rand_window_2[0], rand_window_2[1]), np.arange(rand_window_3[0], rand_window_3[1]),), axis=0)))
+
