@@ -428,10 +428,6 @@ class Appliance:
         self.random_cycle2 = np.array([])
         self.random_cycle3 = np.array([])
 
-        self.random_cycle1 = None
-        self.random_cycle2 = None
-        self.random_cycle3 = None
-
     def save(self):
         dm = {}
         for user_attribute in ("user_name", "num_users", "user_preference"):
