@@ -471,7 +471,6 @@ class Appliance:
         """
         return self.daily_use * np.mean(self.power) * self.number
 
-
     def specific_cycle(self, cycle_num, **kwargs):
         if cycle_num == 1:
             self.specific_cycle_1(**kwargs)
