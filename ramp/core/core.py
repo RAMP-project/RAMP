@@ -8,7 +8,7 @@ import warnings
 import random
 import math
 from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, MAX_WINDOWS, DUTY_CYCLE_PARAMETERS, switch_on_parameters
-from ramp.core.utils import read_input_file
+from ramp.core.utils import random_variation, read_input_file
 
 #%% Definition of Python classes that constitute the model architecture
 """
@@ -552,21 +552,28 @@ class Appliance:
     def assign_random_cycles(self):
         """Calculates randomised cycles taking the random variability in the duty cycle duration"""
         if self.fixed_cycle >= 1:
-            self.p_11 = self.p_11*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.p_12 = self.p_12*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.random_cycle1 = np.concatenate(((np.ones(int(self.t_11*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_11),(np.ones(int(self.t_12*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_12))) #randomise also the fixed cycle
+            p_11 = random_variation(var=self.thermal_p_var, norm=self.p_11) #randomly variates the power of thermal apps, otherwise variability is 0
+            p_12 = random_variation(var=self.thermal_p_var, norm=self.p_12) #randomly variates the power of thermal apps, otherwise variability is 0
+            self.random_cycle1 = np.concatenate((
+                (p_11 * np.ones(int(random_variation(var=-self.r_c1, norm=self.t_11)))),
+                (p_12 * np.ones(int(random_variation(var=-self.r_c1, norm=self.t_12))))
+            )) #randomise also the fixed cycle
             self.random_cycle2 = self.random_cycle1
             self.random_cycle3 = self.random_cycle1
             if self.fixed_cycle >= 2:
-                self.p_21 = self.p_21*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                self.p_22 = self.p_22*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                self.random_cycle2 = np.concatenate(((np.ones(int(self.t_21*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_21),(np.ones(int(self.t_22*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_22))) #randomise also the fixed cycle
+                p_21 = random_variation(var=self.thermal_p_var, norm=self.p_21) #randomly variates the power of thermal apps, otherwise variability is 0
+                p_22 = random_variation(var=self.thermal_p_var, norm=self.p_22) #randomly variates the power of thermal apps, otherwise variability is 0
+                self.random_cycle2 = np.concatenate((
+                    (p_21 * np.ones(int(random_variation(var=-self.r_c2, norm=self.t_21)))),
+                    (p_22 * np.ones(int(random_variation(var=-self.r_c2, norm=self.t_22))))
+                )) #randomise also the fixed cycle
                 if self.fixed_cycle >= 3:
-                    self.p_31 = self.p_31*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                    self.p_32 = self.p_32*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-                    self.random_cycle3 = random.choice([np.concatenate(((np.ones(int(self.t_31*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_31),(np.ones(int(self.t_32*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_32))),np.concatenate(((np.ones(int(self.t_32*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_32),(np.ones(int(self.t_31*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_31)))])#this is to avoid that all cycles are sincronous
-        else:
-            pass
+                    p_31 = random_variation(var=self.thermal_p_var, norm=self.p_31) #randomly variates the power of thermal apps, otherwise variability is 0
+                    p_32 = random_variation(var=self.thermal_p_var, norm=self.p_32) #randomly variates the power of thermal apps, otherwise variability is 0
+                    self.random_cycle3 = np.concatenate((
+                        (p_31 * np.ones(int(random_variation(var=-self.r_c3, norm=self.t_31)))),
+                        (p_32 * np.ones(int(random_variation(var=-self.r_c3, norm=self.t_32))))
+                    )) #randomise also the fixed cycle
 
     def update_daily_use(self, coincidence, power, indexes):
         """Update the daily use depending on existence of duty cycles of the Appliance instance
@@ -595,8 +602,8 @@ class Appliance:
                 np.put(self.daily_use_masked, indexes, (self.random_cycle3 * coincidence), mode='clip')
         else:  # if no duty cycles are specified, a regular switch_on event is modelled
             # randomises also the App Power if thermal_p_var is on
-            np.put(self.daily_use, indexes, (coincidence * power * (random.uniform((1 - self.thermal_p_var), (1 + self.thermal_p_var)))))
-            np.put(self.daily_use_masked, indexes,(coincidence * power * (random.uniform((1 - self.thermal_p_var), (1 + self.thermal_p_var)))), mode='clip')
+            np.put(self.daily_use, indexes, (random_variation(var=self.thermal_p_var, norm=coincidence * power)))
+            np.put(self.daily_use_masked, indexes, (random_variation(var=self.thermal_p_var, norm=coincidence * power)), mode='clip')
         # updates the mask excluding the current switch_on event to identify the free_spots for the next iteration
         self.daily_use_masked = np.zeros_like(ma.masked_greater_equal(self.daily_use_masked, 0.001))
 
@@ -692,8 +699,8 @@ class Appliance:
             Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
             Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
         """
-        random_var_t = random.uniform((1 - self.time_fraction_random_variability),
-                                      (1 + self.time_fraction_random_variability))
+        random_var_t = random_variation(var=self.time_fraction_random_variability)
+
         rand_time = round(random.uniform(self.func_time, int(self.func_time * random_var_t)))
 
         # check that the total randomised time of use does not exceed the total space available in the windows
