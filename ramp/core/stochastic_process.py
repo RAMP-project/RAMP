@@ -93,24 +93,10 @@ def Stochastic_Process(j=None, fname=None, num_profiles=None):
                     else:
                         continue
 
-                    #recalculate windows start and ending times randomly, based on the inputs
-                    rand_window_1 = np.array([int(random.uniform((App.window_1[0]-App.random_var_1),(App.window_1[0]+App.random_var_1))),int(random.uniform((App.window_1[1]-App.random_var_1),(App.window_1[1]+App.random_var_1)))])
-                    if rand_window_1[0] < 0:
-                        rand_window_1[0] = 0
-                    if rand_window_1[1] > 1440:
-                        rand_window_1[1] = 1440
-    
-                    rand_window_2 = np.array([int(random.uniform((App.window_2[0]-App.random_var_2),(App.window_2[0]+App.random_var_2))),int(random.uniform((App.window_2[1]-App.random_var_2),(App.window_2[1]+App.random_var_2)))])
-                    if rand_window_2[0] < 0:
-                        rand_window_2[0] = 0
-                    if rand_window_2[1] > 1440:
-                        rand_window_2[1] = 1440
-                            
-                    rand_window_3 = np.array([int(random.uniform((App.window_3[0]-App.random_var_3),(App.window_3[0]+App.random_var_3))),int(random.uniform((App.window_3[1]-App.random_var_3),(App.window_3[1]+App.random_var_3)))])
-                    if rand_window_3[0] < 0:
-                        rand_window_3[0] = 0
-                    if rand_window_3[1] > 1440:
-                        rand_window_3[1] = 1440
+                    # recalculate windows start and ending times randomly, based on the inputs
+                    rand_window_1 = App.calc_rand_window(window_idx=1)
+                    rand_window_2 = App.calc_rand_window(window_idx=2)
+                    rand_window_3 = App.calc_rand_window(window_idx=3)
     
                     #redefines functioning windows based on the previous randomisation of the boundaries
                     if App.flat == 'yes': #if the app is "flat" the code stops right after filling the newly created windows without applying any further stochasticity
