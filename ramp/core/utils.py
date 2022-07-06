@@ -72,7 +72,6 @@ def read_input_file(filename):
                                 f"The provided power timeseries of the appliance '{appliance_name}' of user '{user_name}' in '{filename}' does not contain 365 values as expected\n{POSSIBLE_FORMATS}"
                             )
                         )
-
                     ts = v
                 except json.JSONDecodeError:
                     raise (
