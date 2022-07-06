@@ -459,30 +459,20 @@ class Appliance:
         """
         calculates the new randomised cycles taking the random variability in the duty cycle duration
         """
-        if self.fixed_cycle == 1:
+        if self.fixed_cycle >= 1:
             self.p_11 = self.p_11*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
             self.p_12 = self.p_12*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
             self.random_cycle1 = np.concatenate(((np.ones(int(self.t_11*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_11),(np.ones(int(self.t_12*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_12))) #randomise also the fixed cycle
             self.random_cycle2 = self.random_cycle1
             self.random_cycle3 = self.random_cycle1
-        elif self.fixed_cycle == 2:
-            self.p_11 = self.p_11*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.p_12 = self.p_12*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.p_21 = self.p_21*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.p_22 = self.p_22*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.random_cycle1 = np.concatenate(((np.ones(int(self.t_11*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_11),(np.ones(int(self.t_12*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_12))) #randomise also the fixed cycle
-            self.random_cycle2 = np.concatenate(((np.ones(int(self.t_21*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_21),(np.ones(int(self.t_22*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_22))) #randomise also the fixed cycle
-            self.random_cycle3 = self.random_cycle1
-        elif self.fixed_cycle == 3:
-            self.p_11 = self.p_11*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.p_12 = self.p_12*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.p_21 = self.p_21*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.p_22 = self.p_22*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.p_31 = self.p_31*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.p_32 = self.p_32*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.random_cycle1 = random.choice([np.concatenate(((np.ones(int(self.t_11*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_11),(np.ones(int(self.t_12*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_12))),np.concatenate(((np.ones(int(self.t_12*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_12),(np.ones(int(self.t_11*(random.uniform((1+self.r_c1),(1-self.r_c1)))))*self.p_11)))]) #randomise also the fixed cycle
-            self.random_cycle2 = random.choice([np.concatenate(((np.ones(int(self.t_21*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_21),(np.ones(int(self.t_22*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_22))),np.concatenate(((np.ones(int(self.t_22*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_22),(np.ones(int(self.t_21*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_21)))])
-            self.random_cycle3 = random.choice([np.concatenate(((np.ones(int(self.t_31*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_31),(np.ones(int(self.t_32*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_32))),np.concatenate(((np.ones(int(self.t_32*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_32),(np.ones(int(self.t_31*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_31)))])#this is to avoid that all cycles are sincronous
+            if self.fixed_cycle >= 2:
+                self.p_21 = self.p_21*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                self.p_22 = self.p_22*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                self.random_cycle2 = np.concatenate(((np.ones(int(self.t_21*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_21),(np.ones(int(self.t_22*(random.uniform((1+self.r_c2),(1-self.r_c2)))))*self.p_22))) #randomise also the fixed cycle
+                if self.fixed_cycle >= 3:
+                    self.p_31 = self.p_31*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                    self.p_32 = self.p_32*(random.uniform((1-self.thermal_p_var),(1+self.thermal_p_var))) #randomly variates the power of thermal apps, otherwise variability is 0
+                    self.random_cycle3 = random.choice([np.concatenate(((np.ones(int(self.t_31*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_31),(np.ones(int(self.t_32*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_32))),np.concatenate(((np.ones(int(self.t_32*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_32),(np.ones(int(self.t_31*(random.uniform((1+self.r_c3),(1-self.r_c3)))))*self.p_31)))])#this is to avoid that all cycles are sincronous
         else:
             pass
 
