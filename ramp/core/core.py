@@ -7,9 +7,8 @@ import pandas as pd
 import warnings
 import random
 import math
-from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, MAX_WINDOWS, DUTY_CYCLE_PARAMETERS
+from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, MAX_WINDOWS, DUTY_CYCLE_PARAMETERS, switch_on_parameters
 from ramp.core.utils import read_input_file
-from ramp.core.initialise import switch_on_parameters
 
 #%% Definition of Python classes that constitute the model architecture
 """
