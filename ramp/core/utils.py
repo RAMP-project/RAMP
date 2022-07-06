@@ -1,5 +1,6 @@
 import json
 import random
+import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.worksheet.cell_range import CellRange
@@ -100,3 +101,65 @@ def random_variation(var, norm=1):
     random number close to norm
     """
     return norm * random.uniform((1 - var), (1 + var))
+
+
+def duty_cycle(var, t1, p1, t2, p2):
+    """Assign a two period duty cycle
+
+    concatenate an array where values equal p1 for a time (t1 +- random variation)
+    followed by values equal to p2 for a time (t2 +- random variation)
+
+    Parameters
+    ----------
+    var: float
+        sets the range of the uniform distribution around t1 and t2
+    t1: int
+        time interval of the first part of the duty cycle in minutes
+    p1: float
+        power of the first part of the duty cycle in Watt
+    t2: int
+        time interval of the second part of the duty cycle in minutes
+    p2: int
+        power of the second part of the duty cycle in Watt
+
+    Returns
+    -------
+    Power during each timestep of the duty cycle where p1 is repeated (t1 +- random variation) times and p2 is repeated (t2 +- random variation) times.
+    The duty cycle is implicitly sampled every minutes (which is the unit for t1 and t2)
+    """
+    return np.concatenate(
+        (
+            np.ones(int(random_variation(var=-var, norm=t1))) * p1,
+            np.ones(int(random_variation(var=-var, norm=t2))) * p2,
+        )
+    )
+
+
+def random_choice(var, t1, p1, t2, p2):
+    """Chooses one of two duty cycles randomly
+
+    The choice is between a normal duty cycle and a reversed duty cycle (where t1 is swapped with t2 and p1 with p2)
+
+    Parameters
+    ----------
+    var: float
+        sets the range of the uniform distribution around t1 and t2
+    t1: int
+        time interval of the first part of the duty cycle in minutes
+    p1: float
+        power of the first part of the duty cycle in Watt
+    t2: int
+        time interval of the second part of the duty cycle in minutes
+    p2: int
+        power of the second part of the duty cycle in Watt
+
+    Returns
+    -------
+    A duty cycle, see function duty_cycle
+    """
+    return random.choice(
+        [
+            duty_cycle(var, t1=t1, p1=p1, t2=t2, p2=p2),
+            duty_cycle(var, t1=t2, p1=p2, t2=t1, p2=p1),
+        ]
+    )
