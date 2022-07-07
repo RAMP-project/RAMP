@@ -1,6 +1,12 @@
 Release History
 ===============
 
+0.3.3 (2022-03-24)
+------------------
+
+**|fixed|**     switch_on + App.func_cycle must be < end of window. Control added.
+
+
 0.3.2-dev ()
 ------------------
 
@@ -10,6 +16,7 @@ Release History
 
 **|fixed|**     the default value for the `peak_enlarg` parameter has been changed from the mistyped value of 0 to the intended value of 0.15 
 
+**|new|**       added a paragraph describing the algorithm of RAMP
 
 0.3.1 (2021-06-23)
 ------------------
