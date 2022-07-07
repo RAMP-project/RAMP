@@ -43,6 +43,14 @@ This input file is used in [this publication](https://doi.org/10.1109/PTC.2019.8
 ### Spreadsheet input files
 It is also possible to use spreadsheets as input files. To do so you need to run the `ramp.py` file which is at the root of the repository with the option `-i`: `python ramp.py -i <path to .xlsx input file>`. If you already know how many profile you want to simulate you can indicate it with the `-n` option: `python ramp.py -i <path to .xlsx input file> -n 10` will simulate 10 profiles. Note that you can use this option without providing a `.xlsx` input file with the `-i` option, this will then be equivalent to running `python ramp_run.py` from the `ramp` folder without being prompted for the number of profile within the console.
 
+### Year simulation with different input parameters per month
+
+The following command (for windows user use `\` instead of `/`)
+`python ramp.py -i ramp/input_files/ -n 3 -y 2022`
+
+will simulate 3 daily profiles and average them to get a daily profile for each day of the whole year 2022, the averaged daily profiles are concatenated to a long timeseries for the year with minute resolution. It expects that 12 independant .xlsx input files are located in the folder `ramp/input_files/` and sorted numerically by month number (the sorted order is printed out at the execution of the function for the user to check)
+The results will be saved in the files `'yearly_profile_min_resolution.csv'` and `'yearly_profile_hour_resolution.csv'` for further data analysis for the time being (let us know in https://github.com/rl-institut/RAMP/issues/11 how you would like to be able to modify the file names and/or location)
+
 ### Convert python input files to xlsx
 If you have existing python input files, you can convert them to spreadsheet. To do so, go to `ramp` folder and run
 
