@@ -10,7 +10,6 @@ from ramp.core.initialise import Initialise_model, Initialise_inputs
 #%% Core model stochastic script
 
 def Stochastic_Process(j):
-    Profile_App = []
     Profile, num_profiles = Initialise_model()
     peak_enlarg, mu_peak, s_peak, op_factor, Year_behaviour, User_list = Initialise_inputs(j)
     '''
@@ -40,11 +39,9 @@ def Stochastic_Process(j):
     each Appliance instance within each User instance is separately and stochastically generated
     '''
     for prof_i in range(num_profiles): #the whole code is repeated for each profile that needs to be generated
-        Diz_App={}
         Tot_Classes = np.zeros(1440) #initialise an empty daily profile that will be filled with the sum of the hourly profiles of each User instance
         for Us in User_list: #iterates for each User instance (i.e. for each user class)
             Us.load = np.zeros(1440) #initialise empty load for User instance
-            Diz_App[Us.user_name]={}
             for i in range(Us.num_users): #iterates for every single user within a User class. Each single user has its own separate randomisation
                 if Us.user_preference == 0:
                     rand_daily_pref = 0
@@ -53,7 +50,6 @@ def Stochastic_Process(j):
                     rand_daily_pref = random.randint(1,Us.user_preference)
                 for App in Us.App_list: #iterates for all the App types in the given User class
                     #initialises variables for the cycle
-                    #print(App.name)
                     tot_time = 0
                     App.daily_use = np.zeros(1440)
                     if random.uniform(0,1) > App.occasional_use: #evaluates if occasional use happens or not
@@ -73,29 +69,20 @@ def Stochastic_Process(j):
                     else:
                         continue
 
-                    #recalculate windows start and ending times randomly, based on the inputs. 
-                    if Year_behaviour[prof_i]==0: # week-day
-                        rand_window_1 = np.array([int(random.uniform((App.window_1[0]-App.random_var_1),(App.window_1[0]+App.random_var_1))),int(random.uniform((App.window_1[1]-App.random_var_1),(App.window_1[1]+App.random_var_1)))])
-                    else: # week-end
-                        rand_window_1 = np.array([int(random.uniform((App.window_1we[0]-App.random_var_1we),(App.window_1we[0]+App.random_var_1we))),int(random.uniform((App.window_1we[1]-App.random_var_1we),(App.window_1we[1]+App.random_var_1we)))])
+                    #recalculate windows start and ending times randomly, based on the inputs
+                    rand_window_1 = np.array([int(random.uniform((App.window_1[0]-App.random_var_1),(App.window_1[0]+App.random_var_1))),int(random.uniform((App.window_1[1]-App.random_var_1),(App.window_1[1]+App.random_var_1)))])
                     if rand_window_1[0] < 0:
                         rand_window_1[0] = 0
                     if rand_window_1[1] > 1440:
                         rand_window_1[1] = 1440
     
-                    if Year_behaviour[prof_i]==0: # week-day
-                        rand_window_2 = np.array([int(random.uniform((App.window_2[0]-App.random_var_2),(App.window_2[0]+App.random_var_2))),int(random.uniform((App.window_2[1]-App.random_var_2),(App.window_2[1]+App.random_var_2)))])
-                    else: # week-end
-                        rand_window_2 = np.array([int(random.uniform((App.window_2we[0]-App.random_var_2we),(App.window_2we[0]+App.random_var_2we))),int(random.uniform((App.window_2we[1]-App.random_var_2we),(App.window_2we[1]+App.random_var_2we)))])
+                    rand_window_2 = np.array([int(random.uniform((App.window_2[0]-App.random_var_2),(App.window_2[0]+App.random_var_2))),int(random.uniform((App.window_2[1]-App.random_var_2),(App.window_2[1]+App.random_var_2)))])
                     if rand_window_2[0] < 0:
                         rand_window_2[0] = 0
                     if rand_window_2[1] > 1440:
                         rand_window_2[1] = 1440
-                     
-                    if Year_behaviour[prof_i]==0: # week-day    
-                        rand_window_3 = np.array([int(random.uniform((App.window_3[0]-App.random_var_3),(App.window_3[0]+App.random_var_3))),int(random.uniform((App.window_3[1]-App.random_var_3),(App.window_3[1]+App.random_var_3)))])
-                    else: #week-end
-                         rand_window_3 = np.array([int(random.uniform((App.window_3we[0]-App.random_var_3we),(App.window_3we[0]+App.random_var_3we))),int(random.uniform((App.window_3we[1]-App.random_var_3we),(App.window_3we[1]+App.random_var_3we)))])
+                            
+                    rand_window_3 = np.array([int(random.uniform((App.window_3[0]-App.random_var_3),(App.window_3[0]+App.random_var_3))),int(random.uniform((App.window_3[1]-App.random_var_3),(App.window_3[1]+App.random_var_3)))])
                     if rand_window_3[0] < 0:
                         rand_window_3[0] = 0
                     if rand_window_3[1] > 1440:
@@ -144,15 +131,13 @@ def Stochastic_Process(j):
                         random_cycle3 = random.choice([np.concatenate(((np.ones(int(App.t_31*(random.uniform((1+App.r_c3),(1-App.r_c3)))))*App.p_31),(np.ones(int(App.t_32*(random.uniform((1+App.r_c3),(1-App.r_c3)))))*App.p_32))),np.concatenate(((np.ones(int(App.t_32*(random.uniform((1+App.r_c3),(1-App.r_c3)))))*App.p_32),(np.ones(int(App.t_31*(random.uniform((1+App.r_c3),(1-App.r_c3)))))*App.p_31)))])#this is to avoid that all cycles are sincronous                      
                     else:
                         pass
-                    
-                    
-                    rand_time = round(random.uniform(App.func_time,int(App.func_time*random_var_t)))                    
+                    rand_time = round(random.uniform(App.func_time,int(App.func_time*random_var_t)))
                     #control to check that the total randomised time of use does not exceed the total space available in the windows
                     if rand_time > 0.99*(np.diff(rand_window_1)+np.diff(rand_window_2)+np.diff(rand_window_3)):
                         rand_time = int(0.99*(np.diff(rand_window_1)+np.diff(rand_window_2)+np.diff(rand_window_3)))
                     max_free_spot = rand_time #free spots are used to detect if there's still space for switch_ons. Before calculating actual free spots, the max free spot is set equal to the entire randomised func_time
-                       
-                    while tot_time < rand_time: #this is the key cycle, which runs for each App until the switch_ons and their duration equals the randomised total time of use of the App
+                           
+                    while tot_time <= rand_time: #this is the key cycle, which runs for each App until the switch_ons and their duration equals the randomised total time of use of the App
                             #check how many windows to consider
                             if App.num_windows == 1:
                                 switch_on = int(random.choice([random.uniform(rand_window_1[0],(rand_window_1[1]))]))
@@ -302,13 +287,7 @@ def Stochastic_Process(j):
                             else:
                                 continue #if the random switch_on falls somewhere where the App has been already turned on, tries again from beginning of the while cycle
                     Us.load = Us.load + App.daily_use #adds the App profile to the User load
-                    Diz_App[Us.user_name][App.name] = App.daily_use
             Tot_Classes = Tot_Classes + Us.load #adds the User load to the total load of all User classes
         Profile.append(Tot_Classes) #appends the total load to the list that will contain all the generated profiles
-        Profile_App.append(Diz_App)
         print('Profile',prof_i+1,'/',num_profiles,'completed') #screen update about progress of computation
-    return(Profile,Profile_App)
-
-### Pasquino modifications
-    # line 140 <
-    # line 143 -App.func_cycle
+    return(Profile)
