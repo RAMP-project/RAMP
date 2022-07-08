@@ -52,6 +52,10 @@ This functionality is accessible via `test/test_run.py`. To run the qualitative 
    
 Ideally, the difference between reference and new results should be minimal and just due to the stochastic nature of the code. If more pronounced, it should be fully explainable based on the changes made to the code and aligned to the expectations of the developers (i.e. it should reflect a change in the output *wanted* and precisely *sought* with the commit in question).
 
+### Unit tests
+
+Install `pytest` (`pip install pytest`) and run `pytest tests/` form the root of the repository to run the unit tests
+
 ## Attribution
 
 The layout and content of this document is partially based on [calliope](https://github.com/calliope-project/calliope/blob/master/CONTRIBUTING.md)'s equivalent document.
