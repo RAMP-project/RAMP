@@ -239,6 +239,3 @@ S_DVD.windows([510,750],[810,1080],0.35)
 
 S_Stereo = School.Appliance(School,1,150,2,90,0.1,5, occasional_use = 0.33)
 S_Stereo.windows([510,750],[810,1080],0.35)
-
-
-
