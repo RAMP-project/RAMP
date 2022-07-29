@@ -52,7 +52,7 @@ def calc_peak_time_range(user_list, peak_enlarge=0.15):
     return np.arange(peak_time - rand_peak_enlarge, peak_time + rand_peak_enlarge)
 
 
-def stochastic_process(j=None, fname=None, num_profiles=None, day_type=0):
+def stochastic_process(j=None, fname=None, num_profiles=None, day_type=None):
     """Generate num_profiles load profile for the usecase
 
         Covers steps 1. and 2. of the algorithm described in [1], p.6-7
@@ -75,14 +75,24 @@ def stochastic_process(j=None, fname=None, num_profiles=None, day_type=0):
     # and on-peak coincident switch-on probability, corresponds to step 1. of [1], p.6
     peak_time_range = calc_peak_time_range(user_list, peak_enlarge)
 
+    if isinstance(day_type, list):
+        yearly_day_types = day_type
+    else:
+        yearly_day_types = None
+
     for prof_i in range(num_profiles):
         # initialise an empty daily profile (or profile load)
         # that will be filled with the sum of the daily profiles of each User instance
         usecase_load = np.zeros(1440)
+
+        # assign day_type between weekend and weekdays
+        if yearly_day_types is not None:
+            day_type = yearly_day_types[prof_i]
+
         # for each User instance generate a load profile, iterating through all user of this instance and
         # all appliances they own, corresponds to step 2. of [1], p.7
         for user in user_list:
-            user.generate_aggregated_load_profile(prof_i, peak_time_range, day_type)
+            user.generate_aggregated_load_profile(prof_i, peak_time_range, day_type=day_type)
             # aggregate the user load to the usecase load
             usecase_load = usecase_load + user.load
         profiles.append(usecase_load)

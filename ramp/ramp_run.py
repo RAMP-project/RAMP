@@ -30,11 +30,11 @@ import numpy as np
 sys.path.append('../')
 
 try:
-    from .core.utils import get_day_type
+    from .core.utils import get_day_type, yearly_pattern
     from .core.stochastic_process import stochastic_process
     from .post_process import post_process as pp
 except ImportError:
-    from core.utils import get_day_type
+    from core.utils import get_day_type, yearly_pattern
     from core.stochastic_process import stochastic_process
     from post_process import post_process as pp
 
@@ -42,7 +42,7 @@ except ImportError:
 def run_usecase(j=None, fname=None, num_profiles=None, days=None, plot=True):
     # Calls the stochastic process and saves the result in a list of stochastic profiles
     if days is None:
-        Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=0)
+        Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=yearly_pattern())
 
         # Post-processes the results and generates plots
         Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)
