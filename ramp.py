@@ -88,7 +88,8 @@ if __name__ == "__main__":
             # This special combination (option -y with only 1 year and option -i with a directory as parameter)
             # Triggers the special mode "one input file per month"
             if os.path.isdir(fnames[0]):
-                fnames = [os.path.join(fnames[0], f) for f in os.listdir(fnames[0]) if f.endswith(ext)]
+                dir_path = fnames[0]
+                fnames = [os.path.join(dir_path, f) for f in os.listdir(fnames[0]) if f.endswith(ext)]
                 fnames.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
 
                 if len(fnames) == 12:
@@ -97,7 +98,7 @@ if __name__ == "__main__":
                     month_files = True
                     year = years[0]
                 else:
-                    raise ValueError(f"You want to simulate a whole year, yet the folder {fnames[0]} only contains {len(month_files)} out of the 12 monthes required ")
+                    raise ValueError(f"You want to simulate a whole year, yet the folder {dir_path} only contains {len(fnames)} out of the 12 monthes required")
             else:
                 print("You selected a single year but the input path is not a folder.")
 
