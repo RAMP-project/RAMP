@@ -415,7 +415,14 @@ class Appliance:
                 raise ValueError("Windows 3 is not provided although 3 windows were declared")
         else:
             self.window_3 = window_3
-        print(self.window_1, self.window_2, self.window_3)
+
+        # check that the time allocated by the windows is larger or equal to the func_time of the appliance
+        window_time = 0
+        for i in range(1, self.num_windows + 1, 1):
+            window_time = window_time + np.diff(getattr(self, f"window_{i}"))[0]
+        if window_time < self.func_time:
+            raise ValueError(f"The sum of all windows time intervals for the appliance '{self.name}' of user '{self.user.user_name}' is smaller than the time the appliance is supposed to be on ({window_time} < {self.func_time}). Please check your input file for typos.")
+
         self.random_var_w = random_var_w #percentage of variability in the start and ending times of the windows
         self.daily_use = np.zeros(1440) #create an empty daily use profile
         self.daily_use[self.window_1[0]:(self.window_1[1])] = np.full(np.diff(self.window_1),0.001) #fills the daily use profile with infinitesimal values that are just used to identify the functioning windows
