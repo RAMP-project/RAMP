@@ -41,7 +41,7 @@ class UseCase:
         return self.save()
 
     def load(self, filename):
-        """Open an .xlsx file which was produces via the save method and create instances of Users and Appliances"""
+        """Open an .xlsx file which was produced via the save method and create instances of Users and Appliances"""
 
         df = read_input_file(filename=filename)
         for user_name in df.user_name.unique():
