@@ -3,16 +3,20 @@ import pytest
 import numpy as np
 
 from ramp.core.core import User, Appliance
-from ramp.core.initialise import initialise_inputs
-e
+from ramp.core.initialise import Initialise_inputs
 from ramp.ramp_convert_old_input_files import convert_old_user_input_file
 
 
 def load_usecase(j=None, fname=None):
-    peak_enlarge, year_behaviour, user_list, num_profiles = initialise_inputs(
-        j, fname, num_profiles=1
-    )
-    return user_list
+    (
+        peak_enlarg,
+        mu_peak,
+        s_peak,
+        op_factor,
+        Year_behaviour,
+        User_list,
+    ) = Initialise_inputs(j, fname)
+    return User_list
 
 
 class TestConversion:
