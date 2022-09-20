@@ -71,9 +71,9 @@ def convert_old_user_input_file(
         fname = f"ramp.{fname}"
     file_module = importlib.import_module(fname)
 
-    User_list = file_module.User_list
+    user_list = file_module.User_list
 
-    UseCase(users=User_list).save(output_fname)
+    UseCase(users=user_list).save(output_fname)
 
 
 if __name__ == "__main__":

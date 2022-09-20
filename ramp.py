@@ -39,7 +39,8 @@ if __name__ == "__main__":
                 num_profiles = num_profiles * len(input_files_to_run)
             else:
                 if len(num_profiles) != len(input_files_to_run):
-                    raise ValueError("The number of profiles parameters  should match the number of input files provided")
+                    raise ValueError(
+                        "The number of profiles parameters  should match the number of input files provided")
         else:
             num_profiles = [None] * len(input_files_to_run)
 
