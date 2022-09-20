@@ -26,7 +26,7 @@ The model is developed in Python 3.6, and requires the following libraries:
 * openpyxl
 
 ## Quick start
-To get started, download the repository, install the dependencies with `pip install -r requirements.txt`, move to the `ramp` folder and simply run the `python ramp_run.py`. The console will ask how many profiles (i.e. independent days) need to be simulated, and will provide the results based on the default inputs defined in `input_file_x`.py. To change the inputs, just modify the latter files. Some guidance about the meaning of each input parameter is available in the `core.py` file, where the *User* and *Appliance* Python classes are defined and fully commented. 
+To get started, download the repository, install the dependencies with `pip install -r requirements.txt` (or, alternatively, `conda env create -f environment.yml`), move to the `ramp` folder and simply run the `python ramp_run.py`. The console will ask how many profiles (i.e. independent days) need to be simulated, and will provide the results based on the default inputs defined in `input_file_x`.py. To change the inputs, just modify the latter files. Some guidance about the meaning of each input parameter is available in the `core.py` file, where the *User* and *Appliance* Python classes are defined and fully commented. 
 
 ### Example python input files
 Three different input files are provided as example representing three different categories of appliancces that can be modelled with RAMP.
