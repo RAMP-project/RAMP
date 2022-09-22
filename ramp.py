@@ -154,7 +154,13 @@ if __name__ == "__main__":
             # TODO let the user choose where to save the files/file_name, make sure the user wants to overwrite the file
             # if it already exists
             series_frame.to_csv(os.path.join(BASE_PATH, 'yearly_profile_min_resolution.csv'))
-            series_frame.resample("H").mean().to_csv(os.path.join(BASE_PATH, 'yearly_profile_hourly_resolution.csv'))
+            resampled = pd.DataFrame()
+
+            resampled["mean"] = series_frame.resample("H").mean()
+            resampled["max"] = series_frame.resample("H").max()
+            resampled["min"] = series_frame.resample("H").min()
+            #TODO add more columns with other resampled functions (do this in Jupyter)
+            resampled.to_csv(os.path.join(BASE_PATH, 'yearly_profile_hourly_resolution.csv'))
         else:
             for i, fname in enumerate(fnames):
                 run_usecase(fname=fname, num_profiles=num_profiles[i], days=days)
