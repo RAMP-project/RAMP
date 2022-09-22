@@ -12,6 +12,16 @@ Release History
 
 **|new|**       added a paragraph describing the algorithm of RAMP
 
+**|new|**       refactored the code by moving many of the code from `stochastic_process.py` into the `User` class in `core.py`, used function where code was duplicated
+
+**|fixed|**     the user now gets a warning if the allocated window time is shorter than the provided `func_time`
+
+**|new|**       add a way to run from `.xlsx` input files, keeping the back compatibility with `.py` files (there is possibility to convert `.py` input files to `.xslx`)
+
+**|new|**       defined a new class in `core.py`: `UseCase` which contains a list of `User` instances
+
+**|fixed|**     variable names are now PEP8 compatible
+
 0.3.1 (2021-06-23)
 ------------------
 
