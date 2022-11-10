@@ -1,20 +1,15 @@
-.. RAMP documentation master file, created by
-   sphinx-quickstart on Wed Oct 12 20:27:08 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. image:: https://github.com/RAMP-project/RAMP/blob/master/docs/figures/RAMP_logo_basic.png?raw=true
+   :width: 300
 
-Welcome to RAMP's documentation!
-================================
+
+Contents:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+
+   intro
+   algorithm
+   examples
+   api_references
 
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
