@@ -108,7 +108,6 @@ if __name__ == "__main__":
     else:
         days = None
 
-
     if fnames is None:
         print("Please provide path to input file with option -i, \n\nDefault to old version of RAMP input files\n")
         # Files are specified as numbers in a list (e.g. [1,2] will consider input_file_1.py and input_file_2.py)

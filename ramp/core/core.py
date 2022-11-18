@@ -8,7 +8,8 @@ import warnings
 import random
 import math
 from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, DUTY_CYCLE_PARAMETERS, switch_on_parameters
-from ramp.core.utils import random_variation, duty_cycle, random_choice, read_input_file
+from ramp.core.utils import random_variation, duty_cycle, random_choice, read_input_file, calc_time_taken
+
 
 #%% Definition of Python classes that constitute the model architecture
 """
@@ -244,6 +245,7 @@ class User:
             name=name,
         )
 
+    @calc_time_taken
     def generate_single_load_profile(self, prof_i, peak_time_range, day_type):
         """Generates a load profile for a single user taking all its appliances into consideration
 
@@ -313,6 +315,7 @@ class User:
             single_load = single_load + App.daily_use  # adds the Appliance load profile to the single User load profile
         return single_load
 
+    @calc_time_taken
     def generate_aggregated_load_profile(self, prof_i, peak_time_range, day_type):
         """Generates an aggregated load profile from single load profile of each user
 

@@ -1,6 +1,6 @@
 import json
 import random
-import datetime
+import time
 import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
@@ -165,7 +165,6 @@ def random_choice(var, t1, p1, t2, p2):
         ]
     )
 
-
 def get_day_type(day):
     """Given a datetime object return 0 for weekdays or 1 for weekends"""
     if day.weekday() > 4:
@@ -190,3 +189,13 @@ def yearly_pattern(year=None):
         # a list with 0 for weekdays and 1 for weekends
         year_behaviour = pd.date_range(start=f"{year}-01-01", end=f"{year}-12-31", freq="D").map(get_day_type).to_list()
     return year_behaviour
+
+def calc_time_taken(func):
+    """ Calculates the time elapsed during the execution of a function"""
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(func.__name__ + ' required ' + str((end-start)*1) + ' seconds for execution. ')
+        return result
+    return wrapper
