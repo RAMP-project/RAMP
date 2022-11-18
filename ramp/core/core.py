@@ -12,7 +12,8 @@ import warnings
 import random
 import math
 from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, DUTY_CYCLE_PARAMETERS, switch_on_parameters
-from ramp.core.utils import random_variation, duty_cycle, random_choice, read_input_file
+from ramp.core.utils import random_variation, duty_cycle, random_choice, read_input_file, calc_time_taken
+
 
 from typing import List, Union,Iterable
 from ramp.errors_logs.errors import InvalidType,InvalidWindow
