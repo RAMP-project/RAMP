@@ -6,6 +6,7 @@ import random
 import math
 from ramp.core.initialise import initialise_inputs
 from ramp.core.utils import calc_time_taken
+from ramp.core.core import UseCase
 
 #%% Core model stochastic script
 
@@ -67,8 +68,6 @@ def stochastic_process(j=None, fname=None, num_profiles=None, day_type=None):
         Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
         Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
     """
-    # creates an empty list to store the results of each code run, i.e. each stochastically generated profile
-    profiles = []
 
     peak_enlarge, user_list, num_profiles = initialise_inputs(j, fname, num_profiles)
 
@@ -76,28 +75,8 @@ def stochastic_process(j=None, fname=None, num_profiles=None, day_type=None):
     # and on-peak coincident switch-on probability, corresponds to step 1. of [1], p.6
     peak_time_range = calc_peak_time_range(user_list, peak_enlarge)
 
-    if isinstance(day_type, list):
-        yearly_day_types = day_type
-    else:
-        yearly_day_types = None
+    uc = UseCase(users=user_list)
 
-    for prof_i in range(num_profiles):
-        # initialise an empty daily profile (or profile load)
-        # that will be filled with the sum of the daily profiles of each User instance
-        usecase_load = np.zeros(1440)
+    profiles = uc.generate_daily_load_profiles(num_profiles, peak_time_range, day_type)
 
-        # assign day_type between weekend and weekdays
-        if yearly_day_types is not None:
-            day_type = yearly_day_types[prof_i]
-
-        # for each User instance generate a load profile, iterating through all user of this instance and
-        # all appliances they own, corresponds to step 2. of [1], p.7
-        for user in user_list:
-            user.generate_aggregated_load_profile(prof_i, peak_time_range, day_type=day_type)
-            # aggregate the user load to the usecase load
-            usecase_load = usecase_load + user.load
-        profiles.append(usecase_load)
-        # screen update about progress of computation
-        print('Profile', prof_i+1, '/', num_profiles, 'completed')
     return profiles
-
