@@ -2,3 +2,5 @@ pandas
 numpy
 matplotlib
 openpyxl
+multiprocess
+tqdm
