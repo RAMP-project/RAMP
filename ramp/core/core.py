@@ -1192,6 +1192,7 @@ class Appliance:
             coincidence = self.number
         return coincidence
 
+    # @calc_time_taken
     def generate_load_profile(self, prof_i, peak_time_range, day_type, power):
         """Generate load profile of the Appliance instance by updating its daily_use attribute
 
