@@ -1,11 +1,11 @@
 API Reference
-==============
+=============
 
 .. currentmodule:: ramp
 
-**********************
+**************
 Use Case class
-**********************
+**************
 
 .. autosummary::
     :toctree: api_document/
@@ -17,9 +17,9 @@ Use Case class
     UseCase.load
 
 
-**********************
+**********
 User class
-**********************
+**********
 
 .. autosummary::
     :toctree: api_document/
@@ -35,9 +35,9 @@ User class
 
 
 
-******************
+***************
 Appliance class
-******************
+***************
 
 .. autosummary::
     :toctree: api_document/
@@ -57,12 +57,14 @@ Appliance class
 
 ****
 
-******************
+*********
 Utilities
-******************
+*********
 
 .. autosummary::
     :toctree: api_document/
 
     yearly_pattern
     calc_peak_time_range
+    load_data
+    download_example

@@ -22,7 +22,7 @@ parser.add_argument(
 )
 
 
-if __name__ == "__main__":
+def main():
 
     args = vars(parser.parse_args())
     fnames = args["fname_path"]

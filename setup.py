@@ -1,6 +1,7 @@
 
 from setuptools import find_packages,setup
-from ramp._version import __version__
+
+exec(open("ramp/_version.py").read())
 
 
 setup(
@@ -18,7 +19,8 @@ setup(
         "pandas >= 1.3.3",
         "numpy >= 1.21.2",
         "xlsxwriter >= 1.3.7",
-        "matplotlib >= 3.3.4"
+        "matplotlib >= 3.3.4",
+        "openpyxl >= 3.0.6"
     ],
     classifiers=[
         "Programming Language :: Python :: 3.6"
@@ -28,10 +30,15 @@ setup(
         "Intended Audience :: End Users/Desktop",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
-        "Operating System :: MacOS :: MacOS X",
-        "Operating System :: Microsoft :: Windows",
         "Programming Language :: Python",
         "Topic :: Scientific/Engineering",
         "Topic :: Utilities",
     ],
+
+    entry_points={
+    "console_scripts": [
+        "ramp=ramp.cli:main",
+    ],
+},
+
 )
