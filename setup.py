@@ -5,7 +5,7 @@ exec(open("ramp/_version.py").read())
 
 
 setup(
-    name = "ramp",
+    name = "rampdemand",
     description= "An open-source python package for building bottom-up stochastic model for generating multi-energy load profiles",
     long_description = open("README.rst").read(),
     author_email = "f.lombardi@tudelft.nl",
