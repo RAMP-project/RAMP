@@ -1288,7 +1288,7 @@ class Appliance:
                 if tot_time > rand_time:
                     # the total functioning time is reached, a correction is applied to avoid overflow of indexes
                     indexes_adj = indexes[:-(tot_time - rand_time)]
-                    inside_peak_window = np.in1d(peak_time_range, indexes_adj).any()
+                    inside_peak_window = np.in1d(indexes_adj,peak_time_range).any()
                     # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
                     coincidence = self.calc_coincident_switch_on(
                         inside_peak_window
@@ -1304,7 +1304,7 @@ class Appliance:
                 else:
                     # the total functioning time has not yet exceeded the rand_time
                     # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
-                    inside_peak_window = np.in1d(peak_time_range, indexes).any()
+                    inside_peak_window = np.in1d(indexes, peak_time_range).any()
                     coincidence = self.calc_coincident_switch_on(
                         inside_peak_window
                     )
