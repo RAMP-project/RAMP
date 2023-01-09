@@ -910,7 +910,7 @@ class Appliance:
             np.put(self.daily_use, indexes, (random_variation(var=self.thermal_p_var, norm=coincidence * power)))
             np.put(self.daily_use_masked, indexes, (random_variation(var=self.thermal_p_var, norm=coincidence * power)), mode='clip')
         # updates the mask excluding the current switch_on event to identify the free_spots for the next iteration
-        self.daily_use_masked = np.zeros_like(ma.masked_greater_equal(self.daily_use_masked, 0.001))
+        self.daily_use_masked = np.zeros_like(ma.masked_greater_equal(self.daily_use, 0.001))
 
     def calc_rand_window(self, window_idx=1, window_range_limits=np.array([0, 1440])):
         _window = self.__getattribute__(f'window_{window_idx}')
