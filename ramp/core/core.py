@@ -898,17 +898,13 @@ class Appliance:
             # selects the proper duty cycle and puts the corresponding power values in the indexes range
             if evaluate in range(self.cw11[0], self.cw11[1]) or evaluate in range(self.cw12[0], self.cw12[1]):
                 np.put(self.daily_use, indexes, (self.random_cycle1 * coincidence))
-                np.put(self.daily_use_masked, indexes, (self.random_cycle1 * coincidence), mode='clip')
             elif evaluate in range(self.cw21[0], self.cw21[1]) or evaluate in range(self.cw22[0], self.cw22[1]):
                 np.put(self.daily_use, indexes, (self.random_cycle2 * coincidence))
-                np.put(self.daily_use_masked, indexes, (self.random_cycle2 * coincidence), mode='clip')
             else:
                 np.put(self.daily_use, indexes, (self.random_cycle3 * coincidence))
-                np.put(self.daily_use_masked, indexes, (self.random_cycle3 * coincidence), mode='clip')
         else:  # if no duty cycles are specified, a regular switch_on event is modelled
             # randomises also the App Power if thermal_p_var is on
             np.put(self.daily_use, indexes, (random_variation(var=self.thermal_p_var, norm=coincidence * power)))
-            np.put(self.daily_use_masked, indexes, (random_variation(var=self.thermal_p_var, norm=coincidence * power)), mode='clip')
         # updates the mask excluding the current switch_on event to identify the free_spots for the next iteration
         self.daily_use_masked = np.zeros_like(ma.masked_greater_equal(self.daily_use, 0.001))
 
