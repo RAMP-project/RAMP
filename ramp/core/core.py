@@ -847,7 +847,9 @@ class Appliance:
         self.daily_use[self.window_1[0]:(self.window_1[1])] = np.full(np.diff(self.window_1),0.001) #fills the daily use profile with infinitesimal values that are just used to identify the functioning windows
         self.daily_use[self.window_2[0]:(self.window_2[1])] = np.full(np.diff(self.window_2),0.001) #same as above for window2
         self.daily_use[self.window_3[0]:(self.window_3[1])] = np.full(np.diff(self.window_3),0.001) #same as above for window3
-        self.daily_use_masked = np.zeros_like(ma.masked_not_equal(self.daily_use,0.001)) #apply a python mask to the daily_use array to make only functioning windows 'visibile'
+        #self.daily_use_masked = np.zeros_like(ma.masked_not_equal(self.daily_use,0.001)) #apply a python mask to the daily_use array to make only functioning windows 'visibile'
+        # TODO erase after this: after this the masked data is true everywhere except in the windows (where the value is 1
+
         self.random_var_1 = int(random_var_w*np.diff(self.window_1)) #calculate the random variability of window1, i.e. the maximum range of time they can be enlarged or shortened
         self.random_var_2 = int(random_var_w*np.diff(self.window_2)) #same as above
         self.random_var_3 = int(random_var_w*np.diff(self.window_3)) #same as above
@@ -906,7 +908,7 @@ class Appliance:
             # randomises also the App Power if thermal_p_var is on
             np.put(self.daily_use, indexes, (random_variation(var=self.thermal_p_var, norm=coincidence * power)))
         # updates the mask excluding the current switch_on event to identify the free_spots for the next iteration
-        self.daily_use_masked = np.zeros_like(ma.masked_greater_equal(self.daily_use, 0.001))
+        self.daily_use_masked[indexes] = np.zeros_like(ma.masked_greater_equal(self.daily_use[indexes], 0.001))
 
     def calc_rand_window(self, window_idx=1, window_range_limits=np.array([0, 1440])):
         _window = self.__getattribute__(f'window_{window_idx}')
