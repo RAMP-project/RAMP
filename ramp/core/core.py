@@ -644,6 +644,7 @@ class Appliance:
         self.random_var_3 = 0
         self.daily_use = None
         self.daily_use_masked = None
+        self.free_spots = None
 
         # attributes used for specific fixed and random cycles
         self.p_11 = 0
@@ -883,6 +884,44 @@ class Appliance:
 
                     self.random_cycle3 = random_choice(self.r_c3, t1=self.t_31, p1=p_31, t2=self.t_32, p2=p_32)
 
+    def update_available_time_for_switch_on_events(self, indexes):
+        """Remove the given time indexes from the ranges available to switch appliance on
+
+        Parameters
+        ----------
+        indexes: list of int
+            time indexes of the daily profile concerned by a new switch-on event
+
+        Return
+        ------
+        nothing but can modify self.free_spots
+        """
+        # identify which of the unallocated time ranges contain the switch-on event
+        spot_idx = None
+        for i, fs in enumerate(self.free_spots):
+            if indexes[0] >= fs.start and indexes[-1] <= fs.stop:
+                spot_idx = i
+                break
+        if spot_idx is None:
+            return None
+        else:
+            spot_to_split = self.free_spots.pop(spot_idx)
+
+            if indexes[0] == spot_to_split.start and indexes[-1] == spot_to_split.stop:
+                pass  # nothing to do as the whole range should be removed, which is already the case from line above
+            elif indexes[0] == spot_to_split.start:
+                # reinsert a range going from end of indexes up to the end of picked range
+                self.free_spots.insert(spot_idx, slice(indexes[-1] + 1, spot_to_split.stop, None))
+            elif indexes[-1] == spot_to_split.stop:
+                # reinsert a range going from beginning of picked range up to the beginning of indexes
+                self.free_spots.insert(spot_idx, slice(spot_to_split.start, indexes[0], None))
+            else:
+                # split the range into 2 smaller ranges
+                new_spot1 = slice(spot_to_split.start, indexes[0], None)
+                new_spot2 = slice(indexes[-1] + 1, spot_to_split.stop, None)
+
+                self.free_spots.insert(spot_idx, new_spot2)
+                self.free_spots.insert(spot_idx, new_spot1)
 
     def update_daily_use(self, coincidence, power, indexes):
         """Update the daily use depending on existence of duty cycles of the Appliance instance
@@ -909,6 +948,8 @@ class Appliance:
             np.put(self.daily_use, indexes, (random_variation(var=self.thermal_p_var, norm=coincidence * power)))
         # updates the mask excluding the current switch_on event to identify the free_spots for the next iteration
         self.daily_use_masked[indexes] = np.zeros_like(ma.masked_greater_equal(self.daily_use[indexes], 0.001))
+        # updates the time ranges remaining for switch on events, excluding the current switch_on event
+        self.update_available_time_for_switch_on_events(indexes)
 
     def calc_rand_window(self, window_idx=1, window_range_limits=np.array([0, 1440])):
         _window = self.__getattribute__(f'window_{window_idx}')
@@ -1251,6 +1292,10 @@ class Appliance:
 
         # steps 2c-2e repeated until the sum of the durations of all the switch-on events equals rand_time
 
+
+
+        self.free_spots = [slice(rw[0], rw[1], None) for rw in rand_windows if rw[0] != rw[1]]
+
         max_free_spot = rand_time  # free spots are used to detect if there's still space for switch_ons. Before calculating actual free spots, the max free spot is set equal to the entire randomised func_time
         tot_time = 0
         while tot_time <= rand_time:
@@ -1313,12 +1358,12 @@ class Appliance:
                         indexes=indexes
                     )
 
-                free_spots = []  # calculate how many free spots remain for further switch_ons
+                # calculate how many free spots remain for further switch_ons
                 try:
-                    for j in ma.notmasked_contiguous(self.daily_use_masked):
-                        free_spots.append(j.stop - j.start)
+                    free_spots = [j.stop - j.start for j in self.free_spots]
                 except TypeError:
                     free_spots = [0]
+                # TODO always taking the maximum of the free spot, isn't that biasing the randomness?
                 max_free_spot = max(free_spots)
 
             else:
