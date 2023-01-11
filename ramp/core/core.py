@@ -643,7 +643,6 @@ class Appliance:
         self.random_var_2 = 0
         self.random_var_3 = 0
         self.daily_use = None
-        self.daily_use_masked = None
         self.free_spots = None
 
         # attributes used for specific fixed and random cycles
@@ -848,8 +847,6 @@ class Appliance:
         self.daily_use[self.window_1[0]:(self.window_1[1])] = np.full(np.diff(self.window_1),0.001) #fills the daily use profile with infinitesimal values that are just used to identify the functioning windows
         self.daily_use[self.window_2[0]:(self.window_2[1])] = np.full(np.diff(self.window_2),0.001) #same as above for window2
         self.daily_use[self.window_3[0]:(self.window_3[1])] = np.full(np.diff(self.window_3),0.001) #same as above for window3
-        #self.daily_use_masked = np.zeros_like(ma.masked_not_equal(self.daily_use,0.001)) #apply a python mask to the daily_use array to make only functioning windows 'visibile'
-        # TODO erase after this: after this the masked data is true everywhere except in the windows (where the value is 1
 
         self.random_var_1 = int(random_var_w*np.diff(self.window_1)) #calculate the random variability of window1, i.e. the maximum range of time they can be enlarged or shortened
         self.random_var_2 = int(random_var_w*np.diff(self.window_2)) #same as above
@@ -946,8 +943,6 @@ class Appliance:
         else:  # if no duty cycles are specified, a regular switch_on event is modelled
             # randomises also the App Power if thermal_p_var is on
             np.put(self.daily_use, indexes, (random_variation(var=self.thermal_p_var, norm=coincidence * power)))
-        # updates the mask excluding the current switch_on event to identify the free_spots for the next iteration
-        self.daily_use_masked[indexes] = np.zeros_like(ma.masked_greater_equal(self.daily_use[indexes], 0.001))
         # updates the time ranges remaining for switch on events, excluding the current switch_on event
         self.update_available_time_for_switch_on_events(indexes)
 
@@ -1285,7 +1280,6 @@ class Appliance:
             # the algorithm goes further on
             for rand_window in rand_windows:
                 self.daily_use[rand_window[0]:rand_window[1]] = np.full(np.diff(rand_window), 0.001)
-        self.daily_use_masked = np.zeros_like(ma.masked_not_equal(self.daily_use, 0.001))
 
         # calculates randomised cycles taking the random variability in the duty cycle duration
         self.assign_random_cycles()
