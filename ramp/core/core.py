@@ -899,9 +899,7 @@ class Appliance:
             if indexes[0] >= fs.start and indexes[-1] <= fs.stop:
                 spot_idx = i
                 break
-        if spot_idx is None:
-            return None
-        else:
+        if spot_idx is not None:
             spot_to_split = self.free_spots.pop(spot_idx)
 
             if indexes[0] == spot_to_split.start and indexes[-1] == spot_to_split.stop:
@@ -1325,17 +1323,18 @@ class Appliance:
                 if tot_time > rand_time:
                     # the total functioning time is reached, a correction is applied to avoid overflow of indexes
                     indexes_adj = indexes[:-(tot_time - rand_time)]
-                    inside_peak_window = np.in1d(indexes_adj,peak_time_range).any()
-                    # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
-                    coincidence = self.calc_coincident_switch_on(
-                        inside_peak_window
-                    )
-                    # Update the daily use depending on existence of duty cycles of the Appliance instance
-                    self.update_daily_use(
-                        coincidence,
-                        power=power,
-                        indexes=indexes_adj
-                    )
+                    if len(indexes_adj) > 0:
+                        inside_peak_window = np.in1d(indexes_adj,peak_time_range).any()
+                        # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
+                        coincidence = self.calc_coincident_switch_on(
+                            inside_peak_window
+                        )
+                        # Update the daily use depending on existence of duty cycles of the Appliance instance
+                        self.update_daily_use(
+                            coincidence,
+                            power=power,
+                            indexes=indexes_adj
+                        )
                     break  # exit cycle and go to next Appliance
 
                 else:
