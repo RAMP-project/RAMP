@@ -1,0 +1,60 @@
+Name,Unit,Allowed values,Description,Coding type,Is this value mandatory?,Default value
+,,,,,,
+user_name,NA,NA,Name of user type,string,yes,NA
+,,,,,,
+num_users,NA,\>=0,Number of users within the resprective user-type,integer,yes,0
+,,,,,,
+user_preference,NA,"{0,1,2,3}","Related to cooking behaviour, how many types of meal a user wants a day (number of user preferences has to be defined here and will be further specified with pref_index parameter)",integer,no,0
+,,,,,,
+name,NA,NA,Appliance name,string,yes,NA
+,,,,,,
+number,NA,\>=0,Number of appliances,integer,yes,0
+,,,,,,
+power,Watt,\>=0,Power rating of appliance (average),Float or array,yes,0
+,,,,,,
+num_windows,NA,"{1,2,3}","Number of distinct time windows, e.g. if an appliance is running 24 h the num_windows is 1. If num_windows is set to x then you have to fill in the window_x_start, window_x_end and random_var_w parameters)",integer,yes,1
+,,,,,,
+func_time,minutes,"in [0,1440]",Total time an appliance is running in a day (not dependant on windows),integer,yes,0
+,,,,,,
+time_fraction_random_variability,%,"in [0,1]","For time (not for windows), randomizes the total time the appliance is on",float,no,0
+,,,,,,
+func_cycle,minutes,"in [0,1440]",Running time: time the appliance is on (after switching it on),float,yes,1
+,,,,,,
+fixed,NA,"{yes,no}",All appliances of the same kind (e.g. street lights) are switched on at the same time (if fixed=yes),boolean,no,no
+,,,,,,
+fixed_cycle,NA,"{0,1,2,3}","Number of duty cycle, 0 means continuous power, if not 0 you have to fill the cw (cycle window) parameter (you may define up to 3 cws)",integer,no,0
+,,,,,,
+occasional_use,%,"in [0,1]","Defines how often the appliance is used, e.g. every second day will be 0.5",float,no,1
+,,,,,,
+flat,NA,"{yes,no}","no variability in the time of usage, similar to fixed, but does not account for all appliances of the same type at the same time, no, if switched on and off at different times for different days",boolean,no,no
+,,,,,,
+thermal_p_var,%,"in [0,1]","Range of change of the power of the appliance (e.g. shower not taken at same temparature) or for the power of duty cycles (e.g. for a cooker, AC, heater if external temperature is different…)",float,no,0
+,,,,,,
+pref_index,NA,"{0,1,2,3}",This number must be smaller or equal to the value input in user_preference,integer,no,0
+,,,,,,
+wd_we_type,NA,"{0,1,2}","Specify whether the appliance is used only on weekdays (0), weekend (1) or the whole week (2)",integer,no,2
+,,,,,,
+p_i1,Watt,\>=0,Power rating for first part of ith duty cycle. Only necessary if fixed_cycle is set to I or greater,float,no,0
+,,,,,,
+t_i1,minutes,"in [0,1440]",Duration of first part of ith duty cycle. Only necessary if fixed_cycle is set to I or greater,float,no,0
+,,,,,,
+cwi1_start,minutes,"in [0,1440]",Window start time for the first part of ith specific duty cycle number (not neccessarily  linked to the overall time window),float,no,0
+,,,,,,
+cwi1_end,minutes,"in [0,1440]",Window end time for the first part of ith specific duty cycle number (not neccessarily  linked to the overall time window),float,no,0
+,,,,,,
+p_i2,Watt,\>=0,Power rating for second part of ith duty cycle number. Only necessary if fixed_cycle is set to i or greater,float,no,0
+,,,,,,
+t_i2,minutes,"in [0,1440]",Duration second part of ith duty cycle number. Only necessary if fixed_cycle is set to I or greater,float,no,0
+,,,,,,
+cwi2_start,minutes,"in [0,1440]",Window start time for the second part of ith duty cycle number (not neccessarily  linked to the overall time window),float,no,0
+,,,,,,
+cwi2_end,minutes,"in [0,1440]",Window end time for the second part of ith duty cycle number (not neccessarily  linked to the overall time window),float,no,0
+,,,,,,
+r_ci,%,"in [0,1]","randomization of the duty cycle parts’ duration. There will be a uniform random variation around t_i1 and t_i2. If this parameter is set to 0.1, then t_i1 and t_i2 will be randomly reassigned between 90% and 110% of their initial value; 0 means no randomisation",float,no,0
+,,,,,,
+window_j_start,minutes,"in [0,1440]",Start time of time-window j. Only necessary if num_windows is set to j or greater,integer,yes,0
+,,,,,,
+window_j_end,minutes,"in [0,1440]",End time of time-window j. Only necessary if num_windows is set to j or greater,integer,yes,0
+,,,,,,
+random_var_w,%,"in [0,1]","variability of the windows in percent, the same for all windows",float,no,0
+,,,,,,

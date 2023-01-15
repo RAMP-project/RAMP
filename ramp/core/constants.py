@@ -108,7 +108,7 @@ APPLIANCE_ATTRIBUTES = (
 APPLIANCE_ARGS = (
             "number",
             "power",
-            "p_series",
+            #"p_series",
             "num_windows",
             "func_time",
             "time_fraction_random_variability",

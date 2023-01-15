@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
-
-#%% Import required libraries
+"""
+The code is based on UseCase, User and Appliance classes.
+A UseCase instance consists of a list of User instances which own Appliance instances
+Within the Appliance class, some other functions are created to define windows of use and,
+if needed, specific duty cycles
+"""
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
@@ -10,38 +14,106 @@ import math
 from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, DUTY_CYCLE_PARAMETERS, switch_on_parameters
 from ramp.core.utils import random_variation, duty_cycle, random_choice, read_input_file
 
-#%% Definition of Python classes that constitute the model architecture
-"""
-The code is based on UseCase, User and Appliance classes.
-A UseCase instance consists of a list of User instances which own Appliance instances
-Within the Appliance class, some other functions are created to define windows of use and, 
-if needed, specific duty cycles
-"""
+from typing import List, Union,Iterable
+from ramp.errors_logs.errors import InvalidType,InvalidWindow
 
 
 class UseCase:
-    def __init__(self, name="", users=None):
-        self.name = name
-        if users is None:
-            users = []
-        self.users = users
+    def __init__(self, name:str="", users:Union[List,None]=None):
+        """ Creates a UseCase instance for gathering a list of User instances which own Appliance instances
 
-    def add_user(self, user):
+        Parameters
+        ----------
+        name : str, optional
+            name of the usecase instance, by default ""
+        users : Union[Iterable,None], optional
+            a list of users to be added to the usecase instance, by default None
+        """
+        self.name = name
+        self.users = []
+        if users is not None:
+            for user in users:
+                self.add_user(user)
+
+    def add_user(self, user) -> None:
+        """adds new user to the user property list
+
+        Parameters
+        ----------
+        user : User
+            an user instance
+
+        Raises
+        ------
+        InvalidType
+            any type rather than User will raise the error.
+        """
         if isinstance(user, User):
             self.users.append(user)
+        else:
+            raise InvalidType(f"{type(user)} is not valid. Only 'User' type is acceptable.")
 
-    def save(self, filename=None):
+    def save(self, filename:str=None) -> Union[pd.DataFrame,None]:
+        """Saves/returns the model databas including all the users and their appliances as a single pd.DataFrame or excel file.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The path where the data will be stored. if None, function will return a pd.DataFrame, by default None.
+
+        Returns
+        -------
+        Union[pd.DataFrame,None]
+            if filename is passed, returnes None, otherwise will return a pd.DataFrame
+
+        Notes
+        -------
+        The 'filename' parameter should consist the path and the name of the file without the file extension.
+        For example, if the user wants to save database into "new_folder" directory and name the file as "ramp_database.xlsx" should use:
+
+        .. code-block:: python
+
+            usecase.save("new_folder/ramp_database")
+        """
         answer = pd.concat([user.save() for user in self.users], ignore_index=True)
         if filename is not None:
             answer.to_excel(f"{filename}.xlsx", index=False, engine="openpyxl")
         else:
             return answer
 
-    def export_to_dataframe(self):
+    def export_to_dataframe(self) -> pd.DataFrame:
+        """exports the model database to a pd.DataFrame containing all the data related to users and their appliances
+
+        Returns
+        -------
+        pd.DataFrame
+            the model database
+        """
         return self.save()
 
-    def load(self, filename):
-        """Open an .xlsx file which was produced via the save method and create instances of Users and Appliances"""
+    def load(self, filename:str) -> None:
+        """Open an .xlsx file which was produced via the save method and create instances of Users and Appliances
+
+        Parameters
+        ----------
+        filename : str
+            The path where the excel database is.
+
+        Raises
+        ---------
+        ValueError
+            #. if the 'num_users' is not the same for a given user profile
+            #. if the 'user_preference' is not the same for a given user profile
+
+        Note
+        ------
+        The 'filename' parameter should consist the path and the name of the file with the file extension.
+        For example, if the user wants to save database into "new_folder" directory and name the file as "ramp_database.xlsx" should use:
+
+        .. code-block:: python
+
+            usecase.save("new_folder/ramp_database.xlsx")
+        """
 
         df = read_input_file(filename=filename)
         for user_name in df.user_name.unique():
@@ -103,15 +175,40 @@ class UseCase:
                 user.add_appliance(**appliance_parameters)
 
 
+
+
+
 class User:
-    def __init__(self, user_name="", num_users=1, user_preference=0):
+    def __init__(self, user_name:str="", num_users:int=1, user_preference:int=0):
+        """Creates a User instance (User Category)
+
+        Parameters
+        ----------
+        user_name : str, optional
+            name of the user type, by default ""
+        num_users : int, optional
+            number of users within the resprective user-type, by default 1
+        user_preference : int {0,1,2,3}, optional
+            Related to cooking behaviour, how many types of meal a user wants a day (number of user preferences has to be defined here and will be further specified with pref_index parameter), by default 0
+        """
         self.user_name = user_name
-        self.num_users = num_users  # specifies the number of users within the class
-        self.user_preference = user_preference  # allows to check if random number coincides with user preference, to distinguish between various appliance_use options (e.g. different cooking options)
+        self.num_users = num_users
+        self.user_preference = user_preference
         self.load = None
         self.App_list = []  # each instance of User (i.e. each user class) has its own list of Appliances
 
+    def __repr__(self):
+        return self.save()[["user_name","num_users","name","number","power"]].to_string()
+
     def add_appliance(self, *args, **kwargs):
+        """adds an appliance to the user category with all the appliance characteristics in a single function
+
+
+        Returns
+        -------
+        Appliance
+            returns the appliance instance
+        """
 
         # parse the args into the kwargs
         if len(args) > 0:
@@ -144,8 +241,13 @@ class User:
         return app
 
     @property
-    def maximum_profile(self):
-        """Aggregate the theoretical maximal profiles of each appliance of the user by switching the appliance always on"""
+    def maximum_profile(self) -> np.array:
+        """Aggregate the theoretical maximal profiles of each appliance of the user by switching the appliance always on
+
+        Returns
+        --------
+        np.array
+        """
         user_max_profile = np.zeros(1440)
         for appliance in self.App_list:
             # Calculate windows curve, i.e. the theoretical maximum curve that can be obtained, for each app, by switching-on always all the 'n' apps altogether in any time-step of the functioning windows
@@ -153,8 +255,41 @@ class User:
             user_max_profile = np.vstack([user_max_profile, app_max_profile])  # this stacks the specific App curve in an overall curve comprising all the Apps within a User class
         return np.transpose(np.sum(user_max_profile, axis=0)) * self.num_users
 
-    def save(self, filename=None):
-        answer = pd.concat([app.save() for app in self.App_list], ignore_index=True)
+    def save(self, filename:str=None) -> Union[pd.DataFrame,None]:
+        """Saves/returns the model databas including allappliances as a single pd.DataFrame or excel file.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The path where the data will be stored. if None, function will return a pd.DataFrame, by default None.
+
+        Returns
+        -------
+        Union[pd.DataFrame,None]
+            if filename is passed, returnes None, otherwise will return a pd.DataFrame
+
+        Raises
+        ------
+        Exception
+            if now appliaces is assigned to the user and the function is called.
+
+        Notes
+        -------
+        1. The 'filename' parameter should consist the path and the name of the file without the file extension.
+        For example, if the user wants to save database into "new_folder" directory and name the file as "ramp_database.xlsx" should use:
+
+        .. code-block:: python
+
+            user.save("new_folder/ramp_database")
+
+        2. Appliances are added to the user-type only if **'windows'** method of the Appliance is called.
+        """
+
+        try:
+            answer = pd.concat([app.save() for app in self.App_list], ignore_index=True)
+        except ValueError:
+            raise Exception("No appliances is assigned to the user.")
+
         if filename is not None:
             answer.to_excel(f"{filename}.xlsx", engine="openpyxl")
         else:
@@ -202,19 +337,34 @@ class User:
                 answer = False
         return answer
 
-    def export_to_dataframe(self):
+    def export_to_dataframe(self) -> pd.DataFrame:
+        """Saves/returns the model databas including allappliances as a single pd.DataFrame or excel file.
+
+        Returns
+        -------
+        pd.DataFrame
+            if filename is passed, returnes None, otherwise will return a pd.DataFrame
+
+        Raises
+        ------
+        Exception
+            if now appliaces is assigned to the user and the function is called.
+
+        Notes
+        -------
+        Appliances are added to the user-type only if **'windows'** method of the Appliance is called.
+        """
         return self.save()
 
 
     def Appliance(
         self,
-        user,
-        n=1,
-        P=0,
-        w=1,
-        t=0,
-        r_t=0,
-        c=1,
+        number=1,
+        power=0,
+        num_windows=1,
+        func_time=0,
+        time_fraction_random_variability=0,
+        func_cycle=1,
         fixed="no",
         fixed_cycle=0,
         occasional_use=1,
@@ -222,17 +372,21 @@ class User:
         thermal_P_var=0,
         pref_index=0,
         wd_we_type=2,
-        P_series=False,
         name="",
     ):
-        """Back-compatibility with legacy code"""
+        """Back-compatibility with legacy code
+
+        Notes
+        ------
+        refer to Appliance class docs
+        """
         return self.add_appliance(
-            number=n,
-            power=P,
-            num_windows=w,
-            func_time=t,
-            time_fraction_random_variability=r_t,
-            func_cycle=c,
+            number=number,
+            power=power,
+            num_windows=num_windows,
+            func_time=func_time,
+            time_fraction_random_variability=time_fraction_random_variability,
+            func_cycle=func_cycle,
             fixed=fixed,
             fixed_cycle=fixed_cycle,
             occasional_use=occasional_use,
@@ -240,22 +394,31 @@ class User:
             thermal_p_var=thermal_P_var,
             pref_index=pref_index,
             wd_we_type=wd_we_type,
-            p_series=P_series,
             name=name,
         )
 
-    def generate_single_load_profile(self, prof_i, peak_time_range, Year_behaviour):
+    def generate_single_load_profile(self, prof_i:int, peak_time_range:np.array, Year_behaviour:np.array):
         """Generates a load profile for a single user taking all its appliances into consideration
 
         Parameters
         ----------
-        prof_i: int
-            ith profile requested by the user
-        peak_time_range: numpy array
-            randomised peak time range calculated using calc_peak_time_range function
+        prof_i: int[0,365]
+            ith profile (day) requested by the user. 0 is the first day of the year and 364 is the last day.
+
+        peak_time_range: np.array
+            randomised peak time range calculated using calc_peak_time_range function.
+
         Year_behaviour: numpy array
-            array consisting of a yearly pattern of weekends and weekdays peak_time_range
+            array consisting of a yearly pattern of weekends and weekdays peak_time_range.
+
+        Returns
+        --------
+        np.array
+            load profile for the requested day
         """
+
+        if prof_i not in range(365):
+            raise ValueError(f'prof_i should be an integer in range of 0 to 364')
 
         single_load = np.zeros(1440)
         rand_daily_pref = 0 if self.user_preference == 0 else random.randint(1, self.user_preference)
@@ -316,75 +479,149 @@ class User:
     def generate_aggregated_load_profile(self, prof_i, peak_time_range, Year_behaviour):
         """Generates an aggregated load profile from single load profile of each user
 
-            Each single load profile has its own separate randomisation
 
         Parameters
         ----------
-        prof_i: int
-            ith profile requested by the user
-        peak_time_range: numpy array
-            randomised peak time range calculated using calc_peak_time_range function
+        prof_i: int[0,365]
+            ith profile (day) requested by the user. 0 is the first day of the year and 364 is the last day.
+
+        peak_time_range: np.array
+            randomised peak time range calculated using calc_peak_time_range function.
+
         Year_behaviour: numpy array
-            array consisting of a yearly pattern of weekends and weekdays peak_time_range
+            array consisting of a yearly pattern of weekends and weekdays peak_time_range.
 
         Returns
-        -------
-        User.load : numpy array
-            the aggregate load profile of all the users within a user class
+        --------
+        np.array
+            load profile for the requested day
+
+        Notes
+        ------
+        Each single load profile has its own separate randomisation
         """
+
+        if prof_i not in range(365):
+            raise ValueError(f'prof_i should be an integer in range of 0 to 364')
+
 
         self.load = np.zeros(1440)  # initialise empty load for User instance
         for _ in range(self.num_users):
             # iterates for every single user within a User class.
             self.load = self.load + self.generate_single_load_profile(prof_i, peak_time_range, Year_behaviour)
 
+        return self.load
 
 class Appliance:
     def __init__(
         self,
         user,
-        number=1,
-        power=0,
-        num_windows=1,
-        func_time=0,
-        time_fraction_random_variability=0,
-        func_cycle=1,
-        fixed="no",
-        fixed_cycle=0,
-        occasional_use=1,
-        flat="no",
-        thermal_p_var=0,
-        pref_index=0,
-        wd_we_type=2,
-        p_series=False,
-        name="",
+        number:int=1,
+        power:Union[float,pd.DataFrame]=0,
+        num_windows:int=1,
+        func_time:int=0,
+        time_fraction_random_variability:float=0,
+        func_cycle:int=1,
+        fixed:str="no",
+        fixed_cycle:int=0,
+        occasional_use:float=1,
+        flat:str="no",
+        thermal_p_var:int=0,
+        pref_index:int=0,
+        wd_we_type:int=2,
+        name:str="",
     ):
-        self.user = user  #user to which the appliance is bounded
+        """Creates an appliance for a given user
+
+        Parameters
+        ----------
+        user : ramp.User
+            user to which the appliance is bounded
+
+        number : int, optional
+            number of appliances of the specified kind, by default 1
+
+        power : Union[float.pd.DataFrame], optional
+            Power rating of appliance (average). If the appliance has variant daily power, a series (with the size of 365) can be passed., by default 0
+
+        num_windows : int [1,2,3], optional
+            Number of distinct time windows, by default 1
+
+        func_time : int[0,1440], optional
+            total time (minutes) the appliance is on during the day (not dependant on windows). Acceptable values are in range 0 to 1440, by default 0
+
+        time_fraction_random_variability : Percentage, optional
+            percentage of total time of use that is subject to random variability. For time (not for windows), randomizes the total time the appliance is on, by default 0
+
+        func_cycle : int[0,1440], optional
+            minimum time(minutes) the appliance is kept on after switch-on event, by default 1
+
+        fixed : str, optional
+            if 'yes', all the 'n' appliances of this kind are always switched-on together, by default "no"
+
+        fixed_cycle : int{0,1,2,3,4}, optional
+            Number of duty cycle, 0 means continuous power, if not 0 you have to fill the cw (cycle window) parameter (you may define up to 3 cws), by default 0
+
+        occasional_use : Percentage, optional
+            Defines how often the appliance is used, e.g. every second day will be 0.5, by default 1
+
+        flat : str{'yes','no'}, optional
+            allows to model appliances that are not subject to any kind of random variability, such as public lighting, by default "no"
+
+        thermal_p_var : Percentage, optional
+            Range of change of the power of the appliance (e.g. shower not taken at same temparature) or for the power of duty cycles (e.g. for a cooker, AC, heater if external temperature is different…), by default 0
+
+        pref_index : int{0,1,2,3}, optional
+            defines preference index for association with random User daily preference behaviour.This number must be smaller or equal to the value input in user_preference, by default 0
+
+        wd_we_type : int{0,1,2}, optional
+            Specify whether the appliance is used only on weekdays (0), weekend (1) or the whole week (2), by default 2
+
+        name : str, optional
+            the name of the appliance, by default ""
+
+        Raises
+        --------
+        ValueError
+            1. if power is not passed as a number of series.
+            2. power array size is not (365,1)
+        """
+
+        self.user = user
         self.name = name
-        self.number = number  #number of appliances of the specified kind
-        self.num_windows = num_windows  #number of functioning windows to be considered
-        self.func_time = func_time  #total time the appliance is on during the day
-        self.time_fraction_random_variability = time_fraction_random_variability  #percentage of total time of use that is subject to random variability
+        self.number = number
+        self.num_windows = num_windows
+        self.func_time = func_time
+        self.time_fraction_random_variability = time_fraction_random_variability
         self.func_cycle = (
-            func_cycle  #minimum time the appliance is kept on after switch-on event
+            func_cycle
         )
-        self.fixed = fixed  #if 'yes', all the 'n' appliances of this kind are always switched-on together
-        self.fixed_cycle = fixed_cycle  #if equal to 1,2 or 3, respectively 1,2 or 3 duty cycles can be modelled, for different periods of the day
-        self.occasional_use = occasional_use  #probability that the appliance is always (i.e. everyday) included in the mix of appliances that the user actually switches-on during the day
-        self.flat = flat  #allows to model appliances that are not subject to any kind of random variability, such as public lighting
+        self.fixed = fixed
+        self.fixed_cycle = fixed_cycle
+        self.occasional_use = occasional_use
+        self.flat = flat
         self.thermal_p_var = (
-            thermal_p_var  #allows to randomly variate the App power within a range
+            thermal_p_var
         )
-        self.pref_index = pref_index  #defines preference index for association with random User daily preference behaviour
-        self.wd_we_type = wd_we_type  #defines if the App is associated with weekdays or weekends | 0 is wd 1 is we 2 is all week
-        if p_series is True:
-            if isinstance(power, str):
-                power = pd.read_json(power)
-            if not isinstance(power, pd.DataFrame):
-                raise(ValueError("The input power is excepted to be a series but it is not recognized as such"))
-            self.power = power.values[:, 0]  #if a timeseries is given the power is treated as so
+        self.pref_index = pref_index
+        self.wd_we_type = wd_we_type
+
+        if isinstance(power,pd.DataFrame):
+            if power.shape == (365,1):
+                power = power.values[:,0]
+            else:
+                raise ValueError("wrong size of array. array size should be (365,1).")
+
+        elif isinstance(power,str):
+            power = pd.read_json(power).values[:,0]
+
+        elif isinstance(power,(float,int)):
+            power = power * np.ones(365)
+
         else:
-            self.power = power * np.ones(365)  # treat the power as single value for the entire year
+            raise ValueError("wrong data type for power.")
+
+        self.power = power
 
         # attributes initialized by self.windows
         self.random_var_w = 0
@@ -426,7 +663,14 @@ class Appliance:
         self.random_cycle2 = np.array([])
         self.random_cycle3 = np.array([])
 
-    def save(self):
+    def save(self) -> pd.DataFrame:
+        """returns a pd.DataFrame containing the appliance data
+
+        Returns
+        -------
+        pd.DataFrame
+            includes all the attributes and the user related information of an appliance.
+        """
         dm = {}
         for user_attribute in ("user_name", "num_users", "user_preference"):
             dm[user_attribute] = getattr(self.user, user_attribute)
@@ -471,14 +715,33 @@ class Appliance:
                         dm[attribute] = None
         return pd.DataFrame.from_records([dm])
 
-    def export_to_dataframe(self):
+    def export_to_dataframe(self) -> pd.DataFrame:
+        """returns a pd.DataFrame containing the appliance data
+
+        Returns
+        -------
+        pd.DataFrame
+            includes all the attributes and the user related information of an appliance.
+        """
         return self.save()
 
-    def __eq__(self, other_appliance):
-        """Compare two appliances
+    def __repr__(self):
 
-        ensure they have the same attributes
-        ensure all their attributes have the same value
+        try:
+            return self.save()[["user_name","num_users","name","number","power"]].to_string()
+        except Exception:
+            return ""
+
+
+    def __eq__(self, other_appliance) -> bool:
+        """checks the equality of two appliances
+
+        Returns
+        -------
+        bool
+            True if the two appliances:
+                1. have the same attributes
+                2. all their attributes have the same value
         """
         answer = np.array([])
         for attribute in APPLIANCE_ATTRIBUTES:
@@ -502,7 +765,47 @@ class Appliance:
                 np.append(answer, False)
         return answer.all()
 
-    def windows(self, window_1=None, window_2=None, random_var_w=0, window_3=None):
+    def windows(self, window_1:Iterable=None, window_2:Iterable=None,random_var_w:float=0 ,window_3:Iterable=None):
+        """assings functioning windows to the appliance and adds the appliance to the user class
+
+        Parameters
+        ----------
+        window_1 : Iterable, optional
+            First functioning window, by default None
+
+        window_2 : Iterable, optional
+            Second functioning window, by default None
+
+        window_3 : Iterable, optional
+            Third functioning window, by default None
+
+        random_var_w : Percentage, optional
+            variability of the windows in percent, the same for all windows, by default 0
+
+        Raises
+        ------
+        InvalidWindow
+
+            * If number of specifies windows does not correspond to the given functioning windows.
+            * If the sum of all windows time intervals for the appliance is smaller than the time the appliance is supposed to be on.
+
+        Example
+        --------
+        If three time window is specified for the appliance as follow:
+
+        #. from 00:00:00 to 00:20:00
+        #. from 00:30:00 to 00:35:00
+        #. from 00:40:00 to 00:55:00
+
+        .. code-block:: python
+
+            user.windows(
+                window_1 = [0,20],
+                window_2 = [30,35],
+                window_3 = [40,55]
+            )
+        """
+
         if window_1 is None:
             warnings.warn(UserWarning("No windows is declared, default window of 24 hours is selected"))
             self.window_1 = np.array([0, 1440])
@@ -511,13 +814,13 @@ class Appliance:
 
         if window_2 is None:
             if self.num_windows >= 2:
-                raise ValueError("Windows 2 is not provided although 2 windows were declared")
+                raise InvalidWindow("Windows 2 is not provided although 2 windows were declared")
         else:
             self.window_2 = window_2
 
         if window_3 is None:
             if self.num_windows == 3:
-                raise ValueError("Windows 3 is not provided although 3 windows were declared")
+                raise InvalidWindow("Windows 3 is not provided although 3 windows were declared")
         else:
             self.window_3 = window_3
 
@@ -526,9 +829,9 @@ class Appliance:
         for i in range(1, self.num_windows + 1, 1):
             window_time = window_time + np.diff(getattr(self, f"window_{i}"))[0]
         if window_time < self.func_time:
-            raise ValueError(f"The sum of all windows time intervals for the appliance '{self.name}' of user '{self.user.user_name}' is smaller than the time the appliance is supposed to be on ({window_time} < {self.func_time}). Please check your input file for typos.")
+            raise InvalidWindow(f"The sum of all windows time intervals for the appliance '{self.name}' of user '{self.user.user_name}' is smaller than the time the appliance is supposed to be on ({window_time} < {self.func_time}). Please check your input file for typos.")
 
-        self.random_var_w = random_var_w #percentage of variability in the start and ending times of the windows
+        self.random_var_w = random_var_w
         self.daily_use = np.zeros(1440) #create an empty daily use profile
         self.daily_use[self.window_1[0]:(self.window_1[1])] = np.full(np.diff(self.window_1),0.001) #fills the daily use profile with infinitesimal values that are just used to identify the functioning windows
         self.daily_use[self.window_2[0]:(self.window_2[1])] = np.full(np.diff(self.window_2),0.001) #same as above for window2
@@ -544,7 +847,9 @@ class Appliance:
             self.cw12 = self.window_2
 
     def assign_random_cycles(self):
-        """Calculates randomised cycles taking the random variability in the duty cycle duration"""
+        """
+        Calculates randomised cycles taking the random variability in the duty cycle duration
+        """
         if self.fixed_cycle >= 1:
             p_11 = random_variation(var=self.thermal_p_var, norm=self.p_11) #randomly variates the power of thermal apps, otherwise variability is 0
             p_12 = random_variation(var=self.thermal_p_var, norm=self.p_12) #randomly variates the power of thermal apps, otherwise variability is 0
@@ -569,10 +874,8 @@ class Appliance:
     def update_daily_use(self, coincidence, power, indexes):
         """Update the daily use depending on existence of duty cycles of the Appliance instance
 
-            This corresponds to step 2d. and 2e. of [1]
+        This corresponds to step 2d. and 2e. of [1]
 
-        Notes
-        -----
         [1] F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo,
             Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
             Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
@@ -614,12 +917,32 @@ class Appliance:
     def maximum_profile(self):
         """Virtual maximum load profile of the appliance
 
+        Returns
+        --------
+        np.array
             It assumes the appliance is always switched-on with maximum power and
             numerosity during all of its potential windows of use
         """
         return self.daily_use * np.mean(self.power) * self.number
 
     def specific_cycle(self, cycle_num, **kwargs):
+        """assigining specific duty cycle for the appliace (maximum of three cycles can be assigned)
+
+        Parameters
+        ----------
+        cycle_num : int
+            represents the number of the specific cycle to be assigned. acceptable values are [1,2,3]
+
+        **kwargs :
+            additional features passed tp each specific cycle function. For example iff cycle_num = 1, **kwargs represents the arguments of function 'spefici_cycle_1' which are:
+                * p_11
+                * t_11
+                * p_12
+                * t_12
+                * r_c1
+                * cw11
+                * cw12
+        """
         if cycle_num == 1:
             self.specific_cycle_1(**kwargs)
         elif cycle_num == 2:
@@ -627,14 +950,37 @@ class Appliance:
         elif cycle_num == 3:
             self.specific_cycle_3(**kwargs)
 
-        # if needed, specific duty cycles can be defined for each Appliance, for a maximum of three different ones
-
     def specific_cycle_1(self, p_11 = 0, t_11 = 0, p_12 = 0, t_12 = 0, r_c1 = 0, cw11=None, cw12=None):
-        self.p_11 = p_11 #power absorbed during first part of the duty cycle
-        self.t_11 = int(t_11) #duration of first part of the duty cycle
-        self.p_12 = p_12 #power absorbed during second part of the duty cycle
-        self.t_12 = int(t_12) #duration of second part of the duty cycle
-        self.r_c1 = r_c1 #random variability of duty cycle segments duration
+        """assigining the frist specific duty cycle for the appliace (maximum of three cycles can be assigned)
+
+        Parameters
+        ----------
+        p_11 : float, optional
+            Power rating for first part of first duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
+
+        t_11 : int[0,1440], optional
+            Duration (minutes) of first part of first duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+
+        p_12 : int, float, optional
+            Power rating for second part of first duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
+
+        t_12 : int[0,1440], optional
+            Duration (minutes) of second part of first duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+
+        r_c1 : Percentage [0,1], optional
+            randomization of the duty cycle parts duration. There will be a uniform random variation around t_i1 and t_i2. If this parameter is set to 0.1, then t_i1 and t_i2 will be randomly reassigned between 90% and 110% of their initial value; 0 means no randomisation, by default 0
+
+        cw11 : Iterable, optional
+            Window time range for the first part of first duty cycle number (not neccessarily linked to the overall time window), by default None
+
+        cw12 : Iterable, optional
+            Window time range for the first part of first duty cycle number (not neccessarily linked to the overall time window), by default None, by default None
+        """
+        self.p_11 = p_11
+        self.t_11 = int(t_11)
+        self.p_12 = p_12
+        self.t_12 = int(t_12)
+        self.r_c1 = r_c1
         if cw11 is not None:
             self.cw11 = cw11
         if cw12 is not None:
@@ -643,7 +989,33 @@ class Appliance:
         self.fixed_cycle1 = np.concatenate(((np.ones(self.t_11)*p_11),(np.ones(self.t_12)*p_12))) #create numpy array representing the duty cycle
 
     def specific_cycle_2(self, p_21 = 0, t_21 = 0, p_22 = 0, t_22 = 0, r_c2 = 0, cw21=None, cw22=None):
-        self.p_21 = p_21 #same as for cycle1
+
+        """assigining the frist specific duty cycle for the appliace (maximum of three cycles can be assigned)
+
+        Parameters
+        ----------
+        p_21 : float, optional
+            Power rating for first part of second duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
+
+        t_21 : int[0,1440], optional
+            Duration (minutes) of first part of second duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+
+        p_22 : int, float, optional
+            Power rating for second part of second duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
+
+        t_22 : int[0,1440], optional
+            Duration (minutes) of second part of second duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+
+        r_c2 : Percentage [0,1], optional
+            randomization of the duty cycle parts duration. There will be a uniform random variation around t_i1 and t_i2. If this parameter is set to 0.1, then t_i1 and t_i2 will be randomly reassigned between 90% and 110% of their initial value; 0 means no randomisation, by default 0
+
+        cw21 : Iterable, optional
+            Window time range for the first part of second duty cycle number (not neccessarily linked to the overall time window), by default None
+
+        cw22 : Iterable, optional
+            Window time range for the first part of second duty cycle number (not neccessarily linked to the overall time window), by default None, by default None
+        """
+        self.p_21 = p_21
         self.t_21 = int(t_21)
         self.p_22 = p_22
         self.t_22 = int(t_22)
@@ -656,7 +1028,32 @@ class Appliance:
         self.fixed_cycle2 = np.concatenate(((np.ones(self.t_21)*p_21),(np.ones(self.t_22)*p_22)))
 
     def specific_cycle_3(self, p_31 = 0, t_31 = 0, p_32 = 0, t_32 = 0, r_c3 = 0, cw31=None, cw32=None):
-        self.p_31 = p_31 #same as for cycle1
+        """assigining the frist specific duty cycle for the appliace (maximum of three cycles can be assigned)
+
+        Parameters
+        ----------
+        p_21 : float, optional
+            Power rating for first part of third duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
+
+        t_21 : int[0,1440], optional
+            Duration (minutes) of first part of third duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+
+        p_22 : int, float, optional
+            Power rating for second part of third duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
+
+        t_22 : int[0,1440], optional
+            Duration (minutes) of second part of third duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+
+        r_c2 : Percentage [0,1], optional
+            randomization of the duty cycle parts duration. There will be a uniform random variation around t_i1 and t_i2. If this parameter is set to 0.1, then t_i1 and t_i2 will be randomly reassigned between 90% and 110% of their initial value; 0 means no randomisation, by default 0
+
+        cw21 : Iterable, optional
+            Window time range for the first part of third duty cycle number (not neccessarily linked to the overall time window), by default None
+
+        cw22 : Iterable, optional
+            Window time range for the first part of third duty cycle number (not neccessarily linked to the overall time window), by default None, by default None
+        """
+        self.p_31 = p_31
         self.t_31 = int(t_31)
         self.p_32 = p_32
         self.t_32 = int(t_32)
@@ -670,7 +1067,23 @@ class Appliance:
 
     #different time windows can be associated with different specific duty cycles
     def cycle_behaviour(self, cw11 = np.array([0,0]), cw12 = np.array([0,0]), cw21 = np.array([0,0]), cw22 = np.array([0,0]), cw31 = np.array([0,0]), cw32 = np.array([0,0])):
+        """_summary_
 
+        Parameters
+        ----------
+        cw11 : Iterable, optional
+            Window time range for the first part of first duty cycle number, by default np.array([0,0])
+        cw12 : Iterable, optional
+            Window time range for the second part of first duty cycle number, by default np.array([0,0])
+        cw21 : Iterable, optional
+            Window time range for the first part of second duty cycle number, by default np.array([0,0])
+        cw22 : Iterable, optional
+            Window time range for the second part of second duty cycle number, by default np.array([0,0])
+        cw31 : Iterable, optional
+            Window time range for the first part of third duty cycle number, by default np.array([0,0])
+        cw32 : Iterable, optional
+            Window time range for the second part of third duty cycle number, by default np.array([0,0])
+        """
         # only used around line 223
         self.cw11 = cw11 #first window associated with cycle1
         self.cw12 = cw12 #second window associated with cycle1
@@ -679,17 +1092,15 @@ class Appliance:
         self.cw31 = cw31 #same for cycle 3
         self.cw32 = cw32
 
-    def rand_total_time_of_use(self, rand_window_1, rand_window_2, rand_window_3):
+    def rand_total_time_of_use(
+        self,
+        rand_window_1: Iterable[int],
+        rand_window_2: Iterable[int],
+        rand_window_3: Iterable[int],
+        ) -> int:
         """Randomised total time of use of the Appliance instance
-
-            This corresponds to step 2a. of [1]
-
-        Notes
-        -----
-        [1] F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo,
-            Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
-            Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
         """
+
         random_var_t = random_variation(var=self.time_fraction_random_variability)
 
         rand_time = round(random.uniform(self.func_time, int(self.func_time * random_var_t)))
@@ -699,14 +1110,12 @@ class Appliance:
             rand_time = int(0.99 * (np.diff(rand_window_1) + np.diff(rand_window_2) + np.diff(rand_window_3)))
         return rand_time
 
-    def switch_on(self, rand_window_1, rand_window_2, rand_window_3):
+    def switch_on(self, rand_window_1:Iterable[int], rand_window_2:Iterable[int], rand_window_3:Iterable[int]) -> int:
         """Return a random switch-on time of the Appliance instance
 
-            This corresponds to step 2c. of [1]
+        This corresponds to step 2c. of:
 
-        Notes
-        -----
-        [1] F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo,
+            F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo,
             Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
             Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
         """
@@ -736,13 +1145,12 @@ class Appliance:
             indexes = np.arange(switch_on, switch_on + upper_limit)
         return indexes
 
-    def calc_coincident_switch_on(self, inside_peak_window=True):
+    def calc_coincident_switch_on(self, inside_peak_window:bool=True):
+
         """Computes how many of the 'n' Appliance instance are switched on simultaneously
 
-            Implement eqs. 3 and 4 of [1]
+        Implement eqs. 3 and 4 of [1]
 
-        Notes
-        -----
         [1] F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo,
             Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
             Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
@@ -776,11 +1184,9 @@ class Appliance:
     def generate_load_profile(self, rand_time, peak_time_range, rand_window_1, rand_window_2, rand_window_3, power):
         """Generate load profile of the Appliance instance by updating its daily_use attribute
 
-            Repeat steps 2c – 2e of [1] until the sum of the durations of all the switch-on events equals
-            the randomised total time of use of the Appliance
+        Repeat steps 2c – 2e of [1] until the sum of the durations of all the switch-on events equals
+        the randomised total time of use of the Appliance
 
-        Notes
-        -----
         [1] F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo,
             Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
             Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
