@@ -10,3 +10,4 @@ RAMP examples
     examples/multi_cycle/multi_cycle
     examples/cooking_app/cooking_app
     examples/using_excel/using_excel
+    examples/thermal_app/thermal_app

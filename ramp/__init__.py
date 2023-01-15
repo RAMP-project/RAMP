@@ -21,6 +21,6 @@ from ramp.core.initialise import yearly_pattern
 from ramp.example.examples import load_data,download_example
 
 __authors__ = "Listed in AUTHORS"
-__copyright__ = ".."
+__copyright__ = "Licensed under the European Union Public Licence (EUPL), Version 1.2-or-later"
 
 

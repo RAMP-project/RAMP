@@ -31,23 +31,20 @@ Creating a user category and appliances
 
 .. code:: ipython3
 
-    computer_0 = household.Appliance(
+    computer_0 = household.add_appliance(
         name = "Household Computer",
         number = 1,
         power  = 50,
         num_windows = 1,
         func_time = 210,
-        occasional_use = 0.5  # 50% chance of occasional use
-    )
-    
-    computer_0.windows(
+        occasional_use = 0.5,  # 50% chance of occasional use,
         window_1 = [510,750],
     )
 
 
 .. code:: ipython3
 
-    computer_1 = school.Appliance(
+    computer_1 = school.add_appliance(
         name = "School Computer",
         number = 1,
         power  = 50,
@@ -55,12 +52,10 @@ Creating a user category and appliances
         func_time = 210,
         time_fraction_random_variability = 0.2,
         func_cycle = 10,
-        occasional_use = 1 # always present in the mix of appliances
-    )
-    
-    computer_1.windows(
+        occasional_use = 1, # always present in the mix of appliances,
         window_1 = [510,750],
     )
+    
 
 
 .. code:: ipython3

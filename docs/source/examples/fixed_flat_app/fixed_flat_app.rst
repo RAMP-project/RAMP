@@ -22,7 +22,7 @@ Adding an appliance with flat and fixed consumption
 
 .. code:: ipython3
 
-    indoor_bulb = school.Appliance(
+    indoor_bulb = school.add_appliance(
         name = "Indoor Light Bulb",
         number = 10,
         power  = 25,
