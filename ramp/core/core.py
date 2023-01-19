@@ -397,7 +397,7 @@ class User:
             name=name,
         )
 
-    def generate_single_load_profile(self, prof_i:int, peak_time_range:np.array, Year_behaviour:np.array):
+    def generate_single_load_profile(self, prof_i:int, peak_time_range:np.array, day_type:int):
         """Generates a load profile for a single user taking all its appliances into consideration
 
         Parameters
@@ -408,8 +408,8 @@ class User:
         peak_time_range: np.array
             randomised peak time range calculated using calc_peak_time_range function.
 
-        Year_behaviour: numpy array
-            array consisting of a yearly pattern of weekends and weekdays peak_time_range.
+        day_type: int[0,1]
+            type of the ith profile. 0 for a week day or 1 for a weekend day
 
         Returns
         --------
@@ -434,7 +434,7 @@ class User:
                      # evaluates if daily preference coincides with the randomised daily preference number
                      or (App.pref_index != 0 and rand_daily_pref != App.pref_index)
                      # checks if the app is allowed in the given yearly behaviour pattern
-                     or App.wd_we_type not in [Year_behaviour[prof_i], 2])
+                     or App.wd_we_type not in [day_type, 2])
             ):
                 continue
 
@@ -476,20 +476,19 @@ class User:
             single_load = single_load + App.daily_use  # adds the Appliance load profile to the single User load profile
         return single_load
 
-    def generate_aggregated_load_profile(self, prof_i, peak_time_range, Year_behaviour):
+    def generate_aggregated_load_profile(self, prof_i, peak_time_range, day_type):
         """Generates an aggregated load profile from single load profile of each user
 
 
         Parameters
         ----------
+
         prof_i: int[0,365]
             ith profile (day) requested by the user. 0 is the first day of the year and 364 is the last day.
-
-        peak_time_range: np.array
-            randomised peak time range calculated using calc_peak_time_range function.
-
-        Year_behaviour: numpy array
-            array consisting of a yearly pattern of weekends and weekdays peak_time_range.
+        peak_time_range: numpy array
+            randomised peak time range calculated using calc_peak_time_range function
+        day_type: int[0,1]
+            type of the ith profile. 0 for a week day or 1 for a weekend day
 
         Returns
         --------
@@ -508,7 +507,7 @@ class User:
         self.load = np.zeros(1440)  # initialise empty load for User instance
         for _ in range(self.num_users):
             # iterates for every single user within a User class.
-            self.load = self.load + self.generate_single_load_profile(prof_i, peak_time_range, Year_behaviour)
+            self.load = self.load + self.generate_single_load_profile(prof_i, peak_time_range, day_type)
 
         return self.load
 

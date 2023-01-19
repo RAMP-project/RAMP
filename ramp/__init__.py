@@ -17,7 +17,7 @@ Package dependencies:
 from ramp._version import __version__
 from ramp.core.core import UseCase,User,Appliance
 from ramp.core.stochastic_process import calc_peak_time_range
-from ramp.core.initialise import yearly_pattern
+from ramp.core.utils import yearly_pattern
 from ramp.example.examples import load_data,download_example
 
 __authors__ = "Listed in AUTHORS"

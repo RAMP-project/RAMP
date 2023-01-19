@@ -7,15 +7,6 @@ import importlib
 from ramp.core.core import UseCase
 
 
-def yearly_pattern():
-    """Definition of a yearly pattern of weekends and weekdays, in case some appliances have specific wd/we behaviour"""
-
-    year_behaviour = np.zeros(365)
-    year_behaviour[5:365:7] = 1
-    year_behaviour[6:365:7] = 1
-
-    return year_behaviour
-
 
 def user_defined_inputs(j=None, fname=None):
     """Imports an input file and returns a processed user_list
@@ -64,7 +55,6 @@ def initialise_inputs(j=None, fname=None, num_profiles=None):
 
     """
 
-    year_behaviour = yearly_pattern()
     user_list = user_defined_inputs(j, fname)
 
     peak_enlarge = 0.15  # percentage random enlargement or reduction of peak time range length, corresponds to \delta_{peak} in [1], p.7
@@ -76,4 +66,4 @@ def initialise_inputs(j=None, fname=None, num_profiles=None):
         )
         print("Please wait...")
 
-    return (peak_enlarge, year_behaviour, user_list, num_profiles)
+    return (peak_enlarge, user_list, num_profiles)

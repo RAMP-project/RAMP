@@ -27,14 +27,16 @@ import sys,os
 sys.path.append('../')
 
 try:
+    from .core.utils import get_day_type, yearly_pattern
     from .core.stochastic_process import stochastic_process
     from .post_process import post_process as pp
 except ImportError:
+    from core.utils import get_day_type, yearly_pattern
     from core.stochastic_process import stochastic_process
     from post_process import post_process as pp
 
 
-def run_usecase(j=None, fname=None, num_profiles=None):
+def run_usecase(j=None, fname=None, num_profiles=None, days=None, plot=True):
     # Calls the stochastic process and saves the result in a list of stochastic profiles
     Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=num_profiles)
 

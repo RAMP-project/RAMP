@@ -66,7 +66,7 @@ def stochastic_process(j=None, fname=None, num_profiles=None):
     # creates an empty list to store the results of each code run, i.e. each stochastically generated profile
     profiles = []
 
-    peak_enlarge, year_behaviour, user_list, num_profiles = initialise_inputs(j, fname, num_profiles)
+    peak_enlarge, user_list, num_profiles = initialise_inputs(j, fname, num_profiles)
 
     # Calculation of the peak time range, which is used to discriminate between off-peak
     # and on-peak coincident switch-on probability, corresponds to step 1. of [1], p.6
@@ -76,10 +76,11 @@ def stochastic_process(j=None, fname=None, num_profiles=None):
         # initialise an empty daily profile (or profile load)
         # that will be filled with the sum of the daily profiles of each User instance
         usecase_load = np.zeros(1440)
+
         # for each User instance generate a load profile, iterating through all user of this instance and
         # all appliances they own, corresponds to step 2. of [1], p.7
         for user in user_list:
-            user.generate_aggregated_load_profile(prof_i, peak_time_range, year_behaviour)
+            user.generate_aggregated_load_profile(prof_i, peak_time_range, day_type=day_type)
             # aggregate the user load to the usecase load
             usecase_load = usecase_load + user.load
         profiles.append(usecase_load)
