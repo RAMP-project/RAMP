@@ -11,3 +11,4 @@ RAMP examples
     examples/cooking_app/cooking_app
     examples/using_excel/using_excel
     examples/thermal_app/thermal_app
+    examples/year_simulation/year_simulation
