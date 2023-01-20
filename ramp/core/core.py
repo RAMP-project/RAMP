@@ -944,11 +944,11 @@ class Appliance:
         # updates the time ranges remaining for switch on events, excluding the current switch_on event
         self.update_available_time_for_switch_on_events(indexes)
 
-    def calc_rand_window(self, window_idx=1, window_range_limits=np.array([0, 1440])):
+    def calc_rand_window(self, window_idx=1, window_range_limits=[0, 1440]):
         _window = self.__getattribute__(f'window_{window_idx}')
         _random_var = self.__getattribute__(f'random_var_{window_idx}')
-        rand_window = np.array([int(random.uniform(_window[0] - _random_var, _window[0] + _random_var)),
-                                int(random.uniform(_window[1] - _random_var, _window[1] + _random_var))])
+        rand_window = [random.randint(_window[0] - _random_var, _window[0] + _random_var),
+                                random.randint(_window[1] - _random_var, _window[1] + _random_var)]
         if rand_window[0] < window_range_limits[0]:
             rand_window[0] = window_range_limits[0]
         if rand_window[1] > window_range_limits[1]:
