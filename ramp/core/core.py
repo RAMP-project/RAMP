@@ -1146,11 +1146,20 @@ class Appliance:
 
         random_var_t = random_variation(var=self.time_fraction_random_variability)
 
-        rand_time = round(random.uniform(self.func_time, int(self.func_time * random_var_t)))
+        rand_time = round(
+            random.uniform(self.func_time, int(self.func_time * random_var_t))
+        )
 
-        # check that the total randomised time of use does not exceed the total space available in the windows
-        if rand_time > 0.99 * (np.diff(rand_window_1) + np.diff(rand_window_2) + np.diff(rand_window_3)):
-            rand_time = int(0.99 * (np.diff(rand_window_1) + np.diff(rand_window_2) + np.diff(rand_window_3)))
+        # total time available for appliance usage
+        total_time = (
+            (rand_window_1[1] - rand_window_1[0])
+            + (rand_window_2[1] - rand_window_2[0])
+            + (rand_window_3[1] - rand_window_3[0])
+        )
+
+        # check that the total randomised time of use does not exceed the total time available
+        if rand_time > 0.99 * total_time:
+            rand_time = int(0.99 * total_time)
         return rand_time
 
     def switch_on(self, rand_window_1:Iterable[int], rand_window_2:Iterable[int], rand_window_3:Iterable[int]) -> int:
