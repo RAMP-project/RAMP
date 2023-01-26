@@ -14,7 +14,7 @@ import warnings
 import random
 import math
 from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, DUTY_CYCLE_PARAMETERS, switch_on_parameters
-from ramp.core.utils import random_variation, duty_cycle, random_choice, read_input_file, calc_time_taken
+from ramp.core.utils import random_variation, duty_cycle, random_choice, read_input_file, calc_time_taken, within_peak_time_window
 
 
 from typing import List, Union,Iterable
@@ -70,8 +70,27 @@ class UseCase:
             appliances = appliances + user.App_list
         self.appliances = appliances
 
-    @calc_time_taken
+
     def generate_daily_load_profiles(self, num_profiles, peak_time_range, day_types):
+        profiles = []
+        for prof_i in range(num_profiles):
+            # initialise an empty daily profile (or profile load)
+            # that will be filled with the sum of the daily profiles of each User instance
+            usecase_load = np.zeros(1440)
+            # for each User instance generate a load profile, iterating through all user of this instance and
+            # all appliances they own, corresponds to step 2. of [1], p.7
+            for user in self.users:
+                user.generate_aggregated_load_profile(prof_i, peak_time_range, day_types)
+                # aggregate the user load to the usecase load
+                usecase_load = usecase_load + user.load
+            profiles.append(usecase_load)
+            # screen update about progress of computation
+            #print('Profile', prof_i+1, '/', num_profiles, 'completed')
+        return profiles
+
+
+    @calc_time_taken
+    def generate_daily_load_profiles_parallel(self, num_profiles, peak_time_range, day_types):
         max_parallel_processes = multiprocessing.cpu_count()
         tasks = []
         t = 0
@@ -1162,8 +1181,8 @@ class Appliance:
             rand_time = int(0.99 * total_time)
         return rand_time
 
-    def switch_on(self, rand_window_1:Iterable[int], rand_window_2:Iterable[int], rand_window_3:Iterable[int]) -> int:
-        """Return a random switch-on time of the Appliance instance
+    def rand_switch_on_window(self, rand_time:int):
+        """Identifies a random switch on window within the available functioning windows
 
         This corresponds to step 2c. of:
 
@@ -1171,34 +1190,42 @@ class Appliance:
             Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model,
             Energy, 2019, https://doi.org/10.1016/j.energy.2019.04.097.
         """
-        # check how many windows to consider
-        if self.num_windows == 1:
-            return int(random.choice([random.uniform(rand_window_1[0], (rand_window_1[1]))]))
-        elif self.num_windows == 2:
-            return int(random.choice(np.concatenate((np.arange(rand_window_1[0], rand_window_1[1]), np.arange(rand_window_2[0], rand_window_2[1])), axis=0)))
-        else:
-            return int(random.choice(np.concatenate((np.arange(rand_window_1[0], rand_window_1[1]), np.arange(rand_window_2[0], rand_window_2[1]), np.arange(rand_window_3[0], rand_window_3[1]),), axis=0)))
 
-    def calc_indexes_for_rand_switch_on(self, switch_on, rand_time, max_free_spot, rand_window):
-        """Identifies a random switch on time within the available functioning windows"""
-        if np.any(self.daily_use[switch_on:rand_window[1]] != 0.001):  # control to check if there are any other switch on times after the current one
-            next_switch = [switch_on + k[0] for k in np.where(self.daily_use[switch_on:] != 0.001)]  # identifies the position of next switch on time and sets it as a limit for the duration of the current switch on
-            if (next_switch[0] - switch_on) >= self.func_cycle and max_free_spot >= self.func_cycle:
-                upper_limit = min((next_switch[0] - switch_on), min(rand_time, rand_window[1] - switch_on))
-            elif (next_switch[0] - switch_on) < self.func_cycle and max_free_spot >= self.func_cycle:  # if next switch_on event does not allow for a minimum functioning cycle without overlapping, but there are other larger free spots, the cycle tries again from the beginning
-                return None # this will trigger a continue in the loop
+        indexes_choice = []
+        for s in self.free_spots:
+            if s.stop - s.start >= self.func_cycle:
+                indexes_choice += [*range(s.start, s.stop - self.func_cycle)] # this will be fast with cython
+        n_choices = len(indexes_choice)
+        if n_choices > 0:
+            # Identifies a random switch on time within the available functioning windows
+            # step 2c of [1]
+            switch_on = indexes_choice[random.randint(0, n_choices-1)]
+            spot_idx = None
+            for i, fs in enumerate(self.free_spots):
+                if fs.start <= switch_on <= fs.stop:
+                    spot_idx = i
+                    break
+
+            largest_duration = min(rand_time, self.free_spots[spot_idx].stop - switch_on)
+
+            if largest_duration > self.func_cycle:
+                indexes = np.arange(switch_on, switch_on + (
+                    int(random.uniform(self.func_cycle, largest_duration))))  # TODO randint
+            elif largest_duration == self.func_cycle:
+                indexes = np.arange(switch_on, switch_on + largest_duration)
             else:
-                upper_limit = next_switch[0] - switch_on  # if there are no other options to reach the total time of use, empty spaces are filled without minimum cycle restrictions until reaching the limit
+                print("func time", self.func_cycle)
+                print("max window", self.free_spots[spot_idx].stop)
+                print("rand_time", rand_time)
+                print("upper_limit", largest_duration)
+                raise ValueError("There is something fishy with upper limit in switch on...")
         else:
-            upper_limit = min(rand_time, rand_window[1] - switch_on)  # if there are no other switch-on events after the current one, the upper duration limit is set this way
-        if upper_limit >= self.func_cycle:
-            indexes = np.arange(switch_on, switch_on + (int(random.uniform(self.func_cycle, upper_limit))))
-        else:
-            indexes = np.arange(switch_on, switch_on + upper_limit)
+            indexes = None
+            # there are no available windows anymore
+
         return indexes
 
     def calc_coincident_switch_on(self, inside_peak_window:bool=True):
-
         """Computes how many of the 'n' Appliance instance are switched on simultaneously
 
         Implement eqs. 3 and 4 of [1]
@@ -1297,59 +1324,29 @@ class Appliance:
 
         self.free_spots = [slice(rw[0], rw[1], None) for rw in rand_windows if rw[0] != rw[1]]
 
-        max_free_spot = rand_time  # free spots are used to detect if there's still space for switch_ons. Before calculating actual free spots, the max free spot is set equal to the entire randomised func_time
         tot_time = 0
         while tot_time <= rand_time:
-            # Identifies a random switch on time within the available functioning windows
-            # step 2c of [1]
-            switch_on = self.switch_on(rand_window_1, rand_window_2, rand_window_3)
 
-            if self.daily_use[switch_on] == 0.001:
-                # control to check if the Appliance instance is not already on
-                # at the randomly selected switch-on time
-                if switch_on in range(rand_window_1[0], rand_window_1[1]):
-                    # random switch_on happens in rand_windows_1
-                    rand_window = rand_window_1
-                elif switch_on in range(rand_window_2[0], rand_window_2[1]):
-                    # random switch_on happens in rand_windows_2
-                    rand_window = rand_window_2
-                else:
-                    # if switch_on is not in rand_window_1 nor in rand_window_2, it shall be in rand_window_3.
-                    rand_window = rand_window_3
 
-                indexes = self.calc_indexes_for_rand_switch_on(
-                    switch_on=switch_on,
-                    rand_time=rand_time,
-                    max_free_spot=max_free_spot,
-                    rand_window=rand_window
-                )
-                if indexes is None:
-                    continue
 
-                # the count of total time is updated with the size of the indexes array
-                tot_time = tot_time + indexes.size
+            # one option could be to generate a lot of them at once
+            indexes = self.rand_switch_on_window(
+                rand_time=rand_time, #TODO maybe only consider rand_time-tot_time ...
+            )
+            if indexes is None:
+                break # exit cycle and go to next Appliance as there are no available windows anymore
 
-                if tot_time > rand_time:
-                    # the total functioning time is reached, a correction is applied to avoid overflow of indexes
-                    indexes_adj = indexes[:-(tot_time - rand_time)]
-                    if len(indexes_adj) > 0:
-                        inside_peak_window = np.in1d(indexes_adj,peak_time_range).any()
-                        # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
-                        coincidence = self.calc_coincident_switch_on(
-                            inside_peak_window
-                        )
-                        # Update the daily use depending on existence of duty cycles of the Appliance instance
-                        self.update_daily_use(
-                            coincidence,
-                            power=power,
-                            indexes=indexes_adj
-                        )
-                    break  # exit cycle and go to next Appliance
 
-                else:
-                    # the total functioning time has not yet exceeded the rand_time
+            # the count of total time is updated with the size of the indexes array
+            tot_time = tot_time + indexes.size
+
+            if tot_time > rand_time:
+                # the total functioning time is reached, a correction is applied to avoid overflow of indexes
+                indexes_adj = indexes[:-(tot_time - rand_time)]
+                if len(indexes_adj) > 0:
+                    inside_peak_window = within_peak_time_window(indexes_adj[0], indexes_adj[-1], peak_time_range[0], peak_time_range[-1])
+
                     # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
-                    inside_peak_window = np.in1d(indexes, peak_time_range).any()
                     coincidence = self.calc_coincident_switch_on(
                         inside_peak_window
                     )
@@ -1357,20 +1354,24 @@ class Appliance:
                     self.update_daily_use(
                         coincidence,
                         power=power,
-                        indexes=indexes
+                        indexes=indexes_adj
                     )
-
-                # calculate how many free spots remain for further switch_ons
-                try:
-                    free_spots = [j.stop - j.start for j in self.free_spots]
-                except TypeError:
-                    free_spots = [0]
-                # TODO always taking the maximum of the free spot, isn't that biasing the randomness?
-                max_free_spot = max(free_spots)
+                break  # exit cycle and go to next Appliance
 
             else:
-                # if the random switch_on falls somewhere where the Appliance instance
-                # has been already turned on, tries again from beginning of the while cycle
-                # TODO not sure this code is useful as the while loop would continue anyway in that case
-                continue
+                inside_peak_window = within_peak_time_window(indexes[0], indexes[-1], peak_time_range[0], peak_time_range[-1])
+
+
+
+                coincidence = self.calc_coincident_switch_on(
+                    inside_peak_window
+                )
+                # Update the daily use depending on existence of duty cycles of the Appliance instance
+                self.update_daily_use(
+                    coincidence,
+                    power=power,
+                    indexes=indexes
+                )
+
+
 

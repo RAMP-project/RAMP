@@ -190,6 +190,19 @@ def yearly_pattern(year=None):
         year_behaviour = pd.date_range(start=f"{year}-01-01", end=f"{year}-12-31", freq="D").map(get_day_type).to_list()
     return year_behaviour
 
+
+def within_peak_time_window(win_start, win_stop, peak_win_start, peak_win_stop):
+    """Given determines if a switch on window falls within the peak time window"""
+    answer = True
+    # start and stop of the given window are both below the lower limit of peak time window
+    if win_start < peak_win_start and win_stop < peak_win_start:
+        answer = False
+    # start and stop of the given window are both above the upper limit of peak time window
+    if win_start > peak_win_stop and win_stop > peak_win_stop:
+        answer = False
+    return answer
+
+
 def calc_time_taken(func):
     """ Calculates the time elapsed during the execution of a function"""
     def wrapper(*args, **kwargs):
