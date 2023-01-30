@@ -20,16 +20,15 @@ parser.add_argument(
 parser.add_argument(
     "-o",
     dest="output_path",
-    nargs=1,
     type=str,
     help="path where to save the converted filename",
 )
 parser.add_argument(
     "--suffix",
     dest="suffix",
-    nargs=1,
     type=str,
     help="suffix appended to the converted filename",
+    default=""
 )
 
 
@@ -49,11 +48,24 @@ def convert_old_user_input_file(
     Imports an input file from a path and returns a processed User_list
     """
 
+    line_to_change = -1
+
     # Check if the lines to save the names of the Appliance instances is already there
+    # And check if the import of the User class is correct, otherwise adapt the file
     with open(fname_path, "r") as fp:
         lines = fp.readlines()
         if "# Code automatically added by ramp_convert_old_input_files.py\n" in lines:
             keep_names = False
+        for i, l in enumerate(lines):
+            if "from core import" in l:
+                line_to_change = i
+        # Change import statement by explicitly naming the full package path
+        lines[line_to_change] = lines[line_to_change].replace("from core import", "from ramp.core.core import")
+
+    # Modify import statement in file
+    if line_to_change != -1:
+        with open(fname_path, "w") as fp:
+            fp.writelines(lines)
 
     # Add code to the input file to assign the variable name of the Appliance instances to their name attribute
     if keep_names is True:
@@ -82,14 +94,6 @@ if __name__ == "__main__":
     fname = args["fname_path"]
     output_path = args.get("output_path")
     suffix = args.get("suffix")
-
-    if output_path is not None:
-        output_path = output_path[0]
-
-    if suffix is None:
-        suffix = ""
-    else:
-        suffix = suffix[0]
 
     if fname is None:
         print("Please provide path to input file with option -i")

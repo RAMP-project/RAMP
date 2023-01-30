@@ -1,5 +1,6 @@
 import json
 import random
+import datetime
 import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
@@ -163,3 +164,29 @@ def random_choice(var, t1, p1, t2, p2):
             duty_cycle(var, t1=t2, p1=p2, t2=t1, p2=p1),
         ]
     )
+
+
+def get_day_type(day):
+    """Given a datetime object return 0 for weekdays or 1 for weekends"""
+    if day.weekday() > 4:
+        answer = 1
+    else:
+        answer = 0
+    return answer
+
+
+def yearly_pattern(year=None):
+    """
+    Definition of a yearly pattern of weekends and weekdays, in case some appliances have specific wd/we behaviour
+    If no argument is provided, the pattern always starts a monday and lasts 365 days, otherwise the pattern matches
+    the weekdays and weekends of the provided year
+    """
+    if year is None:
+        year_behaviour = np.zeros(365)
+        year_behaviour[5:365:7] = 1
+        year_behaviour[6:365:7] = 1
+        year_behaviour = year_behaviour.tolist()
+    else:
+        # a list with 0 for weekdays and 1 for weekends
+        year_behaviour = pd.date_range(start=f"{year}-01-01", end=f"{year}-12-31", freq="D").map(get_day_type).to_list()
+    return year_behaviour

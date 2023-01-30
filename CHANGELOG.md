@@ -4,6 +4,10 @@ Release History
 0.3.2-dev ()
 ------------------
 
+**|new|**       added a way to run a whole year with different input files for each month for seasonality of parameters (only for the command line, type `ramp -h` in terminal for more help)
+
+**|new|**       added a way to define date ranges for ramp simulation to get the weekdays automatically and avoid always starting on a monday (only for the command line, type `ramp -h` in terminal for more help)
+
 **|new|**       added a qualitative testing functionality, accessible via `test/test_run.py`, to check how code changes affect default outputs
 
 **|fixed|**     the way in which the random switch-on time is computed in the `stochastic_process` has been changed so that it is sampled with uniform probability from a concatenated set of functioning windows, rather than for each window separately (which led to short windows having higher concentration of switch-on events and demand peaks)

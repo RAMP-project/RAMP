@@ -178,12 +178,21 @@ providing a ``.xlsx`` input file with the ``-i`` option, this will then
 be equivalent to running ``python ramp_run.py`` from the ``ramp`` folder
 without being prompted for the number of profile within the console.
 
+Other options are documented in the help of ramp, which you access with the ``-h`` option
+
+.. code-block:: bash
+
+   ramp -h
+
+
 If you have existing python input files, you can convert them to
 spreadsheet. To do so, go to ``ramp`` folder and run
 
 .. code-block:: bash
 
    python ramp_convert_old_input_files.py -i <path to the input file you wish to convert>
+
+For other example of command lines options, such as setting date ranges, please visit :ref:`this section <date_range_input_section>` of the documentation
 
 Building a model with a python script
 -------------------------------------
