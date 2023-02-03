@@ -25,6 +25,7 @@ def read_input_file(filename):
     name = sheet_names[0]
     headers = [c.value for c in wb[name][1]]
     df = pd.DataFrame(tuple(wb[name].values)[1:], columns=headers)
+    df = df.fillna(value=np.nan)
 
     df["p_series"] = False
     for i, v in enumerate(df["power"].values):
