@@ -1202,7 +1202,7 @@ class Appliance:
             switch_on = indexes_choice[random.randint(0, n_choices-1)]
             spot_idx = None
             for i, fs in enumerate(self.free_spots):
-                if fs.start <= switch_on <= fs.stop:
+                if fs.start <= switch_on <= fs.stop - self.func_cycle:
                     spot_idx = i
                     break
 
