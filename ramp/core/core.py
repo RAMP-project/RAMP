@@ -1169,6 +1169,9 @@ class Appliance:
             random.uniform(self.func_time, int(self.func_time * random_var_t))
         )
 
+        if rand_time < self.func_cycle:
+            rand_time = self.func_cycle
+
         # total time available for appliance usage
         total_time = (
             (rand_window_1[1] - rand_window_1[0])
@@ -1179,6 +1182,9 @@ class Appliance:
         # check that the total randomised time of use does not exceed the total time available
         if rand_time > 0.99 * total_time:
             rand_time = int(0.99 * total_time)
+
+        if rand_time < self.func_cycle:
+            raise ValueError(f"The func_cycle you choose for appliance {self.name} might be too large to fit in the available time for appliance usage, please either reduce func_cycle or increase the windows of use of the appliance")
         return rand_time
 
     def rand_switch_on_window(self, rand_time:int):
@@ -1194,7 +1200,7 @@ class Appliance:
         indexes_choice = []
         for s in self.free_spots:
             if s.stop - s.start >= self.func_cycle:
-                indexes_choice += [*range(s.start, s.stop - self.func_cycle)] # this will be fast with cython
+                indexes_choice += [*range(s.start, s.stop - self.func_cycle + 1)] # this will be fast with cython
         n_choices = len(indexes_choice)
         if n_choices > 0:
             # Identifies a random switch on time within the available functioning windows
