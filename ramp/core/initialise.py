@@ -5,7 +5,6 @@
 import numpy as np
 import importlib
 from ramp.core.core import UseCase
-from ramp.core.utils import calc_time_taken
 
 
 
@@ -37,7 +36,7 @@ def user_defined_inputs(j=None, fname=None):
 
     return user_list
 
-@calc_time_taken
+
 def initialise_inputs(j=None, fname=None, num_profiles=None):
     """Loads the provided input file and prompt the user for number of profiles if not defined
 

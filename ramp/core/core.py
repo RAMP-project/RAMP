@@ -6,7 +6,6 @@ Within the Appliance class, some other functions are created to define windows o
 if needed, specific duty cycles
 """
 import numpy as np
-import numpy.ma as ma
 import pandas as pd
 from tqdm import tqdm
 import multiprocessing
@@ -14,7 +13,7 @@ import warnings
 import random
 import math
 from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, DUTY_CYCLE_PARAMETERS, switch_on_parameters
-from ramp.core.utils import random_variation, duty_cycle, random_choice, read_input_file, calc_time_taken, within_peak_time_window
+from ramp.core.utils import random_variation, duty_cycle, random_choice, read_input_file, within_peak_time_window
 
 
 from typing import List, Union,Iterable
@@ -24,7 +23,6 @@ def single_appliance_daily_load_profile(args):
     app, args = args
     app.generate_load_profile(*args, power=app.power[args[0]])
 
-    #print('Profile', args[0] + 1, 'completed')
     return args[0], app.daily_use
 
 
@@ -88,8 +86,6 @@ class UseCase:
             #print('Profile', prof_i+1, '/', num_profiles, 'completed')
         return profiles
 
-
-    @calc_time_taken
     def generate_daily_load_profiles_parallel(self, num_profiles, peak_time_range, day_types):
         max_parallel_processes = multiprocessing.cpu_count()
         tasks = []
@@ -1266,7 +1262,6 @@ class Appliance:
             coincidence = self.number
         return coincidence
 
-    # @calc_time_taken
     def generate_load_profile(self, prof_i, peak_time_range, day_type, power):
         """Generate load profile of the Appliance instance by updating its daily_use attribute
 

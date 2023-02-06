@@ -5,12 +5,11 @@ import numpy as np
 import random 
 import math
 from ramp.core.initialise import initialise_inputs
-from ramp.core.utils import calc_time_taken
 from ramp.core.core import UseCase
 
 #%% Core model stochastic script
 
-@calc_time_taken
+
 def calc_peak_time_range(user_list, peak_enlarge=0.15):
     """
     Calculate the peak time range, which is used to discriminate between off-peak and on-peak coincident switch-on probability
@@ -53,7 +52,6 @@ def calc_peak_time_range(user_list, peak_enlarge=0.15):
     # The peak_time is randomly enlarged based on the calibration parameter peak_enlarge
     return np.arange(peak_time - rand_peak_enlarge, peak_time + rand_peak_enlarge)
 
-@calc_time_taken
 
 def stochastic_process(j=None, fname=None, num_profiles=None, day_type=None, parallel=False):
     """Generate num_profiles load profile for the usecase
