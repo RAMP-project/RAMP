@@ -4,6 +4,10 @@ Release History
 0.3.2-dev ()
 ------------------
 
+**|fixed|**     refactored the code in order to improve execution time, use of masks were dismissed
+
+**|new|**       added a way to compute ramp profiles for a usecase using parallel processes via the `generate_daily_load_profiles_parallel` method of the `UseCase` class  (option `-p` for command line input)
+
 **|new|**       added a way to run a whole year with different input files for each month for seasonality of parameters (only for the command line, type `ramp -h` in terminal for more help)
 
 **|new|**       added a way to define date ranges for ramp simulation to get the weekdays automatically and avoid always starting on a monday (only for the command line, type `ramp -h` in terminal for more help)
