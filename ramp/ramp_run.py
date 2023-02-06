@@ -39,10 +39,10 @@ except ImportError:
     from post_process import post_process as pp
 
 
-def run_usecase(j=None, fname=None, num_profiles=None, days=None, plot=True):
+def run_usecase(j=None, fname=None, num_profiles=None, days=None, plot=True, parallel=False):
     # Calls the stochastic process and saves the result in a list of stochastic profiles
     if days is None:
-        Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=yearly_pattern())
+        Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=yearly_pattern(), parallel=parallel)
 
         # Post-processes the results and generates plots
         Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)
@@ -56,7 +56,7 @@ def run_usecase(j=None, fname=None, num_profiles=None, days=None, plot=True):
         Profiles_list = []
         for day in days:
             print("Day", day)
-            daily_profiles = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=get_day_type(day))
+            daily_profiles = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=get_day_type(day), parallel=parallel)
 
             Profiles_list.append(np.mean(daily_profiles, axis=0))
         if plot is True:

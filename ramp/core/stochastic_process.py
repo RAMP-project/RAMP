@@ -54,7 +54,8 @@ def calc_peak_time_range(user_list, peak_enlarge=0.15):
     return np.arange(peak_time - rand_peak_enlarge, peak_time + rand_peak_enlarge)
 
 @calc_time_taken
-def stochastic_process(j=None, fname=None, num_profiles=None, day_type=None):
+
+def stochastic_process(j=None, fname=None, num_profiles=None, day_type=None, parallel=False):
     """Generate num_profiles load profile for the usecase
 
         Covers steps 1. and 2. of the algorithm described in [1], p.6-7
@@ -77,6 +78,9 @@ def stochastic_process(j=None, fname=None, num_profiles=None, day_type=None):
 
     uc = UseCase(users=user_list)
 
-    profiles = uc.generate_daily_load_profiles(num_profiles, peak_time_range, day_type)
+    if parallel is True:
+        profiles = uc.generate_daily_load_profiles_parallel(num_profiles, peak_time_range, day_type)
+    else:
+        profiles = uc.generate_daily_load_profiles(num_profiles, peak_time_range, day_type)
 
     return profiles
