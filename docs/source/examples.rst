@@ -12,3 +12,4 @@ RAMP examples
     examples/using_excel/using_excel
     examples/thermal_app/thermal_app
     examples/year_simulation/year_simulation
+    examples/parallel_processing/parallel_processing
