@@ -54,11 +54,14 @@ def run_usecase(j=None, fname=None, num_profiles=None, days=None, plot=True, par
             pp.Profile_cloud_plot(Profiles_list, Profiles_avg)
     else:
         Profiles_list = []
-        for day in days:
-            print("Day", day)
-            daily_profiles = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=get_day_type(day), parallel=parallel)
+        if parallel is True:
+            Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=len(days), day_type=[get_day_type(day)for day in days], parallel=parallel)
+        else:
+            for day in days:
+                print("Day", day)
+                daily_profiles = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=get_day_type(day), parallel=parallel)
 
-            Profiles_list.append(np.mean(daily_profiles, axis=0))
+                Profiles_list.append(np.mean(daily_profiles, axis=0))
         if plot is True:
             # Post-processes the results and generates plots
             Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)

@@ -109,7 +109,6 @@ class UseCase:
             ) as pbar:
 
                 imap_unordered_it = pool.imap_unordered(single_appliance_daily_load_profile, tasks, chunksize=4)
-
                 for prof_i, daily_load in imap_unordered_it:
                     if prof_i in daily_profiles_dict:
                         daily_profiles_dict[prof_i].append(daily_load)
@@ -642,7 +641,8 @@ class Appliance:
             power = pd.read_json(power).values[:,0]
 
         elif isinstance(power,(float,int)):
-            power = power * np.ones(365)
+            # TODO change this automatic value depending on the range of the usecase
+            power = power * np.ones(366)
 
         else:
             raise ValueError("wrong data type for power.")
