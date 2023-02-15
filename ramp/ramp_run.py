@@ -80,5 +80,10 @@ input_files_to_run = [1, 2, 3]
 
 if __name__ == "__main__":
 
-    for i, j in enumerate(input_files_to_run):
-        run_usecase(j=j)
+    for j in input_files_to_run:
+        try:
+            run_usecase(j=j, fname='../example/input_file_{}.xlsx'.format(j))
+        except:
+            print('Input files in .xlsx format not found. Running the default files in .py format.')
+            run_usecase(j=j)
+            
