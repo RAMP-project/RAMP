@@ -75,8 +75,3 @@ HH_mate = HH.Appliance(1,1800,1,30,0.3,2, thermal_P_var = 0.2, pref_index =0)
 HH_mate.windows([7*60,20*60],[0,0],0.15)
 
 
-# Code automatically added by ramp_convert_old_input_files.py
-from ramp.core.core import Appliance
-local_var_names = [(i, a) for i, a in locals().items() if isinstance(a, Appliance)]
-for i, a in local_var_names:
-    a.name = i

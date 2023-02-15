@@ -242,9 +242,3 @@ S_Stereo.windows([510,750],[810,1080],0.35)
 
 
 
-
-# Code automatically added by ramp_convert_old_input_files.py
-from ramp.core.core import Appliance
-local_var_names = [(i, a) for i, a in locals().items() if isinstance(a, Appliance)]
-for i, a in local_var_names:
-    a.name = i
