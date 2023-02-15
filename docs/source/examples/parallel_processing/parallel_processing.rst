@@ -97,11 +97,11 @@ Run usecase without parallel processing
 
 
 
-.. image:: output_6_1.png
+.. image:: output_5_1.png
 
 
 
-.. image:: output_6_2.png
+.. image:: output_5_2.png
 
 
 Run usecase with parallel processing
@@ -130,9 +130,9 @@ Run usecase with parallel processing
 
 
 
-.. image:: output_8_1.png
+.. image:: output_7_1.png
 
 
 
-.. image:: output_8_2.png
+.. image:: output_7_2.png
 
