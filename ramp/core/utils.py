@@ -1,6 +1,6 @@
 import json
 import random
-import datetime
+import time
 import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
@@ -25,6 +25,7 @@ def read_input_file(filename):
     name = sheet_names[0]
     headers = [c.value for c in wb[name][1]]
     df = pd.DataFrame(tuple(wb[name].values)[1:], columns=headers)
+    df = df.fillna(value=np.nan)
 
     df["p_series"] = False
     for i, v in enumerate(df["power"].values):
@@ -165,7 +166,6 @@ def random_choice(var, t1, p1, t2, p2):
         ]
     )
 
-
 def get_day_type(day):
     """Given a datetime object return 0 for weekdays or 1 for weekends"""
     if day.weekday() > 4:
@@ -190,3 +190,26 @@ def yearly_pattern(year=None):
         # a list with 0 for weekdays and 1 for weekends
         year_behaviour = pd.date_range(start=f"{year}-01-01", end=f"{year}-12-31", freq="D").map(get_day_type).to_list()
     return year_behaviour
+
+
+def within_peak_time_window(win_start, win_stop, peak_win_start, peak_win_stop):
+    """Given determines if a switch on window falls within the peak time window"""
+    answer = True
+    # start and stop of the given window are both below the lower limit of peak time window
+    if win_start < peak_win_start and win_stop < peak_win_start:
+        answer = False
+    # start and stop of the given window are both above the upper limit of peak time window
+    if win_start > peak_win_stop and win_stop > peak_win_stop:
+        answer = False
+    return answer
+
+
+def calc_time_taken(func):
+    """ Calculates the time elapsed during the execution of a function"""
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(func.__name__ + ' required ' + str((end-start)*1) + ' seconds for execution. ')
+        return result
+    return wrapper

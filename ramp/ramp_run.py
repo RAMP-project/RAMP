@@ -39,10 +39,10 @@ except ImportError:
     from post_process import post_process as pp
 
 
-def run_usecase(j=None, fname=None, num_profiles=None, days=None, plot=True):
+def run_usecase(j=None, fname=None, num_profiles=None, days=None, plot=True, parallel=False):
     # Calls the stochastic process and saves the result in a list of stochastic profiles
     if days is None:
-        Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=yearly_pattern())
+        Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=yearly_pattern(), parallel=parallel)
 
         # Post-processes the results and generates plots
         Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)
@@ -54,11 +54,14 @@ def run_usecase(j=None, fname=None, num_profiles=None, days=None, plot=True):
             pp.Profile_cloud_plot(Profiles_list, Profiles_avg)
     else:
         Profiles_list = []
-        for day in days:
-            print("Day", day)
-            daily_profiles = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=get_day_type(day))
+        if parallel is True:
+            Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=len(days), day_type=[get_day_type(day)for day in days], parallel=parallel)
+        else:
+            for day in days:
+                print("Day", day)
+                daily_profiles = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=get_day_type(day), parallel=parallel)
 
-            Profiles_list.append(np.mean(daily_profiles, axis=0))
+                Profiles_list.append(np.mean(daily_profiles, axis=0))
         if plot is True:
             # Post-processes the results and generates plots
             Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)
@@ -77,5 +80,10 @@ input_files_to_run = [1, 2, 3]
 
 if __name__ == "__main__":
 
-    for i, j in enumerate(input_files_to_run):
-        run_usecase(j=j)
+    for j in input_files_to_run:
+        try:
+            run_usecase(j=j, fname='../example/input_file_{}.xlsx'.format(j))
+        except:
+            print('Input files in .xlsx format not found. Running the default files in .py format.')
+            run_usecase(j=j)
+            

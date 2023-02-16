@@ -57,6 +57,16 @@ parser.add_argument(
     default="xlsx"
 )
 
+parser.add_argument(
+    "-p",
+    dest="parallel",
+    default=False,
+    const=True,
+    nargs="?",
+    type=bool,
+    help="Wether or not the simulation uses parallel processing",
+)
+
 
 def main():
 
@@ -67,6 +77,7 @@ def main():
     date_start = args["date_start"]
     date_end = args["date_end"]
     ext = args["extension"]
+    parallel_processing = args["parallel"]
 
     years = args["years"]
 
@@ -109,7 +120,6 @@ def main():
     else:
         days = None
 
-
     if fnames is None:
         print("Please provide path to input file with option -i, \n\nDefault to old version of RAMP input files\n")
         # Files are specified as numbers in a list (e.g. [1,2] will consider input_file_1.py and input_file_2.py)
@@ -126,7 +136,7 @@ def main():
             num_profiles = [None] * len(input_files_to_run)
 
         for i, j in enumerate(input_files_to_run):
-            run_usecase(j=j, num_profiles=num_profiles[i])
+            run_usecase(j=j, num_profiles=num_profiles[i], parallel=parallel_processing)
     else:
         if num_profiles is not None:
             if len(num_profiles) == 1:
@@ -143,7 +153,7 @@ def main():
                 month_start = datetime.date(year, i+1, 1)
                 month_end = datetime.date(year, i+1, pd.Period(month_start, freq="D").days_in_month)
                 days = pd.date_range(start=month_start, end=month_end, freq='D')
-                monthly_profiles = run_usecase(fname=fname, num_profiles=num_profiles[i], days=days, plot=False)
+                monthly_profiles = run_usecase(fname=fname, num_profiles=num_profiles[i], days=days, plot=False, parallel=parallel_processing)
                 year_profile.append(np.hstack(monthly_profiles))
 
             # Create a dataFrame to save the year profile with timestamps every minutes
@@ -164,7 +174,7 @@ def main():
             resampled.to_csv(os.path.join(BASE_PATH, 'yearly_profile_hourly_resolution.csv'))
         else:
             for i, fname in enumerate(fnames):
-                run_usecase(fname=fname, num_profiles=num_profiles[i], days=days)
+                run_usecase(fname=fname, num_profiles=num_profiles[i], days=days, parallel=parallel_processing)
 
 
 if __name__ == "__main__":

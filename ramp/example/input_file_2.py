@@ -20,12 +20,10 @@ the thermal_P_var attribute.
 HH = User("generic households",1)
 User_list.append(HH)
 
-HH_shower_P = pd.read_csv('shower_P.csv')
+HH_shower_P = pd.read_csv('example/shower_P.csv')
 
 #High-Income
-HH_shower = HH.Appliance(HH,1,HH_shower_P,2,15,0.1,3, thermal_P_var = 0.2)
+HH_shower = HH.Appliance(1,HH_shower_P,2,15,0.1,3, thermal_P_var = 0.2)
 HH_shower.windows([390,540],[1080,1200],0.2)
-
-
 
 
