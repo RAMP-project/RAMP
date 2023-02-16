@@ -65,5 +65,5 @@ parameters, the developers should check whether any other differences are brough
 by the tested code changes. If any differences are there, the developers should 
 evaluate whether these are as expected/designed or not
 '''
-os.chdir('..')
-test_output('results','test', num_input_files=3)
+
+test_output('../results','../test', num_input_files=3)
