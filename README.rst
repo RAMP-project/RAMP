@@ -4,8 +4,8 @@
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 
-.. image:: https://img.shields.io/pypi/v/rampdemand
-    :target: https://pypi.org/project/rampdemand/
+.. .. image:: https://img.shields.io/pypi/v/rampdemand
+..     :target: https://pypi.org/project/rampdemand/
 
 .. image:: https://readthedocs.org/projects/rampdemand/badge/?version=latest
     :target: https://rampdemand.readthedocs.io/en/latest/?badge=latest
@@ -79,11 +79,7 @@ You can follow the first two steps mentioned in **Installing throguh pip**. Then
 
 .. code-block:: bash
 
-   python setup.py
-
-.. .. code-block:: bash
-
-..    pip install -e.
+Alternatively, you may use:
 
 Alternatively, you may use:
 

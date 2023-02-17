@@ -7,7 +7,7 @@ exec(open("ramp/_version.py").read())
 setup(
     name = "rampdemand",
     description= "An open-source python package for building bottom-up stochastic model for generating multi-energy load profiles",
-    long_description = open("README.rst").read(),
+    long_description = open("README.rst",encoding="utf8").read(),
     author_email = "f.lombardi@tudelft.nl",
     url= "https://github.com/RAMP-project/RAMP",
     version = __version__,
@@ -20,7 +20,8 @@ setup(
         "numpy >= 1.21.2",
         "xlsxwriter >= 1.3.7",
         "matplotlib >= 3.3.4",
-        "openpyxl >= 3.0.6"
+        "openpyxl >= 3.0.6",
+        "tqdm",
     ],
     classifiers=[
         "Programming Language :: Python :: 3.6"
