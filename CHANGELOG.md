@@ -4,6 +4,8 @@ Release History
 0.4.0 (2023-02-17)
 ------------------
 
+**|new|**       added full software documentation
+
 **|fixed|**     refactored the code in order to improve execution time, use of masks were dismissed
 
 **|new|**       added a way to compute ramp profiles for a usecase using parallel processes via the `generate_daily_load_profiles_parallel` method of the `UseCase` class  (option `-p` for command line input)
