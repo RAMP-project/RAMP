@@ -22,7 +22,7 @@ What is RAMP
 ============
 RAMP is an open-source software suite for the stochastic simulation of any user-driven energy demand time series based on few simple inputs.
 
-The project aims to provide synthetic data wherever metered data does not exist, such as when designing systems in remote areas. Check out the [documentation](https://rampdemand.readthedocs.io/en/latest/?badge=latest) and learn more on the RAMP world from our [website](https://rampdemand.org/applications/)! 
+The project aims to provide synthetic data wherever metered data does not exist, such as when designing systems in remote areas. Check out the `documentation <https://rampdemand.readthedocs.io/en/latest/?badge=latest>`_ and learn more on the RAMP world from our `website <https://rampdemand.org>`_! 
 
 .. image:: https://github.com/RAMP-project/RAMP/blob/master/docs/figures/Example_output.jpg?raw=true
    :width: 600
