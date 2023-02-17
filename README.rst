@@ -20,11 +20,9 @@
 
 What is RAMP
 ============
-RAMP is a bottom-up stochastic model for the generation
-of high-resolution multi-energy profiles, conceived for
-application in contexts where only rough information about users'
-behaviour are obtainable. Those may range from remote villages to whole countries. RAMP provides an easy and intuitve
-API for building up stochastic profiles.
+RAMP is an open-source software suite for the stochastic simulation of any user-driven energy demand time series based on few simple inputs.
+
+The project aims to provide synthetic data wherever metered data does not exist, such as when designing systems in remote areas. Check out the `documentation <https://rampdemand.readthedocs.io/en/latest/?badge=latest>`_ and learn more on the RAMP world from our `website <https://rampdemand.org>`_! 
 
 .. image:: https://github.com/RAMP-project/RAMP/blob/master/docs/figures/Example_output.jpg?raw=true
    :width: 600
@@ -32,8 +30,7 @@ API for building up stochastic profiles.
 Recommended installation method
 ===============================
 
-The easiest way to make RAMP software working is to use the free
-conda package manager which can install the current and future RAMP
+The easiest way to make RAMP software working is to use the free conda package manager which can install the current and future RAMP
 depencies in an easy and user friendly way.
 
 To get conda, `download and install "Anaconda Distribution" <https://www.anaconda.com/products/individual>`_, or `"miniconda" <https://docs.conda.io/en/latest/miniconda.html>`_ which is lighter.
@@ -41,28 +38,27 @@ You can install RAMP using pip, conda or from source code.
 
 Installing through pip
 ----------------------
-1. For installing RAMP software, it is suggested to create a new environment by running the following command in the anaconda prompt:
+1. To install the RAMP software, we suggest to create a new environment by running the following command in the anaconda prompt:
 
 .. code-block:: python
 
    conda create -n ramp python=3.8
 
-2. If you create a new environment for ramp, to use it, you need to activate the ramp environment each time by writing
-the following line in *Anaconda Prompt*
+2. If you create a new environment for RAMP, you'll need to activate it each time before using it, by writing
+the following line in the *Anaconda Prompt*
 
 .. code-block:: python
 
    conda activate ramp
 
-3. Now you can use pip to install ramp on your environment as follow:
+3. Now you can use pip to install `rampdemand` on your environment as follow:
 
 .. code-block:: python
 
   pip install rampdemand
 
 
-
-Installing throguh source code
+Installing through source code
 ------------------------------
 You can also install RAMP from the source code! To do so, you first need to download the source code first:
 
@@ -79,18 +75,23 @@ You can also install RAMP from the source code! To do so, you first need to down
 In this case, the source code will be downloaded as a zip file, so you need the extract the files.
 
 After downloading the source code using any of abovementioned ways, you need to use your **anaconda prompt** to install the code.
-You can follow the first two steps mentioned in **Installing throguh pip**. Then you need to change the directory of the promt to the folder that source code is saved (where you can find the *setup.py* file). To install the RAMP software use:
+You can follow the first two steps mentioned in **Installing throguh pip**. Then you need to change the directory of the promt to the folder where the source code is saved (where you can find the *setup.py* file). To install the RAMP software use:
 
 .. code-block:: bash
 
-   python setup.py
+Alternatively, you may use:
 
+Alternatively, you may use:
+
+.. code-block:: bash
+
+   conda env create -f requirements.yml
 
 Requirements
 ============
 RAMP has been tested on macOS, Windows and Linux.
 
-For running RAMP, a couple of things are needed:
+For running RAMP, you'll need a few packages:
 
 #. The Python programming language, version 3.6 or higher
 #. A number of Python adds-on packages:
@@ -100,14 +101,15 @@ For running RAMP, a couple of things are needed:
    * `Matplotlib  <https://matplotlib.org/>`_
    * `Openpyxl  <https://openpyxl.readthedocs.io/en/stable/>`_
 
+The requirements are specified in the `requirements.txt` file.
 
 Quick start
 ===========
-There are different ways to build a model using RAMP!
+There are different ways to build a model using RAMP! Here, we provide a first example but you can find more information in our [documentation](https://rampdemand.readthedocs.io/en/latest/?badge=latest).
 
 Example python input files
 --------------------------
-Three different input files are provided as example representing three different categories of appliancces that can be modelled with RAMP.
+Three different input files are provided as example representing three different categories of appliances that can be modelled with RAMP.
 To have a look to the python files, you can download them using the "download_example" function:
 
 .. code-block:: python
@@ -171,7 +173,7 @@ providing a ``.xlsx`` input file with the ``-i`` option, this will then
 be equivalent to running ``python ramp_run.py`` from the ``ramp`` folder
 without being prompted for the number of profile within the console.
 
-Other options are documented in the help of ramp, which you access with the ``-h`` option
+Other options are documented in the help of `ramp`, which you access with the ``-h`` option
 
 .. code-block:: bash
 
@@ -185,7 +187,7 @@ spreadsheet. To do so, go to ``ramp`` folder and run
 
    python ramp_convert_old_input_files.py -i <path to the input file you wish to convert>
 
-For other example of command lines options, such as setting date ranges, please visit :ref:`this section <date_range_input_section>` of the documentation
+For other example of command lines options, such as setting date ranges, please visit :ref:`the dedicated section <date_range_input_section>` of the documentation.
 
 Building a model with a python script
 -------------------------------------
@@ -258,14 +260,13 @@ Please cite the original Journal publication if you use RAMP in your research:
 *F. Lombardi, S. Balderrama, S. Quoilin, E. Colombo, Generating high-resolution multi-energy load profiles for remote areas with an open-source stochastic model, Energy, 2019,*
 `https://doi.org/10.1016/j.energy.2019.04.097 <https://doi.org/10.1016/j.energy.2019.04.097>`_
 
-
 More information
 ================
-Take a look to `RAMP Website <https://rampdemand.org>`_!
+Want to know more about the possible applications of RAMP, the studies that relied on it and much more? Then take a look at the `RAMP Website <https://rampdemand.org>`_!
 
 License
 =======
-Copyright 2019 RAMP, contributors listed in **Authors**
+Copyright 2019-2023 RAMP, contributors listed in **Authors**
 
 Licensed under the European Union Public Licence (EUPL), Version 1.2-or-later; you may not use this file except in compliance with the License.
 
