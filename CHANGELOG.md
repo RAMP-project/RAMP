@@ -1,7 +1,7 @@
 Release History
 ===============
 
-0.3.2-dev ()
+0.4.0 (2023-02-17)
 ------------------
 
 **|fixed|**     refactored the code in order to improve execution time, use of masks were dismissed
