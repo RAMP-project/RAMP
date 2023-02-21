@@ -23,18 +23,18 @@ setup(
         "openpyxl >= 3.0.6",
         "tqdm",
     ],
-    classifiers=[
-        "Programming Language :: Python :: 3.6"
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Intended Audience :: End Users/Desktop",
-        "Intended Audience :: Developers",
-        "Intended Audience :: Science/Research",
-        "Programming Language :: Python",
-        "Topic :: Scientific/Engineering",
-        "Topic :: Utilities",
-    ],
+    # classifiers=[
+    #     "Programming Language :: Python :: 3.7",
+    #     "Programming Language :: Python :: 3.8",
+    #     "Programming Language :: Python :: 3.9",
+    #     "Intended Audience :: End Users/Desktop",
+    #     "Intended Audience :: Developers",
+    #     "Intended Audience :: Science/Research",
+    #     "Operating System :: MacOS :: MacOS X",
+    #     "Operating System :: Microsoft :: Windows",
+    #     "Programming Language :: Python",
+    #     "Topic :: Scientific/Engineering",
+    # ],
 
     entry_points={
     "console_scripts": [
