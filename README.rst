@@ -4,8 +4,8 @@
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 
-.. .. image:: https://img.shields.io/pypi/v/rampdemand
-..     :target: https://pypi.org/project/rampdemand/
+.. image:: https://badge.fury.io/py/rampdemand.svg
+    :target: https://badge.fury.io/py/rampdemand
 
 .. image:: https://readthedocs.org/projects/rampdemand/badge/?version=latest
     :target: https://rampdemand.readthedocs.io/en/latest/?badge=latest
