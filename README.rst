@@ -75,9 +75,11 @@ You can also install RAMP from the source code! To do so, you first need to down
 In this case, the source code will be downloaded as a zip file, so you need the extract the files.
 
 After downloading the source code using any of abovementioned ways, you need to use your **anaconda prompt** to install the code.
-You can follow the first two steps mentioned in **Installing throguh pip**. Then you need to change the directory of the promt to the folder where the source code is saved (where you can find the *setup.py* file). To install the RAMP software use:
+You can follow the first two steps mentioned in **Installing through pip**. Then you need to change the directory of the promt to the folder where the source code is saved (where you can find the *setup.py* file). To install the RAMP software use:
 
 .. code-block:: bash
+
+   python setup.py
 
 Alternatively, you may use:
 
