@@ -81,8 +81,6 @@ You can follow the first two steps mentioned in **Installing throguh pip**. Then
 
 Alternatively, you may use:
 
-Alternatively, you may use:
-
 .. code-block:: bash
 
    conda env create -f requirements.yml
@@ -187,7 +185,7 @@ spreadsheet. To do so, go to ``ramp`` folder and run
 
    python ramp_convert_old_input_files.py -i <path to the input file you wish to convert>
 
-For other example of command lines options, such as setting date ranges, please visit :ref:`the dedicated section <date_range_input_section>` of the documentation.
+For other example of command lines options, such as setting date ranges, please visit :ref:`the dedicated section <_date_range_input_section>` of the documentation.
 
 Building a model with a python script
 -------------------------------------
