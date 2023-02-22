@@ -70,7 +70,7 @@ You can also install RAMP from the source code! To do so, you first need to down
 
 2. you may download the source code directly from:
 
-`"RAMP GitHub Repository" <https://github.com/RAMP-project/RAMP/tree/development>`_.
+`"RAMP GitHub Repository" <https://github.com/RAMP-project/RAMP>`_.
 
 In this case, the source code will be downloaded as a zip file, so you need the extract the files.
 
