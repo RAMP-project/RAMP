@@ -75,11 +75,11 @@ You can also install RAMP from the source code! To do so, you first need to down
 In this case, the source code will be downloaded as a zip file, so you need the extract the files.
 
 After downloading the source code using any of abovementioned ways, you need to use your **anaconda prompt** to install the code.
-You can follow the first two steps mentioned in **Installing throguh pip**. Then you need to change the directory of the promt to the folder where the source code is saved (where you can find the *setup.py* file). To install the RAMP software use:
+You can follow the first two steps mentioned in **Installing through pip**. Then you need to change the directory of the promt to the folder where the source code is saved (where you can find the *setup.py* file). To install the RAMP software use:
 
 .. code-block:: bash
 
-Alternatively, you may use:
+   python setup.py
 
 Alternatively, you may use:
 
@@ -105,7 +105,7 @@ The requirements are specified in the `requirements.txt` file.
 
 Quick start
 ===========
-There are different ways to build a model using RAMP! Here, we provide a first example but you can find more information in our [documentation](https://rampdemand.readthedocs.io/en/latest/?badge=latest).
+There are different ways to build a model using RAMP! Here, we provide a first example but you can find more information in our `documentation  <https://rampdemand.readthedocs.io/en/latest/?badge=latest>`_.
 
 Example python input files
 --------------------------
@@ -187,7 +187,7 @@ spreadsheet. To do so, go to ``ramp`` folder and run
 
    python ramp_convert_old_input_files.py -i <path to the input file you wish to convert>
 
-For other example of command lines options, such as setting date ranges, please visit :ref:`the dedicated section <date_range_input_section>` of the documentation.
+For other example of command lines options, such as setting date ranges, please visit `the dedicated section  <https://rampdemand.readthedocs.io/en/latest/examples/year_simulation/year_simulation.html#setting-date-range>`_ of the documentation.
 
 Building a model with a python script
 -------------------------------------
