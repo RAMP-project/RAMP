@@ -29,7 +29,7 @@ def download_example(destination:str):
     destination : str
         The path to copy the model files.
     """
-    files = ["input_file_1.py","input_file_2.py","input_file_3.py","shower_P.csv"]
+    files = ["input_file_1.py","input_file_2.py","input_file_3.py","shower_P.csv","daily_T.csv","T_gw.csv"]
 
     for file in files:
         shutil.copyfile(src=f"{path}/{file}", dst=f"{destination}/{file}")
