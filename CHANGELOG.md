@@ -1,6 +1,12 @@
 Release History
 ===============
 
+0.4.1 (dev)
+------------------
+
+**|fixed|**     automated download of example applications via the `download_example` functions now includes previously missing .csv files
+
+
 0.4.0 (2023-02-17)
 ------------------
 
