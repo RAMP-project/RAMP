@@ -1,4 +1,4 @@
-name: ramp_env
+name: ramp
 dependencies:
 - python=3.8
 - pip:

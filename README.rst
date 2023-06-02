@@ -58,34 +58,35 @@ the following line in the *Anaconda Prompt*
   pip install rampdemand
 
 
-Installing through source code
+Installing through the source code
 ------------------------------
-You can also install RAMP from the source code! To do so, you first need to download the source code first:
+You can also install RAMP from the source code! To do so, you first need to download the source code, which can be done in two ways:
 
-1. you can use git to clone the repository using:
+* You can use git to clone the repository via:
 
 .. code-block:: bash
 
    git clone https://github.com/RAMP-project/RAMP.git
 
-2. you may download the source code directly from:
+* Or, you may download the source code directly from:
 
 `"RAMP GitHub Repository" <https://github.com/RAMP-project/RAMP>`_.
 
-In this case, the source code will be downloaded as a zip file, so you need the extract the files.
+In this second case, the source code will be downloaded as a zip file, so you'll need to extract the files.
 
-After downloading the source code using any of abovementioned ways, you need to use your **anaconda prompt** to install the code.
-You can follow the first two steps mentioned in **Installing through pip**. Then you need to change the directory of the promt to the folder where the source code is saved (where you can find the *setup.py* file). To install the RAMP software use:
+After downloading the source code using any of abovem methods, you'll need to use your **anaconda prompt** to install it. There are two options again:
+
+* You may follow the first two steps mentioned in **Installing through pip**. Then, change the directory in the prompt to the folder where the source code is saved (where you can find the *setup.py* file). To install the RAMP software, you may then use:
 
 .. code-block:: bash
 
    python setup.py
 
-Alternatively, you may use:
+* Alternatively, without taking any prior action, simply change the directory in the prompt to the folder where the source code is saved and then use:
 
 .. code-block:: bash
 
-   conda env create -f requirements.yml
+   conda env create -f environment.yml
 
 Requirements
 ============
@@ -110,7 +111,7 @@ There are different ways to build a model using RAMP! Here, we provide a first e
 Example python input files
 --------------------------
 Three different input files are provided as example representing three different categories of appliances that can be modelled with RAMP.
-To have a look to the python files, you can download them using the "download_example" function:
+To have a look to the python files, you can download them using the `download_example` function:
 
 .. code-block:: python
 
@@ -153,15 +154,14 @@ To have a look to the python files, you can download them using the "download_ex
 Spreadsheet input files
 -----------------------
 
-It is also possible to use spreadsheets as input files. To do so you
+It is also possible to use spreadsheets as input files. To do so, you
 need to run the ``ramp`` command with the option ``-i``:
 
 .. code-block:: bash
 
    ramp -i <path to .xlsx input file>
 
-If you already know
-how many profile you want to simulate you can indicate it with the
+If you already know how many profile you want to simulate, you can indicate it with the
 ``-n`` option:
 
 .. code-block:: bash
@@ -173,7 +173,7 @@ providing a ``.xlsx`` input file with the ``-i`` option, this will then
 be equivalent to running ``python ramp_run.py`` from the ``ramp`` folder
 without being prompted for the number of profile within the console.
 
-Other options are documented in the help of `ramp`, which you access with the ``-h`` option
+Other options are documented in the helper of `ramp`, which you access with the ``-h`` option
 
 .. code-block:: bash
 
@@ -181,13 +181,13 @@ Other options are documented in the help of `ramp`, which you access with the ``
 
 
 If you have existing python input files, you can convert them to
-spreadsheet. To do so, go to ``ramp`` folder and run
+spreadsheet. To do so, go to the ``\ramp`` folder and run
 
 .. code-block:: bash
 
    python ramp_convert_old_input_files.py -i <path to the input file you wish to convert>
 
-For other example of command lines options, such as setting date ranges, please visit `the dedicated section  <https://rampdemand.readthedocs.io/en/latest/examples/year_simulation/year_simulation.html#setting-date-range>`_ of the documentation.
+For other examples of command lines options, such as setting date ranges, please visit `the dedicated section  <https://rampdemand.readthedocs.io/en/latest/examples/year_simulation/year_simulation.html#setting-date-range>`_ of the documentation.
 
 Building a model with a python script
 -------------------------------------
@@ -226,7 +226,7 @@ The use time frames can be specified using the 'window' method for each applianc
     window_2 = [1320,1380], # from 10 PM to 11 PM
    )
 
-Now you can generate your **stochastic Profiles**:
+Now you can generate your **stochastic profiles**:
 
 .. code-block:: python
 
