@@ -38,21 +38,21 @@ You can install RAMP using pip, conda or from source code.
 
 Installing through pip
 ----------------------
-#. To install the RAMP software, we suggest to create a new environment by running the following command in the *Anaconda prompt*:
+1. To install the RAMP software, we suggest to create a new environment by running the following command in the *Anaconda prompt*:
 
 .. code-block:: python
 
    conda create -n ramp python=3.8
 
 
-#. If you create a new environment for RAMP, you'll need to activate it each time before using it, by writing
+2. If you create a new environment for RAMP, you'll need to activate it each time before using it, by writing
 the following line in the *Anaconda Prompt*:
 
 .. code-block:: python
 
    conda activate ramp
 
-#. Now you can use pip to install `rampdemand` on your environment as follow:
+3. Now you can use pip to install `rampdemand` on your environment as follow:
 
 .. code-block:: python
 
