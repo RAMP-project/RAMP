@@ -43,7 +43,7 @@ Installing through pip
 .. code-block:: python
 
    conda create -n ramp python=3.8
-
+   
 #. If you create a new environment for RAMP, you'll need to activate it each time before using it, by writing
 the following line in the *Anaconda Prompt*
 
