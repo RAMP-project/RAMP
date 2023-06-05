@@ -4,9 +4,9 @@ Excel input file parameter description
 
 The table below displays the input parameters of RAMP. If **NA** is displayed in the table below, it means that the corresponding column is not applicable to the parameter.
 
-When filling .xlsx input file, you can simply leave the cell empty if the parameter is not mandatory and the default value will be automatically used.
+When filling an .xlsx input file, you can simply leave the cell empty if the parameter is not mandatory. In this case, the default value will be automatically used.
 
-The **"allowed values"** column provide information about the format one should provide when:
+The **"allowed values"** column provide information about the format one should provide. For example:
 
 - {1,2,3} is a set and the allowed value are either 1, 2 or 3;
 - in [0-1440] is a range and the allowed value must lie between 0 and 1440. 0 and 1440 are also possible values.
@@ -116,7 +116,7 @@ The **"allowed values"** column provide information about the format one should 
    * - flat
      - NA
      - {yes,no}
-     - no variability in the time of usage, similar to fixed, but does not account for all appliances of the same type at the same time, no, if switched on and off at different times for different days
+     - No variability in the time of usage, similar to fixed, and no variability in the power consumption
      - boolean
      - no
      - no
@@ -144,14 +144,14 @@ The **"allowed values"** column provide information about the format one should 
    * - p_i1
      - Watt
      - >=0
-     - Power rating for first part of ith duty cycle. Only necessary if fixed_cycle is set to I or greater
+     - Power rating for first part of ith duty cycle. Only necessary if fixed_cycle is set to 1 or greater
      - float
      - no
      - 0
    * - t_i1
      - minutes
      - in [0,1440]
-     - Duration of first part of ith duty cycle. Only necessary if fixed_cycle is set to I or greater
+     - Duration of first part of ith duty cycle. Only necessary if fixed_cycle is set to 1 or greater
      - float
      - no
      - 0
@@ -200,7 +200,7 @@ The **"allowed values"** column provide information about the format one should 
    * - r_ci
      - %
      - in [0,1]
-     - randomization of the duty cycle parts’ duration. There will be a uniform random variation around t_i1 and t_i2. If this parameter is set to 0.1, then t_i1 and t_i2 will be randomly reassigned between 90% and 110% of their initial value; 0 means no randomisation
+     - Randomization of the duty cycle parts’ duration. There will be a uniform random variation around t_i1 and t_i2. If this parameter is set to 0.1, then t_i1 and t_i2 will be randomly reassigned between 90% and 110% of their initial value; 0 means no randomisation
      - float
      - no
      - 0
@@ -221,7 +221,7 @@ The **"allowed values"** column provide information about the format one should 
    * - random_var_w
      - %
      - in [0,1]
-     - variability of the windows in percent, the same for all windows
+     - Variability of the windows in percentage, the same for all windows
      - float
      - no
      - 0
@@ -229,37 +229,37 @@ The **"allowed values"** column provide information about the format one should 
 Python input file parameter description
 =======================================
 
-A new instance of class ``User`` need the parameters ``user_name``,
+A new instance of class ``User`` requires the parameters ``user_name``,
 ``num_users``, ``user_preference`` from the table above. To add an
-appliance use the method ``add_appliance`` with at least the mandatory
-parameters listed in the table above (except the 3 first parameters
+appliance, use the method ``add_appliance`` with at least the mandatory
+parameters listed in the table above (except the first three parameters
 which belong to the user class and are already assigned in this case)
 and with any of the non-mandatory ones.
 
 If no window parameter (``window_j_start``, ``window_j_end``) is
-provided to the ``add_appliance`` method of the user, then one must then
+provided to the ``add_appliance`` method of the user, then one must 
 call the ``windows`` method of the appliance to provide up to 3 windows
 : ``window_1``, ``window_2``, ``window_3`` as well as ``random_var_w``
-The parameters to describe a window of time should simply directly be
+The parameters to describe a window of time should directly be
 provided as a numpy array ( for example
 ``window_j = np.array([window_j_start, window_j_end])``) (where j is an
 integer smaller or equal to the provided value of ``num_windows``).
 
 If no duty cycle parameter is provided to the ``add_appliance`` method
-of the user, then one can then enable up to 3 duty cycle by calling the
-method ``specific_cycle_i`` of the appliance (where i is an integer
+of the user, then one can enable up to 3 different duty cycles by calling 
+the method ``specific_cycle_i`` of the appliance (where i is an integer
 smaller or equal to the provided value of ``fixed_cycle``) The
 parameters to describe the ith duty cycle are the following: ``p_i1``,
-``t_i1``, ``p_i2``, ``t_i2``, ``r_ci``, ``cwi1`` and ``cwi2`` It is also
+``t_i1``, ``p_i2``, ``t_i2``, ``r_ci``, ``cwi1`` and ``cwi2``. It is also
 possible to provide the parameters ``cwi1`` and ``cwi2`` using the
 method ``cycle_behaviour`` of the appliance.
 
 The legacy way to create an appliance instance is by using the
 ``Appliance`` method of the user (note that the names of input
 parameters are the old ones). This way of creating an appliance is to
-keep a back compatibility of the legacy input files, using the
-``add_appliance`` method of the user should be preferred Note that with
-the legacy way, one must then call the ``windows`` method of the
+keep the backward compatibility of legacy input files: using the
+``add_appliance`` method of the user should be preferred. Note that with
+the legacy method, one must then call the ``windows`` method of the
 appliance to provide at least one windows. And one can add duty cycles
 only via the method ``specific_cycle_i`` of the appliance.
 
