@@ -10,6 +10,7 @@ User Guide:
    intro
    algorithm
    examples
+   input_parameters
    api_references
 
 
