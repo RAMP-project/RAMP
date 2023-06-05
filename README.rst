@@ -81,7 +81,7 @@ After downloading the source code using any of abovem methods, you'll need to us
 
 .. code-block:: bash
 
-   python setup.py
+   python setup.py install
 
 * Alternatively, without taking any prior action, simply change the directory in the prompt to the folder where the source code is saved and then use:
 
