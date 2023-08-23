@@ -3,4 +3,5 @@ dependencies:
 - python=3.8
 - pip=21.0.1
 - pip:
-   - rampdemand
+   - -r requirements.txt
+   - -e .
