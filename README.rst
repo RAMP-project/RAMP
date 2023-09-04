@@ -30,6 +30,8 @@ The project aims to provide synthetic data wherever metered data does not exist,
 Recommended installation method
 ===============================
 
+RAMP has been successfully installed and used on macOS, Windows and Linux.
+
 The easiest way to make RAMP software working is to use the free conda package manager which can install the current and future RAMP
 depencies in an easy and user friendly way.
 
@@ -88,22 +90,6 @@ After downloading the source code using any of abovem methods, you'll need to us
 .. code-block:: bash
 
    conda env create -f environment.yml
-
-Requirements
-============
-RAMP has been tested on macOS, Windows and Linux.
-
-For running RAMP, you'll need a few packages:
-
-#. The Python programming language, version 3.6 or higher
-#. A number of Python adds-on packages:
-
-   * `Pandas  <https://pandas.pydata.org/>`_
-   * `Numpy  <https://numpy.org/>`_
-   * `Matplotlib  <https://matplotlib.org/>`_
-   * `Openpyxl  <https://openpyxl.readthedocs.io/en/stable/>`_
-
-The requirements are specified in the `requirements.txt` file.
 
 Quick start
 ===========
