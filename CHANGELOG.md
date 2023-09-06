@@ -4,6 +4,8 @@ Release History
 0.4.1 (dev)
 ------------------
 
+**|fixed|**     installation options have been debugged and the documentation updated accordingly
+
 **|fixed|**     automated download of example applications via the `download_example` functions now includes previously missing .csv files
 
 
