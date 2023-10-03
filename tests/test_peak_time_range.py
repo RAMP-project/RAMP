@@ -28,7 +28,7 @@ class TestPeakTime:
     def test_calc_peak_time_range(self):
             j=1
             peak_enlarge=0.15
-            user_list=load_usecase(j,peak_enlarge )
+            user_list=load_usecase(j)
             #call the function onder test
             peak_time_range = calc_peak_time_range(user_list, peak_enlarge)
             #perform assertions to validate the output
