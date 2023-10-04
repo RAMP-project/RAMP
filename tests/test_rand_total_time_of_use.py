@@ -6,7 +6,6 @@ Created on Mon Aug 28 15:40:12 2023
 @author: claudia
 """
 
-from ramp.core.utils import random_variation
 from ramp.core.core import Appliance
 from ramp.core.core import User
 
@@ -46,9 +45,14 @@ class TestAppliance:
         rand_window_2 = [200, 300]
         rand_window_3 = [400, 500]
         appliance_instance.func_cycle = 50
-        # Call the method from the class
-        rand_time = appliance_instance.rand_total_time_of_use(rand_window_1, rand_window_2, rand_window_3)
-        assert rand_time >= appliance_instance.func_cycle, 'rand_time is not greater than func_cycle'
+        # Generate a sample of 'rand_time' values 
+        sample_size = 100
+        rand_time_sample = []
+        for _ in range(sample_size):
+            rand_time = appliance_instance.rand_total_time_of_use(rand_window_1, rand_window_2, rand_window_3)
+            rand_time_sample.append(rand_time)
+        assert all(rand_time >= appliance_instance.func_cycle for rand_time in rand_time_sample)
+    
     
     # Tests that the method returns a value less than or equal to 0.99 * total_time
     @pytest.mark.usefixtures("appliance_instance") 
