@@ -39,7 +39,8 @@ except ImportError:
     from post_process import post_process as pp
 
 
-def run_usecase(j=None, fname=None, num_profiles=None, days=None, plot=True, parallel=False):
+def run_usecase(j=None, fname=None, ofname=None, num_profiles=None, days=None, plot=True, parallel=False):
+
     # Calls the stochastic process and saves the result in a list of stochastic profiles
     if days is None:
         Profiles_list = stochastic_process(j=j, fname=fname, num_profiles=num_profiles, day_type=yearly_pattern(), parallel=parallel)
@@ -48,7 +49,7 @@ def run_usecase(j=None, fname=None, num_profiles=None, days=None, plot=True, par
         Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)
         pp.Profile_series_plot(Profiles_series)  # by default, profiles are plotted as a series
 
-        pp.export_series(Profiles_series, j, fname)
+        pp.export_series(Profiles_series, j, fname, ofname)
 
         if len(Profiles_list) > 1:  # if more than one daily profile is generated, also cloud plots are shown
             pp.Profile_cloud_plot(Profiles_list, Profiles_avg)
@@ -67,7 +68,7 @@ def run_usecase(j=None, fname=None, num_profiles=None, days=None, plot=True, par
             Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(Profiles_list)
             pp.Profile_series_plot(Profiles_series)  # by default, profiles are plotted as a series
 
-            pp.export_series(Profiles_series, j, fname)
+            pp.export_series(Profiles_series, j, fname, ofname)
 
             if len(Profiles_list) > 1:  # if more than one daily profile is generated, also cloud plots are shown
                 pp.Profile_cloud_plot(Profiles_list, Profiles_avg)
