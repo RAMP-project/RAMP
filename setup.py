@@ -22,6 +22,7 @@ setup(
         "matplotlib >= 3.3.4",
         "openpyxl >= 3.0.6",
         "tqdm",
+        "plotly"
     ],
     # classifiers=[
     #     "Programming Language :: Python :: 3.7",
