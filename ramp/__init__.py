@@ -19,6 +19,7 @@ from ramp.core.core import UseCase,User,Appliance
 from ramp.core.stochastic_process import calc_peak_time_range
 from ramp.core.utils import yearly_pattern
 from ramp.example.examples import load_data,download_example
+from ramp.post_process.post_process import Run,Plot
 
 __authors__ = "Listed in AUTHORS"
 __copyright__ = "Licensed under the European Union Public Licence (EUPL), Version 1.2-or-later"

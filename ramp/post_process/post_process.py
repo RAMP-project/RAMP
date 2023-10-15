@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
-
-#%% Import required libraries
-import os.path
-
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
+import plotly.express as px
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import os.path
+import numpy as np
+
 
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-#%% Post-processing
+# Post-processing
 '''
 Just some additional code lines to calculate useful indicators and generate plots
 '''
@@ -18,15 +17,15 @@ def Profile_formatting(stoch_profiles):
     for pr in stoch_profiles:
         Profile_avg = Profile_avg + pr
     Profile_avg = Profile_avg/len(stoch_profiles)
-    
+
     Profile_kW = []
     for kW in stoch_profiles:
         Profile_kW.append(kW/1000)
-    
+
     Profile_series = np.array([])
     for iii in stoch_profiles:
         Profile_series = np.append(Profile_series,iii)
-    
+
     return (Profile_avg, Profile_kW, Profile_series)
 
 def Profile_cloud_plot(stoch_profiles,stoch_profiles_avg):
@@ -60,7 +59,7 @@ def Profile_series_plot(stoch_profiles_series):
     #plt.savefig('profiles.eps', format='eps', dpi=1000)
     plt.show()
 
-#%% Export individual profiles
+# Export individual profiles
 '''
 for i in range (len(Profile)):
     np.save('p0%d.npy' % (i), Profile[i])
@@ -90,3 +89,586 @@ def export_series(stoch_profiles_series, j=None, fname=None, ofname=None):
         series_frame.to_csv(path_to_write)
     else:
         print("No path to a file was provided to write the results")
+
+valid_units = ('kW',"W","MW","GW","TW")
+class Run:
+
+    def __init__(self,user,unit,calendar_years):
+
+        self.user = user
+        self.unit = unit
+
+        if isinstance(calendar_years,int):
+            calendar_years = [calendar_years]
+
+        self.calendar_years = calendar_years
+
+        datatimeIndexes = [
+            pd.date_range(start=f"{year}-01-01",periods=365*60*24,freq="1min",name = "date")
+            for year in self.calendar_years
+        ]
+        self._datetimeIndex = datatimeIndexes[0]
+
+        for year,Index in enumerate(datatimeIndexes):
+            if year != 0:
+                self._datetimeIndex=self._datetimeIndex.append(Index)
+
+    @property
+    def unit(self):
+        return self._unit
+
+    @unit.setter
+    def unit(self,var):
+        if var not in valid_units:
+            raise ValueError(f"valid units are: {valid_units}")
+
+        self._unit = var
+
+
+    def _get_DatetimeIndex(self,starting_day,n_days):
+
+        request = pd.date_range(start=starting_day,periods=n_days*24*60,freq="1min")
+
+        request_intersection = self._datetimeIndex.intersection(request)
+
+        if not request.equals(request_intersection):
+            raise ValueError("not a valid date")
+
+        return request
+
+    def generate_profiles(self,starting_day,n_days,peak_time_range,columns=["Baseline"]):
+        idx = self._get_DatetimeIndex(starting_day,n_days)
+        results = {}
+        for profile in columns:
+            profiles = []
+            for prof_i in  idx.day_of_year.unique():
+
+                result = self.user.generate_aggregated_load_profile(
+                    prof_i = prof_i,
+                    day_type = 1,
+                    peak_time_range = peak_time_range
+                )
+
+                profiles.extend(result.tolist())
+
+            results[profile] = pd.Series(index=idx,data=profiles)
+
+
+        return Plot(pd.concat(results,axis=1))
+
+
+
+class LinePlot:
+    """Line plot functions for Plotly and matplotlib engine
+    """
+    def plotly(df,**layout):
+
+        fig = px.line(df)
+        fig.update_layout(layout)
+
+        return fig
+
+    def matplotlib(df,**kwargs):
+
+        ax = df.plot(kind="line",**kwargs)
+
+        return ax
+
+
+class ShadowPlot:
+    """Shadow plot functions for Plotly and matplotlib engine
+    """
+    def plotly(line,other,**layout):
+
+        fig = go.Figure()
+
+        fig.add_trace(
+            go.Scatter(
+                x = line.index,
+                y = line.values.ravel(),
+                mode = "lines",
+                name = line.columns[0],
+                line = dict(color = "rgb(0,0,0)")
+            )
+        )
+
+        for col,vals in other.iteritems():
+
+            fig.add_trace(
+                go.Scatter(
+                    x = vals.index,
+                    y = vals.values.ravel(),
+                    mode = "lines",
+                    showlegend=False,
+                    line = dict(color = "rgba(0,0,0,0.15)")
+                )
+            )
+
+
+
+        fig.update_layout(**layout)
+
+        return fig
+
+    def matplotlib(line,other,**kwargs):
+
+        fig = plt.figure(**kwargs)
+        ax = fig.add_subplot(1, 1, 1)
+
+        ax.plot(line.index, line.values,color="black",label=line.columns[0])
+
+        ax.plot(other.index,other.values,alpha=0.3,color="black")
+
+        ax.legend()
+
+        return fig,ax
+
+class AreaPlot:
+    """Area plot functions for Plotly and matplotlib engine
+    """
+    def matplotlib(df,**kwargs):
+
+        ax = df.plot(kind="area")
+
+        return ax
+
+    def plotly(df,**layout):
+        fig =  px.area(df)
+        fig.update_layout(**layout)
+
+        return fig
+
+
+
+class Plot:
+
+    @classmethod
+    def from_file(self,file,sheet_name=0,sep=",",index=None):
+        """initializing a Plot object from a file results
+
+        Parameters
+        ----------
+        file : str
+            path to the file of the results
+        sheet_name : int,str, optional
+            sheet_name of the result in case an excel file is passed, by default 0
+        sep : str, optional
+            separator in case a csv file is passed, by default ","
+        index: pd.DatetimeIndex, optional
+            if df index is not pd.DatetimeIndex, an DatetimeIndex object can be passed to change the index
+
+        Returns
+        -------
+        Plot
+            A Plot object
+        """
+
+        if file.split(".")[-1] == "csv":
+            df = pd.read_excel(file,sheet_name=sheet_name,index_col=0,header=0,sep=sep)
+
+        elif file.split(".")[-1] == "xlsx":
+
+            df = pd.read_excel(file,sheet_name=sheet_name,index_col=0,header=0)
+
+        return Plot(df,index)
+
+
+
+    def __init__(self,df,index=None):
+        """initializes a Plot object using a pd.DataFrame
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            a pd.DataFrame with pd.DatetimeIndex
+
+        index: pd.DatetimeIndex, optional
+            if df index is not pd.DatetimeIndex, an DatetimeIndex object can be passed to change the index
+        """
+        if index is not None:
+            df = df.copy()
+            df.index = index
+
+        self.DataFrame = df
+
+
+    @property
+    def freq(self):
+        """return the frequency of the pd.DatetimeIndex
+        """
+        return self.df.index.freq
+
+    @property
+    def columns(self):
+        """returns a list of columns (cases) of the Plot dataframe
+
+        Returns
+        -------
+        list
+            list of cases
+        """
+        return self.df.columns.tolist()
+
+    @columns.setter
+    def columns(self,var):
+        self.df.columns = var
+
+    @property
+    def index(self):
+        return self.df.index
+
+    def resample(self,freq,rule,conversion="*1",inplace=False):
+        """returns a resampled version of the data
+
+        Parameters
+        ----------
+        freq : str
+            pd.DataFrame.resample frequency, for example: "1h" for hourly resampling, "1w" for weekly data. Refer to https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html
+        rule : str
+            resampling rule. acceptable values are 'sum', 'mean', 'nearest', ...
+        conversion : str, optional
+            if resampling needs a conversion, can be done through this argument, by default "*1"
+        inplace : bool, optional
+            if True, implements the changes inplace otherwise, returns the resampled data as a new object, by default False
+
+        Returns
+        -------
+        Plot, None
+            Plot object if inplace=False otherwise returns None
+        """
+        df = self.df.copy()
+
+        df = eval(f"df{conversion}")
+        df = getattr(df.resample(freq),rule)()
+
+        if inplace:
+
+            self.df = df
+
+        else:
+            return Plot(df)
+
+    def line(self,columns=None,engine="matplotlib",**kwargs):
+        """creating a like plot
+
+        Parameters
+        ----------
+        columns : str,list, optional
+            columns (cases of the data to plot), by default None that takes all the columns
+        engine : str, optional
+            engine of the plot, by default "matplotlib"
+        **kwargs : optional
+            matplotlib or plotly **kwargs
+
+        Returns
+        -------
+        a matplotlib or plotly graph
+
+        """
+
+        if columns is None:
+            df = self.df
+        else:
+            df = self.df[columns]
+
+
+        return getattr(LinePlot,engine)(df,**kwargs)
+
+    def shadow(self,main_column=None,columns="all",average=True,engine="matplotlib",**kwargs):
+        """creating a shadow plot
+
+        Parameters
+        ----------
+        main_column : str, optional
+            the main column in the data to consider with darker color, by default None
+        columns : list, optional
+            columns to consider as the shadow plots, by default "all" to take all the columns
+        average : bool, optional
+            if True, will take the average profile as the dark line, by default True
+        engine : str, optional
+            engine of the plot, by default "matplotlib"
+        **kwargs : optional
+            matplotlib or plotly **kwargs
+
+        Returns
+        -------
+        a matplotlib or plotly graph
+        """
+
+        if main_column is None and average == False:
+            raise ValueError("one of columns should be passed as the main_column when the average = False")
+
+        elif main_column is not None and average == True:
+            raise ValueError("main_column cannot be given when average = True")
+
+        elif main_column is not None and average == False:
+            df_main  = (self.df.copy()[main_column]).to_frame(main_column)
+
+        else:
+            df_main = (self.mean()).df["Mean"].to_frame("Average")
+
+        if columns.lower() == "all":
+            columns = self.columns
+
+        df_other = self.df.copy()[columns]
+
+        if isinstance(df_other,pd.Series):
+            df_other = df_other.to_frame(columns)
+
+
+        return getattr(ShadowPlot,engine)(df_main,df_other,**kwargs)
+
+
+    def area(self,columns=None,engine="matplotlib",**kwargs):
+        """an area plot
+
+        Parameters
+        ----------
+        columns : str,list, optional
+            columns (cases of the data to plot), by default None that takes all the columns
+        engine : str, optional
+            engine of the plot, by default "matplotlib"
+        **kwargs : optional
+            matplotlib or plotly **kwargs
+
+        Returns
+        -------
+        a matplotlib or plotly graph
+        """
+        if columns is None:
+            df = self.df
+        else:
+            df = self.df[columns]
+
+        return getattr(AreaPlot,engine)(df,**kwargs)
+
+    def load_duration_curve(self,column,engine="matplotlib",**kwargs):
+        """plots the load duration curve
+
+        Parameters
+        ----------
+        column : str
+            the column to draw the load duration curve
+        engine : str, optional
+            engine of the plot, by default "matplotlib"
+        **kwargs : optional
+            matplotlib or plotly **kwargs
+
+        Returns
+        -------
+        a matplotlib or plotly graph
+        """
+        df = self.df[[column]]
+
+
+        df = df.sort_values(by=column,ascending=False)
+        df.index = [i for i in range(1,len(df.index)+1)]
+
+        return getattr(LinePlot,engine)(df,**kwargs)
+
+
+
+    def error(self,base_column,validated_data):
+        """returns the error
+
+        Parameters
+        ----------
+        base_column : str
+            simulation column
+        validated_data : str
+            validation column
+
+        Returns
+        -------
+        pd.DataFrame
+            error in each time slice
+        """
+
+        er =  (self.df[base_column] - self.df[validated_data])/self.df[validated_data].values * 100
+        er = er.fillna(0)
+
+        return er
+
+
+    @property
+    def peak(self):
+        """a dict with all peak hours for each column of the pd.DataFrame
+
+        Returns
+        -------
+        dict
+            keys are the columns of the data and values are the pd.Series representing the value and the time of the peak hours
+        """
+
+        output = {}
+
+        for col,vals in self.df.iteritems():
+            max = vals.loc[vals == vals.max()]
+
+            output[col] = max
+
+        return output
+
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self) -> str:
+        return (self.DataFrame.head(10).to_string() + "\n ......")
+
+    @property
+    def DataFrame(self):
+        """returns the data of the Plot object
+        """
+        return self.df
+
+    @DataFrame.setter
+    def DataFrame(self,var):
+
+        self._validate_df(var,check_index=False)
+
+        self.df = var
+
+    def add_column(self,var):
+        """adds new column to the data
+
+        Parameters
+        ----------
+        var : pd.DataFrame
+            a pd.DataFrame with similar index to the main dataset
+        """
+        if isinstance(var,Plot):
+            var = var.DataFrame
+
+        self._validate_df(var)
+
+        self.df[var.columns] = var.values
+
+
+    def __getitem__(self,key):
+
+        if isinstance(key,str):
+            key = [key]
+
+        return Plot(self.DataFrame[key])
+
+    def loc(self,index=slice(None),columns=slice(None)):
+        """loc method to filter the data
+
+        Parameters
+        ----------
+        index : str,list,tuple, optional
+            pd.DataFrame.loc index filtering input, by default slice(None)
+        columns : str,list,tuple, optional
+            pd.DataFrame.loc columns filtering input, by default slice(None)
+
+        Returns
+        -------
+        Plot
+            a Plot object using the index and columns filters
+        """
+
+        return Plot(self.DataFrame.loc[index,columns])
+
+    def iloc(self,index=slice(None),columns=slice(None)):
+        """iloc method to filter the data based on position index
+
+        Parameters
+        ----------
+        index : int,list,tuple, optional
+            pd.DataFrame.iloc index filtering input, by default slice(None)
+        columns : int,list,tuple, optional
+            pd.DataFrame.iloc columns filtering input, by default slice(None)
+
+        Returns
+        -------
+        Plot
+            a Plot object using the index and columns filters
+        """
+
+        return Plot(self.DataFrame.iloc[index,columns])
+
+    def head(self,var):
+        """returns the top var numbers of data
+
+        Parameters
+        ----------
+        var : int
+            numbers of rows of the data to show
+
+        Returns
+        -------
+        Plot
+            a Plot object with the numbers of rows specified
+        """
+        return Plot(self.DataFrame.head(var))
+
+    def plot(self,**kwargs):
+        """returns a pd.DataFrame.plot object
+
+        Returns
+        -------
+        matplotlib.axes._axes.Axes
+        """
+        return self.DataFrame.plot(**kwargs)
+
+    def _validate_df(self,other,check_index=True):
+        if not isinstance(other,pd.DataFrame):
+            raise ValueError("only pd.DataFrame object is allowed")
+
+        if not(isinstance,other.index,pd.DatetimeIndex):
+            raise ValueError("a valid dataframe shoud has only a pd.DatatimeIndex")
+        if check_index:
+            if not self.index.equals(other.index):
+                raise ValueError("the new column should have identical index with the existing DataFrame")
+
+
+    def to_excel(self,path):
+        """saves the data into excel
+
+        Parameters
+        ----------
+        path : str
+            path to save the file
+        """
+
+        with pd.ExcelWriter(path) as file:
+            self.DataFrame.to_excel(file)
+
+    def to_csv(self,path,sep=','):
+        """saves the data into csv
+
+        Parameters
+        ----------
+        path : str
+            path to save the file
+        sep : str,optional
+            csv separator
+        """
+        self.DataFrame.to_csv(path,sep=sep)
+
+    def mean(self):
+        """returns the mean of the columns
+
+        Returns
+        -------
+        Plot
+            average of columns for each timestep
+        """
+        return Plot(self.DataFrame.mean(1).to_frame("Mean"))
+
+    def sum(self):
+        """returns the sum of the columns
+
+        Returns
+        -------
+        Plot
+            sum of columns for each timestep
+        """
+        return Plot(self.DataFrame.sum(1).to_frame("Sum"))
+
+    def copy(self):
+        """returns a copy of the existing object
+        """
+        return Plot(self.df.copy())
+

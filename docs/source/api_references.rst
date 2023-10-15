@@ -55,7 +55,7 @@ Appliance class
     Appliance.__eq__
 
 
-****
+
 
 *********
 Utilities
@@ -68,3 +68,34 @@ Utilities
     calc_peak_time_range
     load_data
     download_example
+
+
+*************
+Visualization
+*************
+
+.. autosummary::
+    :toctree: api_document/
+
+    Plot.__init__
+    Plot.from_file
+    Plot.freq
+    Plot.columns
+    Plot.index
+    Plot.resample
+    Plot.line
+    Plot.shadow
+    Plot.area
+    Plot.load_duration_curve
+    Plot.validate_results
+    Plot.error
+    Plot.peak
+    Plot.DataFrame
+    Plot.add_column
+    Plot.loc
+    Plot.head
+    Plot.plot
+    Plot.to_excel
+    Plot.to_csv
+    Plot.mean
+    Plot.sum
