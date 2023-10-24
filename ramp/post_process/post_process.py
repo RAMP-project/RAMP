@@ -90,6 +90,7 @@ def export_series(stoch_profiles_series, j=None, fname=None, ofname=None):
     else:
         print("No path to a file was provided to write the results")
 
+
 valid_units = ('kW',"W","MW","GW","TW")
 class Run:
 
@@ -158,90 +159,25 @@ class Run:
 
 
 
-class LinePlot:
-    """Line plot functions for Plotly and matplotlib engine
-    """
-    def plotly(df,**layout):
-
-        fig = px.line(df)
-        fig.update_layout(layout)
-
-        return fig
-
-    def matplotlib(df,**kwargs):
-
-        ax = df.plot(kind="line",**kwargs)
-
-        return ax
-
-
-class ShadowPlot:
-    """Shadow plot functions for Plotly and matplotlib engine
-    """
-    def plotly(line,other,**layout):
-
-        fig = go.Figure()
-
-        fig.add_trace(
-            go.Scatter(
-                x = line.index,
-                y = line.values.ravel(),
-                mode = "lines",
-                name = line.columns[0],
-                line = dict(color = "rgb(0,0,0)")
-            )
-        )
-
-        for col,vals in other.iteritems():
-
-            fig.add_trace(
-                go.Scatter(
-                    x = vals.index,
-                    y = vals.values.ravel(),
-                    mode = "lines",
-                    showlegend=False,
-                    line = dict(color = "rgba(0,0,0,0.15)")
-                )
-            )
-
-
-
-        fig.update_layout(**layout)
-
-        return fig
-
-    def matplotlib(line,other,**kwargs):
-
-        fig = plt.figure(**kwargs)
-        ax = fig.add_subplot(1, 1, 1)
-
-        ax.plot(line.index, line.values,color="black",label=line.columns[0])
-
-        ax.plot(other.index,other.values,alpha=0.3,color="black")
-
-        ax.legend()
-
-        return fig,ax
-
-class AreaPlot:
-    """Area plot functions for Plotly and matplotlib engine
-    """
-    def matplotlib(df,**kwargs):
-
-        ax = df.plot(kind="area")
-
-        return ax
-
-    def plotly(df,**layout):
-        fig =  px.area(df)
-        fig.update_layout(**layout)
-
-        return fig
-
-
 
 class Plot:
+    """
+    The Plot class will provide useful fucntionalities for analyzing and visualizing the results of one or multiple ramp simulations.
 
+    The Plot class will store ramp simulation into a pd.DataFrame with timeseries index, representign the timeline of the simulation and the columns representing the simulated cases.
+    A Plot class can be initialized using a pd.DataFrame, or from a csv, or xlsx file.
+
+    Parameters
+    ----------
+    DataFrame : pd.DataFrame
+        the Plot object data storing the simulation cases
+    freq : pd.offsets
+        the frequency of the data based on the DataFrame index
+    index : Index
+        Index to use for resulting frame timeseries.
+    columns : Index or list-like
+        Column labels to use for resulting frame when representing the simulation cases
+    """
     @classmethod
     def from_file(self,file,sheet_name=0,sep=",",index=None):
         """initializing a Plot object from a file results
@@ -263,12 +199,15 @@ class Plot:
             A Plot object
         """
 
-        if file.split(".")[-1] == "csv":
-            df = pd.read_excel(file,sheet_name=sheet_name,index_col=0,header=0,sep=sep)
+        if file.endswith(".csv"):
+            df = pd.read_csv(file,sheet_name=sheet_name,index_col=0,header=0,sep=sep)
 
-        elif file.split(".")[-1] == "xlsx":
+        elif file.endswith(".xlsx"):
 
             df = pd.read_excel(file,sheet_name=sheet_name,index_col=0,header=0)
+
+        else:
+            raise ValueError("unkwnon format specified for the file. Only .csv or .xlsx formats are allowed.")
 
         return Plot(df,index)
 
@@ -317,7 +256,7 @@ class Plot:
     def index(self):
         return self.df.index
 
-    def resample(self,freq,rule,conversion="*1",inplace=False):
+    def resample(self,freq,rule,conversion=1,inplace=False):
         """returns a resampled version of the data
 
         Parameters
@@ -326,8 +265,8 @@ class Plot:
             pd.DataFrame.resample frequency, for example: "1h" for hourly resampling, "1w" for weekly data. Refer to https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html
         rule : str
             resampling rule. acceptable values are 'sum', 'mean', 'nearest', ...
-        conversion : str, optional
-            if resampling needs a conversion, can be done through this argument, by default "*1"
+        conversion : int, optional
+            if resampling needs a conversion, can be done through this argument. The value of the data will be divided by 'conversion', by default 1
         inplace : bool, optional
             if True, implements the changes inplace otherwise, returns the resampled data as a new object, by default False
 
@@ -338,11 +277,10 @@ class Plot:
         """
         df = self.df.copy()
 
-        df = eval(f"df{conversion}")
+        df = df/conversion
         df = getattr(df.resample(freq),rule)()
 
         if inplace:
-
             self.df = df
 
         else:
@@ -365,14 +303,26 @@ class Plot:
         a matplotlib or plotly graph
 
         """
+        engine = self._check_engine(engine)
 
         if columns is None:
             df = self.df
         else:
             df = self.df[columns]
 
+        if engine == "plotly":
 
-        return getattr(LinePlot,engine)(df,**kwargs)
+            fig = px.line(df)
+            fig.update_layout(**kwargs)
+
+            return fig
+
+        elif engine == "matplotlib":
+
+            ax = df.plot(kind="line",**kwargs)
+
+            return ax
+
 
     def shadow(self,main_column=None,columns="all",average=True,engine="matplotlib",**kwargs):
         """creating a shadow plot
@@ -394,6 +344,7 @@ class Plot:
         -------
         a matplotlib or plotly graph
         """
+        engine = self._check_engine(engine)
 
         if main_column is None and average == False:
             raise ValueError("one of columns should be passed as the main_column when the average = False")
@@ -415,8 +366,48 @@ class Plot:
         if isinstance(df_other,pd.Series):
             df_other = df_other.to_frame(columns)
 
+        if engine == "matplotlib":
+            fig = plt.figure(**kwargs)
+            ax = fig.add_subplot(1, 1, 1)
 
-        return getattr(ShadowPlot,engine)(df_main,df_other,**kwargs)
+            ax.plot(df_main.index, df_main.values,color="black",label=df_main.columns[0])
+
+            ax.plot(df_other.index,df_other.values,alpha=0.3,color="black")
+
+            ax.legend()
+
+            return fig,ax
+
+        elif engine == "plotly":
+            fig = go.Figure()
+
+            fig.add_trace(
+                go.Scatter(
+                    x = df_main.index,
+                    y = df_main.values.ravel(),
+                    mode = "lines",
+                    name = df_main.columns[0],
+                    line = dict(color = "rgb(0,0,0)")
+                )
+            )
+
+            for col,vals in df_other.items():
+
+                fig.add_trace(
+                    go.Scatter(
+                        x = vals.index,
+                        y = vals.values.ravel(),
+                        mode = "lines",
+                        showlegend=False,
+                        line = dict(color = "rgba(0,0,0,0.15)")
+                    )
+                )
+
+
+
+            fig.update_layout(**kwargs)
+
+            return fig
 
 
     def area(self,columns=None,engine="matplotlib",**kwargs):
@@ -435,12 +426,23 @@ class Plot:
         -------
         a matplotlib or plotly graph
         """
+        engine = self._check_engine(engine)
+
         if columns is None:
             df = self.df
         else:
             df = self.df[columns]
 
-        return getattr(AreaPlot,engine)(df,**kwargs)
+        if engine == "matplotlib":
+            return df.plot(kind = "area",**kwargs)
+
+        elif engine == "plotly":
+
+            fig =  px.area(df)
+            fig.update_layout(**kwargs)
+
+            return fig
+
 
     def load_duration_curve(self,column,engine="matplotlib",**kwargs):
         """plots the load duration curve
@@ -458,15 +460,26 @@ class Plot:
         -------
         a matplotlib or plotly graph
         """
+        engine = self._check_engine(engine)
+
         df = self.df[[column]]
 
 
         df = df.sort_values(by=column,ascending=False)
         df.index = [i for i in range(1,len(df.index)+1)]
 
-        return getattr(LinePlot,engine)(df,**kwargs)
+        if engine == "plotly":
 
+                fig = px.line(df)
+                fig.update_layout(**kwargs)
 
+                return fig
+
+        elif engine == "matplotlib":
+
+            ax = df.plot(kind="line",**kwargs)
+
+            return ax
 
     def error(self,base_column,validated_data):
         """returns the error
@@ -502,7 +515,7 @@ class Plot:
 
         output = {}
 
-        for col,vals in self.df.iteritems():
+        for col,vals in self.df.items():
             max = vals.loc[vals == vals.max()]
 
             output[col] = max
@@ -671,4 +684,16 @@ class Plot:
         """returns a copy of the existing object
         """
         return Plot(self.df.copy())
+
+    def _check_engine(self,engine):
+
+        if engine.lower() == "matplotlib":
+
+            return "matplotlib"
+
+        elif engine.lower() == "plotly":
+
+            return "plotly"
+
+        raise ValueError(f"{engine} is not a valid plot engine. Only 'Plotly' and 'matplotlib are valid.'")
 
