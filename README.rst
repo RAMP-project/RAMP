@@ -33,7 +33,7 @@ Recommended installation method
 RAMP has been successfully installed and used on macOS, Windows and Linux.
 
 The easiest way to make RAMP software working is to use the free conda package manager which can install the current and future RAMP
-depencies in an easy and user friendly way.
+dependencies in an easy and user friendly way.
 
 To get conda, `download and install "Anaconda Distribution" <https://www.anaconda.com/products/individual>`_, or `"miniconda" <https://docs.conda.io/en/latest/miniconda.html>`_ which is lighter.
 You can install RAMP using pip, conda or from source code.
@@ -77,7 +77,7 @@ You can also install RAMP from the source code! To do so, you first need to down
 
 In this second case, the source code will be downloaded as a zip file, so you'll need to extract the files.
 
-After downloading the source code using any of abovem methods, you'll need to use your **anaconda prompt** to install it. There are two options again:
+After downloading the source code using any of abovementioned methods, you'll need to use your **anaconda prompt** to install it. There are two options again:
 
 * You may follow the first two steps mentioned in **Installing through pip**. Then, change the directory in the prompt to the folder where the source code is saved (where you can find the *setup.py* file). To install the RAMP software, you may then use:
 
@@ -113,7 +113,7 @@ To have a look to the python files, you can download them using the `download_ex
    publication <https://doi.org/10.1016/j.energy.2019.04.097>`__.
 
 -  ``input_file_2.py``: shows how to model thermal loads, with the
-   example of a “shower” appliance. The peculiarity of thermal appiances
+   example of a “shower” appliance. The peculiarity of thermal appliances
    is that the nominal power can be provided as external input as a
    “csv” file (in this case, ``shower_P.csv``). For the example “shower”
    appliance, the varying nominal power accounts for the effect of
@@ -239,7 +239,7 @@ Now you can generate your **stochastic profiles**:
 
 Contributing
 ============
-This project is open-source. Interested users are therefore invited to test, comment or contribute to the tool. Submitting issues is the best way to get in touch with the development team, which will address your comment, question, or development request in the best possible way. We are also looking for contributors to the main code, willing to contibute to its capabilities, computational-efficiency, formulation, etc.
+This project is open-source. Interested users are therefore invited to test, comment or contribute to the tool. Submitting issues is the best way to get in touch with the development team, which will address your comment, question, or development request in the best possible way. We are also looking for contributors to the main code, willing to contribute to its capabilities, computational-efficiency, formulation, etc.
 
 To contribute changes:
 
@@ -250,7 +250,7 @@ To contribute changes:
 #. Push the branch to GitHub
 #. On GitHub, create a new pull request from the feature branch
 
-When committing new changes, please also take care of checking code stability by means of the `qualitativte testing <https://github.com/RAMP-project/RAMP/blob/development/CONTRIBUTING.md>`_ functionality.
+When committing new changes, please also take care of checking code stability by means of the `qualitative testing <https://github.com/RAMP-project/RAMP/blob/development/CONTRIBUTING.md>`_ functionality.
 
 
 How to cite
