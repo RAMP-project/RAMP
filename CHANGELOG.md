@@ -1,13 +1,17 @@
 Release History
 ===============
 
-0.4.1 (dev)
+0.4.2 (dev)
 ------------------
 
 **|fixed|**     installation options have been debugged and the documentation updated accordingly
 
 **|fixed|**     automated download of example applications via the `download_example` functions now includes previously missing .csv files
 
+0.4.1 (2023-10-XX)
+------------------
+
+**|hotfix|**    added option `-o` to the terminal command line interface to enable the user to provide output path to save ramp results. This option is also accessible to python users using `ofname` argument of the `ramp/ramp_run.py::run_usecase` or the `ramp/post_process/post_process.py::export_series` functions. 
 
 0.4.0 (2023-02-17)
 ------------------

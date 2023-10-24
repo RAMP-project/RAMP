@@ -148,7 +148,11 @@ need to run the ``ramp`` command with the option ``-i``:
 
    ramp -i <path to .xlsx input file>
 
-If you already know how many profile you want to simulate, you can indicate it with the
+
+.. note:: You can input several files, separated from each others by a single blank space
+
+If you already know
+how many profile you want to simulate you can indicate it with the
 ``-n`` option:
 
 .. code-block:: bash
@@ -160,7 +164,16 @@ providing a ``.xlsx`` input file with the ``-i`` option, this will then
 be equivalent to running ``python ramp_run.py`` from the ``ramp`` folder
 without being prompted for the number of profile within the console.
 
-Other options are documented in the helper of `ramp`, which you access with the ``-h`` option
+
+If you want to save ramp results to a custom file, you can provide it with the option `-o`
+
+.. code-block:: bash
+
+   ramp -i <path to .xlsx input file> -o <path where to save RAMP outputs>
+
+.. note:: You can provide a number of output files, separated from each others by a single blank space, matching the number of input files.
+
+Other options are documented in the help of `ramp`, which you access with the ``-h`` option
 
 .. code-block:: bash
 
