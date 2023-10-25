@@ -266,6 +266,7 @@ class User:
         self.user_name = user_name
         self.num_users = num_users
         self.user_preference = user_preference
+        self.rand_daily_pref = 0
         self.load = None
         self.App_list = []  # each instance of User (i.e. each user class) has its own list of Appliances
 
@@ -494,6 +495,7 @@ class User:
 
         single_load = np.zeros(1440)
 
+        self.rand_daily_pref = 0 if self.user_preference == 0 else random.randint(1, self.user_preference)
 
         for App in self.App_list:  # iterates for all the App types in the given User class
 
@@ -1275,14 +1277,12 @@ class Appliance:
         # initialises variables for the cycle
         self.daily_use = np.zeros(1440)
 
-        rand_daily_pref = 0 if self.user.user_preference == 0 else random.randint(1, self.user.user_preference)
-
         # skip this appliance in any of the following applies
         if (
                 # evaluates if occasional use happens or not
                 (random.uniform(0, 1) > self.occasional_use
                  # evaluates if daily preference coincides with the randomised daily preference number
-                 or (self.pref_index != 0 and rand_daily_pref != self.pref_index)
+                 or (self.pref_index != 0 and self.user.rand_daily_pref != self.pref_index)
                  # checks if the app is allowed in the given yearly behaviour pattern
                  or self.wd_we_type not in [day_type, 2])
         ):
