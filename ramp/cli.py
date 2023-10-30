@@ -20,6 +20,13 @@ parser.add_argument(
     help="path to the (xlsx) input files (including filename). If not provided, then legacy .py input files will be fetched",
 )
 parser.add_argument(
+    "-o",
+    dest="ofname_path",
+    nargs="+",
+    type=str,
+    help=f"path to the csv output files (including filename). If not provided, default output will be provided in {os.path.join(BASE_PATH, 'results')}",
+)
+parser.add_argument(
     "-n",
     dest="num_profiles",
     nargs="+",
@@ -72,6 +79,7 @@ def main():
 
     args = vars(parser.parse_args())
     fnames = args["fname_path"]
+    ofnames = args["ofname_path"]
     num_profiles = args["num_profiles"]
     # Define which input files should be considered and run.
     date_start = args["date_start"]
@@ -120,6 +128,9 @@ def main():
     else:
         days = None
 
+    if ofnames is None:
+        ofnames = [None]
+
     if fnames is None:
         print("Please provide path to input file with option -i, \n\nDefault to old version of RAMP input files\n")
         # Files are specified as numbers in a list (e.g. [1,2] will consider input_file_1.py and input_file_2.py)
@@ -135,8 +146,20 @@ def main():
         else:
             num_profiles = [None] * len(input_files_to_run)
 
+        if len(ofnames) == 1:
+            ofnames = ofnames * len(input_files_to_run)
+        elif len(input_files_to_run) != len(ofnames):
+            raise ValueError(
+                f"The number of output file paths({len(ofnames)}) should match the number of input files paths ({len(input_files_to_run)})"
+            )
+
         for i, j in enumerate(input_files_to_run):
-            run_usecase(j=j, num_profiles=num_profiles[i], parallel=parallel_processing)
+            run_usecase(
+                j=j,
+                ofname=ofnames[i],
+                num_profiles=num_profiles[i],
+                parallel=parallel_processing,
+            )
     else:
         if num_profiles is not None:
             if len(num_profiles) == 1:
@@ -173,8 +196,21 @@ def main():
             #TODO add more columns with other resampled functions (do this in Jupyter)
             resampled.to_csv(os.path.join(BASE_PATH, 'yearly_profile_hourly_resolution.csv'))
         else:
+            if len(ofnames) == 1:
+                ofnames = ofnames * len(fnames)
+            elif len(fnames) != len(ofnames):
+                raise ValueError(
+                    f"The number of output file paths({len(ofnames)}) should match the number of input files paths ({len(fnames)})"
+                )
+
             for i, fname in enumerate(fnames):
-                run_usecase(fname=fname, num_profiles=num_profiles[i], days=days, parallel=parallel_processing)
+                run_usecase(
+                    fname=fname,
+                    ofname=ofnames[i],
+                    num_profiles=num_profiles[i],
+                    days=days,
+                    parallel=parallel_processing,
+                )
 
 
 if __name__ == "__main__":

@@ -68,9 +68,25 @@ for i in range (len(Profile)):
 
 # Export Profiles
 
-def export_series(stoch_profiles_series, j=None, fname=None):
+def export_series(stoch_profiles_series, j=None, fname=None, ofname=None):
     series_frame = pd.DataFrame(stoch_profiles_series)
-    if j is not None:
-        series_frame.to_csv(os.path.join(BASE_PATH, 'results', 'output_file_%d.csv' % (j)))
-    if fname is not None:
-        series_frame.to_csv(os.path.join(BASE_PATH, 'results', f'output_file_{os.path.split(fname)[-1]}.csv'))
+    path_to_write = None
+    if ofname is not None:
+        path_to_write = ofname
+    else:
+        if j is not None:
+            path_to_write = os.path.join(
+                BASE_PATH, "results", "output_file_%d.csv" % (j)
+            )
+        if fname is not None:
+            path_to_write = os.path.join(
+                BASE_PATH,
+                "results",
+                f'output_file_{os.path.split(fname)[-1].replace(".", "_")}.csv',
+            )
+
+    if path_to_write is not None:
+        print(f"Writing RAMP results to {path_to_write}")
+        series_frame.to_csv(path_to_write)
+    else:
+        print("No path to a file was provided to write the results")
