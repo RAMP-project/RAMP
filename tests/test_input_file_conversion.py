@@ -19,15 +19,12 @@ class TestConversion:
     def setup_method(self):
         self.input_files_to_run = [1, 2, 3]
         self.file_suffix = "_test"
-        os.chdir(
-            "ramp"
-        )  # for legacy code to work the loading of the input file has to happen from the ramp folder
         self.py_fnames = [
-            os.path.join("input_files", f"input_file_{i}.py")
+            os.path.join("ramp","example", f"input_file_{i}.py")
             for i in self.input_files_to_run
         ]
         self.xlsx_fnames = [
-            os.path.join("test", f"input_file_{i}{self.file_suffix}.xlsx")
+            os.path.join("ramp","test", f"input_file_{i}{self.file_suffix}.xlsx")
             for i in self.input_files_to_run
         ]
         for fname in self.xlsx_fnames:
@@ -56,7 +53,7 @@ class TestConversion:
         for i, j in enumerate(self.input_files_to_run):
             old_user_list = load_usecase(j=j)
             convert_old_user_input_file(
-                self.py_fnames[i], output_path="test", suffix=self.file_suffix
+                self.py_fnames[i], output_path=os.path.join("ramp","test"), suffix=self.file_suffix
             )
             new_user_list = load_usecase(fname=self.xlsx_fnames[i])
             for old_user, new_user in zip(old_user_list, new_user_list):
@@ -130,7 +127,7 @@ def test_provide_no_appliance_window_when_declaring_one():
 def test_A():
     user = User("test user", 1)
 
-    old_params = dict(n=1, P=200, w=1, t=0)
+    old_params = dict(power=200, num_windows=1, func_time=0)
     win_start = 390
     win_stop = 540
     appliance1 = user.Appliance(user, **old_params)
