@@ -4,7 +4,7 @@ import numpy as np
 
 from ramp.core.core import User, Appliance
 from ramp.core.initialise import initialise_inputs
-e
+
 from ramp.ramp_convert_old_input_files import convert_old_user_input_file
 
 
