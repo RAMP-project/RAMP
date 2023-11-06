@@ -1,10 +1,15 @@
-ame: Deploy to Test PyPi
+name: Deploy to Test PyPi
 
-on: 
+on:
   push:
       branches:
         - development
         - main
+
+  pull_request:
+    branches:
+      - development
+      - main
 jobs:
   build_and_deploy:
     name: Build the release and deploy to test pypi
@@ -12,7 +17,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@master
-        
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v3
         with:
@@ -33,5 +38,5 @@ jobs:
         with:
           skip_existing: true
           verbose: true
-          password: ${{ secrets.SHAFT_PYPI_TEST }}
+          password: ${{ secrets.RAMP_TEST }}
           repository_url: https://test.pypi.org/legacy/
