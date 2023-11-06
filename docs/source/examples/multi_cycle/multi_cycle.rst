@@ -1,12 +1,13 @@
 Appliances with multiple cycles
 ===============================
 
-An example of an appliance with multiple cycle is fridge. Fridges
-usually have different duty cycles can be estimated based on seasonal
-temperature trends.
+An example of an appliance with multiple cycle is a fridge. Fridges
+usually have different duty cycles, which can be estimated based on seasonal
+temperature trends and/or frequency of user interaction (e.g., how often the 
+door gets opened).
 
 In this example a fridge with 3 different duty cycles is modelled. The
-time windows are defined for 3 different cycles for 3 different season
+time windows are defined for 3 different cycles across 3 different season
 types:
 
 +--------+------------------------------+--------------+--------------+

@@ -1,9 +1,9 @@
-Using excel to build a model
+Using tabular inputs to build a model
 ============================
 
-In some cases in which the number of users or appliances are high, it
-can be difficult to create a model using python scripts. In RAMP, there
-is the possibility to create inputs using excel. In this example we show
+When the number of users or appliances is high, it can be difficult 
+to create a model using python scripts. Therefore, RAMP allows you 
+to create inputs in tabular format (.xlsx). In this example we show
 a use case of this functionality.
 
 .. code:: ipython3
@@ -13,7 +13,7 @@ a use case of this functionality.
     import pandas as pd
 
 At the first step, user needs to creat User classes and assign
-Appliances to the user class without assiging detaild appliance
+Appliances to the user class without assiging any detailed appliance
 characteristics
 
 Buidling a model database
@@ -49,13 +49,13 @@ Buidling a model database
 
 .. parsed-literal::
 
-    /Users/mohammadamintahavori/Documents/GitHub/RAMP/ramp/core/core.py:738: UserWarning: No windows is declared, default window of 24 hours is selected
+    UserWarning: No windows is declared, default window of 24 hours is selected
       warnings.warn(UserWarning("No windows is declared, default window of 24 hours is selected"))
 
 
-Once the users and appliacnes are added to the use_case instance, the
-user can get a pd.DataFrame or an excel file of all the data with the
-default values:
+Once the users and appliances are added to the :code:`use_case` instance, the
+user can get a pd.DataFrame or an .xlsx file of all the data with the
+default values.
 
 Exporting the database
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -217,19 +217,12 @@ Exporting the database
 
 .. code:: ipython3
 
-    # Printing out the database to an excel file
+    # Printing out the database to an .xlsx file
     use_case.save("path/name_of_file")
 
-Once the function is used, an excel file will be created in the given
-path:
-
-.. figure:: excel_file.png
-   :alt: excel file image
-
-   excel file image
-
-Now the user can easily fill-out the information in the excel file and
-load the data into the model database as follow:
+Once the function is used, an .xlsx file will be created in the given
+path. Now you can easily fill-out the information in the .xlsx file and
+load the data into the model database as detailed below.
 
 Loading the database
 ~~~~~~~~~~~~~~~~~~~~
