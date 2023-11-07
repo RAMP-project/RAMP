@@ -2,15 +2,15 @@ Cooking Appliances
 ==================
 
 In this example, appliances with multiple preferences index and
-attributes are modeled.
+attributes are modelled.
 
 To have a better understanding of RAMP features for modelling these
 category of appliances, two households are considered:
 
-1. First household with a fixed lunch habit of eating soup everyday.
-2. Second household with two lunch preferences: cooking soup or rice.
+1. A household with a fixed lunch habit of eating soup everyday.
+2. A household with two lunch preferences: cooking soup or rice.
 
-The number of user preferences can be specified through
+The number of user preferences can be specified through the
 **“user_preference”** parameter when initializing a **User** instance.
 
 .. code:: ipython3
@@ -25,7 +25,7 @@ Creating a user category
 .. code:: ipython3
 
     user_1 = User(
-        user_name = "Household with single lunch habit",
+        user_name = "Household with a single lunch habit",
         num_users = 1,
         user_preference = 1, # user_1 has only one lunch preference
     )
@@ -39,7 +39,7 @@ Creating a user category
 Defining the cycles for cooking soup and rice
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-for cooking soup it is assumed that the user needs 25 minutes divided
+For cooking soup, we assume the user needs 25 minutes divided
 into two parts:
 
 ============= ===== ====
@@ -49,7 +49,7 @@ Boiling Water 1200  5
 Cooking soup  750   20
 ============= ===== ====
 
-for cooking rice it is assumed that the user needs 15 minutes divided
+For cooking rice, we assume the user needs 15 minutes divided
 into two parts:
 
 ============= ===== ====
@@ -78,15 +78,15 @@ Cooking rice  600   10
     )
 
 
-As second user has two different preferences for lunch, we need to model
-this preferences and their characterisitics as two different appliances.
+The second user has two different preferences for lunch. Accordingly, we need to model
+these preferences and their characterisitics as two different appliances.
 
-Each preference needs to be specified with the cooking energy needs like
+Each preference needs to be specified with its associated cooking energy needs, such as
 the power, functioning time and the duty cycles of the cooking process.
 
 More importantly, for each preference, the user needs to specify the
-index of preference by using **pref_index** parameter. In this example,
-soup is the first prefernce of the user (pref_index = 1), and rice is
+index of preference by using the **pref_index** parameter. In this example,
+soup is the first preference of the user (pref_index = 1), and rice is
 the second one (pref_index = 2).
 
 .. code:: ipython3
@@ -132,7 +132,7 @@ the second one (pref_index = 2).
 
 .. code:: ipython3
 
-    # you can have an overview of data inputs by usering User.export_to_dataframe method
+    # you can have an overview of the just defined input data by using User.export_to_dataframe method
     user_lunch = UseCase(users=[user_1,user_2])
     user_lunch.export_to_dataframe().T
 
@@ -167,7 +167,7 @@ the second one (pref_index = 2).
       <tbody>
         <tr>
           <th>user_name</th>
-          <td>Household with single lunch habit</td>
+          <td>Household with a single lunch habit</td>
           <td>Household with different lunch habit</td>
           <td>Household with different lunch habit</td>
         </tr>
@@ -514,10 +514,9 @@ Generating a profile for some months
         
 
 
-As the second user has the probability of cooking rice for lunch, and
-lunch has a less energy intensive cooking cycle, it is expected to see
-that the user with fixed lunch meal has higher energy consumption in
-most of the cases.
+Considering that the second user has the possibility of cooking rice for lunch, which 
+has a less energy-intensive cooking cycle, we expect to see a higher energy 
+consumption for the the user that only eats soup, in most of the cases.
 
 .. code:: ipython3
 

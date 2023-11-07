@@ -3,7 +3,7 @@ Thermal loads
 
 This example input file represents a single household user whose only
 load is the “shower”. The example showcases how to model thermal loads
-by means of the thermal_P_var attribute.
+by means of the :code:`thermal_P_var` attribute.
 
 .. code:: ipython3
 
@@ -19,7 +19,7 @@ Creating a user category and appliances
 
     household = User()
 
-when the power is variant during the day, the “power” parameter needs to
+When the power is varying during the day, the “power” parameter needs to
 be passed as a pd.DataFrame or np.array with a daily profile (365 rows
 of data). For this exercise, data can be loaded from the default
 examples in ramp:

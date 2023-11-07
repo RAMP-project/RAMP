@@ -153,8 +153,8 @@ Generating a profile for the ith day of the year
 .. image:: output_13_1.png
 
 
-whole year profile can be generated
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Whole year profile functionality
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 

@@ -52,7 +52,7 @@ Defining the peak time range using the calc_peak_time_range
 Defining the yearly patterns
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-by default the yearly_pattern function returns weekdays (defined by 0)
+By default the :code:`yearly_pattern` function returns weekdays (defined by 0)
 /weekends (defined by 1) division
 
 .. code:: ipython3

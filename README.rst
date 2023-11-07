@@ -11,7 +11,7 @@
     :target: https://rampdemand.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://github.com/RAMP-project/RAMP/blob/documentation/docs/source/_static/RAMP_logo_basic.png?raw=true
+.. image:: https://github.com/RAMP-project/RAMP/blob/main/docs/source/_static/RAMP_logo_basic.png?raw=true
    :width: 300
 
 
@@ -24,7 +24,7 @@ RAMP is an open-source software suite for the stochastic simulation of any user-
 
 The project aims to provide synthetic data wherever metered data does not exist, such as when designing systems in remote areas. Check out the `documentation <https://rampdemand.readthedocs.io/en/latest/?badge=latest>`_ and learn more on the RAMP world from our `website <https://rampdemand.org>`_! 
 
-.. image:: https://github.com/RAMP-project/RAMP/blob/master/docs/figures/Example_output.jpg?raw=true
+.. image:: https://github.com/RAMP-project/RAMP/blob/main/docs/figures/Example_output.jpg?raw=true
    :width: 600
 
 Recommended installation method
@@ -62,7 +62,7 @@ the following line in the *Anaconda Prompt*:
 
 
 Installing through the source code
-------------------------------
+----------------------------------
 You can also install RAMP from the source code! To do so, you first need to download the source code, which can be done in two ways:
 
 * You can use git to clone the repository via:

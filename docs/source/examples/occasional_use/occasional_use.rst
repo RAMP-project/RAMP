@@ -2,14 +2,16 @@ Appliances with occasional use
 ==============================
 
 There are some appliances that are occasionally included in the mix pf
-appliances that the user switches-on during the day. For example, iron,
-stereo, printers and …
+appliances that the user switches-on during the day. For example, an iron,
+a stereo, printers, etc.
 
-Within ramp, the user may specify the probability of using an appliance
+Within RAMP, the user may specify the probability of using an appliance
 on the daily mix with a parameter called, **occasional_use**.
 
-When occasional_use = 0, the appliance is always present in the mix and
-when occasional_use = 1, the appliance is never present.
+When :code:`occasional_use = 0`, the appliance is always present in the mix, and
+when :code:`occasional_use = 1`,  the appliance is never present. Any in-between
+values will lead to a probablistic calculation to decide whether the appliance
+is used or not on a given day.
 
 The following example, investigates the effect of this parameter by
 modelling two user category: \* A household that uses a computer with
@@ -163,4 +165,5 @@ Generating profiles
 
 
 As it can be seen from the figures, the computer is always present in
-the school appliance mix while for household, is occasionally present.
+the school's appliance mix while, for the household, it is only occasionally 
+present.
