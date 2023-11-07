@@ -62,7 +62,7 @@ the following line in the *Anaconda Prompt*:
 
 
 Installing through the source code
-------------------------------
+----------------------------------
 You can also install RAMP from the source code! To do so, you first need to download the source code, which can be done in two ways:
 
 * You can use git to clone the repository via:
