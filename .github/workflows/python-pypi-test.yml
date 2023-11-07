@@ -32,11 +32,11 @@ jobs:
       - name: test install package
         run: |
           pip install -e .
-      - name: Publish distribution 📦 to Test PyPI
+      - name: Publish distribution 📦 to TestPyPI
 
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          skip_existing: true
+          skip-existing: true
           verbose: true
-          password: ${{ secrets.RAMP_TEST }}
-          repository_url: https://test.pypi.org/legacy/
+          password: ${{ secrets.RAMP_TEST}}
+          repository-url: https://test.pypi.org/legacy/
