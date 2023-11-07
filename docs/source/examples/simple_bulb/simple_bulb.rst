@@ -154,7 +154,7 @@ Generating a profile for the ith day of the year
 
 
 Whole year profile functionality
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
