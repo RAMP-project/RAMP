@@ -22,7 +22,7 @@ What is RAMP
 ============
 RAMP is an open-source software suite for the stochastic simulation of any user-driven energy demand time series based on few simple inputs.
 
-The project aims to provide synthetic data wherever metered data does not exist, such as when designing systems in remote areas. Check out the `documentation <https://rampdemand.readthedocs.io/en/latest/?badge=latest>`_ and learn more on the RAMP world from our `website <https://rampdemand.org>`_! 
+The project aims to provide synthetic data wherever metered data does not exist, such as when designing systems in remote areas. Check out the `documentation <https://rampdemand.readthedocs.io/en/latest/?badge=latest>`_ and learn more on the RAMP world from our `website <https://rampdemand.org>`_!
 
 .. image:: https://github.com/RAMP-project/RAMP/blob/main/docs/figures/Example_output.jpg?raw=true
    :width: 600
@@ -151,9 +151,7 @@ need to run the ``ramp`` command with the option ``-i``:
 
 .. note:: You can input several files, separated from each others by a single blank space
 
-If you already know
-how many profile you want to simulate you can indicate it with the
-``-n`` option:
+If you already know how many profile you want to simulate you can indicate it with the ``-n`` option:
 
 .. code-block:: bash
 
