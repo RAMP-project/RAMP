@@ -9,63 +9,71 @@ import numpy as np
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Post-processing
-'''
+"""
 Just some additional code lines to calculate useful indicators and generate plots
-'''
+"""
+
+
 def Profile_formatting(stoch_profiles):
     Profile_avg = np.zeros(1440)
     for pr in stoch_profiles:
         Profile_avg = Profile_avg + pr
-    Profile_avg = Profile_avg/len(stoch_profiles)
+    Profile_avg = Profile_avg / len(stoch_profiles)
 
     Profile_kW = []
     for kW in stoch_profiles:
-        Profile_kW.append(kW/1000)
+        Profile_kW.append(kW / 1000)
 
     Profile_series = np.array([])
     for iii in stoch_profiles:
-        Profile_series = np.append(Profile_series,iii)
+        Profile_series = np.append(Profile_series, iii)
 
     return (Profile_avg, Profile_kW, Profile_series)
 
-def Profile_cloud_plot(stoch_profiles,stoch_profiles_avg):
-    #x = np.arange(0,1440,5)
-    plt.figure(figsize=(10,5))
+
+def Profile_cloud_plot(stoch_profiles, stoch_profiles_avg):
+    # x = np.arange(0,1440,5)
+    plt.figure(figsize=(10, 5))
     for n in stoch_profiles:
-        plt.plot(np.arange(1440),n,'#b0c4de')
-        plt.xlabel('Time (hours)')
-        plt.ylabel('Power (W)')
+        plt.plot(np.arange(1440), n, "#b0c4de")
+        plt.xlabel("Time (hours)")
+        plt.ylabel("Power (W)")
         plt.ylim(ymin=0)
-        #plt.ylim(ymax=5000)
+        # plt.ylim(ymax=5000)
         plt.margins(x=0)
         plt.margins(y=0)
-    plt.plot(np.arange(1440),stoch_profiles_avg,'#4169e1')
-    plt.xticks([0,240,480,(60*12),(60*16),(60*20),(60*24)],[0,4,8,12,16,20,24])
-    #plt.savefig('profiles.eps', format='eps', dpi=1000)
+    plt.plot(np.arange(1440), stoch_profiles_avg, "#4169e1")
+    plt.xticks(
+        [0, 240, 480, (60 * 12), (60 * 16), (60 * 20), (60 * 24)],
+        [0, 4, 8, 12, 16, 20, 24],
+    )
+    # plt.savefig('profiles.eps', format='eps', dpi=1000)
     plt.show()
 
 
 def Profile_series_plot(stoch_profiles_series):
-    #x = np.arange(0,1440,5)
-    plt.figure(figsize=(10,5))
-    plt.plot(np.arange(len(stoch_profiles_series)),stoch_profiles_series,'#4169e1')
-    #plt.xlabel('Time (hours)')
-    plt.ylabel('Power (W)')
+    # x = np.arange(0,1440,5)
+    plt.figure(figsize=(10, 5))
+    plt.plot(np.arange(len(stoch_profiles_series)), stoch_profiles_series, "#4169e1")
+    # plt.xlabel('Time (hours)')
+    plt.ylabel("Power (W)")
     plt.ylim(ymin=0)
-    #plt.ylim(ymax=5000)
+    # plt.ylim(ymax=5000)
     plt.margins(x=0)
     plt.margins(y=0)
-    #plt.xticks([0,240,480,(60*12),(60*16),(60*20),(60*24)],[0,4,8,12,16,20,24])
-    #plt.savefig('profiles.eps', format='eps', dpi=1000)
+    # plt.xticks([0,240,480,(60*12),(60*16),(60*20),(60*24)],[0,4,8,12,16,20,24])
+    # plt.savefig('profiles.eps', format='eps', dpi=1000)
     plt.show()
 
+
 # Export individual profiles
-'''
+"""
 for i in range (len(Profile)):
     np.save('p0%d.npy' % (i), Profile[i])
-'''
+"""
 
 # Export Profiles
+
 
 def export_series(stoch_profiles_series, j=None, fname=None, ofname=None):
     series_frame = pd.DataFrame(stoch_profiles_series)
@@ -91,44 +99,46 @@ def export_series(stoch_profiles_series, j=None, fname=None, ofname=None):
         print("No path to a file was provided to write the results")
 
 
-valid_units = ('kW',"W","MW","GW","TW")
+valid_units = ("kW", "W", "MW", "GW", "TW")
+
+
 class Run:
-
-    def __init__(self,user,unit,calendar_years):
-
+    def __init__(self, user, unit, calendar_years):
         self.user = user
         self.unit = unit
 
-        if isinstance(calendar_years,int):
+        if isinstance(calendar_years, int):
             calendar_years = [calendar_years]
 
         self.calendar_years = calendar_years
 
         datatimeIndexes = [
-            pd.date_range(start=f"{year}-01-01",periods=365*60*24,freq="1min",name = "date")
+            pd.date_range(
+                start=f"{year}-01-01", periods=365 * 60 * 24, freq="1min", name="date"
+            )
             for year in self.calendar_years
         ]
         self._datetimeIndex = datatimeIndexes[0]
 
-        for year,Index in enumerate(datatimeIndexes):
+        for year, Index in enumerate(datatimeIndexes):
             if year != 0:
-                self._datetimeIndex=self._datetimeIndex.append(Index)
+                self._datetimeIndex = self._datetimeIndex.append(Index)
 
     @property
     def unit(self):
         return self._unit
 
     @unit.setter
-    def unit(self,var):
+    def unit(self, var):
         if var not in valid_units:
             raise ValueError(f"valid units are: {valid_units}")
 
         self._unit = var
 
-
-    def _get_DatetimeIndex(self,starting_day,n_days):
-
-        request = pd.date_range(start=starting_day,periods=n_days*24*60,freq="1min")
+    def _get_DatetimeIndex(self, starting_day, n_days):
+        request = pd.date_range(
+            start=starting_day, periods=n_days * 24 * 60, freq="1min"
+        )
 
         request_intersection = self._datetimeIndex.intersection(request)
 
@@ -137,27 +147,23 @@ class Run:
 
         return request
 
-    def generate_profiles(self,starting_day,n_days,peak_time_range,columns=["Baseline"]):
-        idx = self._get_DatetimeIndex(starting_day,n_days)
+    def generate_profiles(
+        self, starting_day, n_days, peak_time_range, columns=["Baseline"]
+    ):
+        idx = self._get_DatetimeIndex(starting_day, n_days)
         results = {}
         for profile in columns:
             profiles = []
-            for prof_i in  idx.day_of_year.unique():
-
+            for prof_i in idx.day_of_year.unique():
                 result = self.user.generate_aggregated_load_profile(
-                    prof_i = prof_i,
-                    day_type = 1,
-                    peak_time_range = peak_time_range
+                    prof_i=prof_i, day_type=1, peak_time_range=peak_time_range
                 )
 
                 profiles.extend(result.tolist())
 
-            results[profile] = pd.Series(index=idx,data=profiles)
+            results[profile] = pd.Series(index=idx, data=profiles)
 
-
-        return Plot(pd.concat(results,axis=1))
-
-
+        return Plot(pd.concat(results, axis=1))
 
 
 class Plot:
@@ -178,8 +184,9 @@ class Plot:
     columns : Index or list-like
         Column labels to use for resulting frame when representing the simulation cases
     """
+
     @classmethod
-    def from_file(self,file,sheet_name=0,sep=",",index=None):
+    def from_file(self, file, sheet_name=0, sep=",", index=None):
         """initializing a Plot object from a file results
 
         Parameters
@@ -200,20 +207,21 @@ class Plot:
         """
 
         if file.endswith(".csv"):
-            df = pd.read_csv(file,sheet_name=sheet_name,index_col=0,header=0,sep=sep)
+            df = pd.read_csv(
+                file, sheet_name=sheet_name, index_col=0, header=0, sep=sep
+            )
 
         elif file.endswith(".xlsx"):
-
-            df = pd.read_excel(file,sheet_name=sheet_name,index_col=0,header=0)
+            df = pd.read_excel(file, sheet_name=sheet_name, index_col=0, header=0)
 
         else:
-            raise ValueError("unkwnon format specified for the file. Only .csv or .xlsx formats are allowed.")
+            raise ValueError(
+                "unkwnon format specified for the file. Only .csv or .xlsx formats are allowed."
+            )
 
-        return Plot(df,index)
+        return Plot(df, index)
 
-
-
-    def __init__(self,df,index=None):
+    def __init__(self, df, index=None):
         """initializes a Plot object using a pd.DataFrame
 
         Parameters
@@ -230,11 +238,9 @@ class Plot:
 
         self.DataFrame = df
 
-
     @property
     def freq(self):
-        """return the frequency of the pd.DatetimeIndex
-        """
+        """return the frequency of the pd.DatetimeIndex"""
         return self.df.index.freq
 
     @property
@@ -249,14 +255,14 @@ class Plot:
         return self.df.columns.tolist()
 
     @columns.setter
-    def columns(self,var):
+    def columns(self, var):
         self.df.columns = var
 
     @property
     def index(self):
         return self.df.index
 
-    def resample(self,freq,rule,conversion=1,inplace=False):
+    def resample(self, freq, rule, conversion=1, inplace=False):
         """returns a resampled version of the data
 
         Parameters
@@ -277,8 +283,8 @@ class Plot:
         """
         df = self.df.copy()
 
-        df = df/conversion
-        df = getattr(df.resample(freq),rule)()
+        df = df / conversion
+        df = getattr(df.resample(freq), rule)()
 
         if inplace:
             self.df = df
@@ -286,7 +292,7 @@ class Plot:
         else:
             return Plot(df)
 
-    def line(self,columns=None,engine="matplotlib",**kwargs):
+    def line(self, columns=None, engine="matplotlib", **kwargs):
         """creating a like plot
 
         Parameters
@@ -311,20 +317,24 @@ class Plot:
             df = self.df[columns]
 
         if engine == "plotly":
-
             fig = px.line(df)
             fig.update_layout(**kwargs)
 
             return fig
 
         elif engine == "matplotlib":
-
-            ax = df.plot(kind="line",**kwargs)
+            ax = df.plot(kind="line", **kwargs)
 
             return ax
 
-
-    def shadow(self,main_column=None,columns="all",average=True,engine="matplotlib",**kwargs):
+    def shadow(
+        self,
+        main_column=None,
+        columns="all",
+        average=True,
+        engine="matplotlib",
+        **kwargs,
+    ):
         """creating a shadow plot
 
         Parameters
@@ -347,13 +357,15 @@ class Plot:
         engine = self._check_engine(engine)
 
         if main_column is None and average == False:
-            raise ValueError("one of columns should be passed as the main_column when the average = False")
+            raise ValueError(
+                "one of columns should be passed as the main_column when the average = False"
+            )
 
         elif main_column is not None and average == True:
             raise ValueError("main_column cannot be given when average = True")
 
         elif main_column is not None and average == False:
-            df_main  = (self.df.copy()[main_column]).to_frame(main_column)
+            df_main = (self.df.copy()[main_column]).to_frame(main_column)
 
         else:
             df_main = (self.mean()).df["Mean"].to_frame("Average")
@@ -363,54 +375,52 @@ class Plot:
 
         df_other = self.df.copy()[columns]
 
-        if isinstance(df_other,pd.Series):
+        if isinstance(df_other, pd.Series):
             df_other = df_other.to_frame(columns)
 
         if engine == "matplotlib":
             fig = plt.figure(**kwargs)
             ax = fig.add_subplot(1, 1, 1)
 
-            ax.plot(df_main.index, df_main.values,color="black",label=df_main.columns[0])
+            ax.plot(
+                df_main.index, df_main.values, color="black", label=df_main.columns[0]
+            )
 
-            ax.plot(df_other.index,df_other.values,alpha=0.3,color="black")
+            ax.plot(df_other.index, df_other.values, alpha=0.3, color="black")
 
             ax.legend()
 
-            return fig,ax
+            return fig, ax
 
         elif engine == "plotly":
             fig = go.Figure()
 
             fig.add_trace(
                 go.Scatter(
-                    x = df_main.index,
-                    y = df_main.values.ravel(),
-                    mode = "lines",
-                    name = df_main.columns[0],
-                    line = dict(color = "rgb(0,0,0)")
+                    x=df_main.index,
+                    y=df_main.values.ravel(),
+                    mode="lines",
+                    name=df_main.columns[0],
+                    line=dict(color="rgb(0,0,0)"),
                 )
             )
 
-            for col,vals in df_other.items():
-
+            for col, vals in df_other.items():
                 fig.add_trace(
                     go.Scatter(
-                        x = vals.index,
-                        y = vals.values.ravel(),
-                        mode = "lines",
+                        x=vals.index,
+                        y=vals.values.ravel(),
+                        mode="lines",
                         showlegend=False,
-                        line = dict(color = "rgba(0,0,0,0.15)")
+                        line=dict(color="rgba(0,0,0,0.15)"),
                     )
                 )
-
-
 
             fig.update_layout(**kwargs)
 
             return fig
 
-
-    def area(self,columns=None,engine="matplotlib",**kwargs):
+    def area(self, columns=None, engine="matplotlib", **kwargs):
         """an area plot
 
         Parameters
@@ -434,17 +444,15 @@ class Plot:
             df = self.df[columns]
 
         if engine == "matplotlib":
-            return df.plot(kind = "area",**kwargs)
+            return df.plot(kind="area", **kwargs)
 
         elif engine == "plotly":
-
-            fig =  px.area(df)
+            fig = px.area(df)
             fig.update_layout(**kwargs)
 
             return fig
 
-
-    def load_duration_curve(self,column,engine="matplotlib",**kwargs):
+    def load_duration_curve(self, column, engine="matplotlib", **kwargs):
         """plots the load duration curve
 
         Parameters
@@ -464,24 +472,21 @@ class Plot:
 
         df = self.df[[column]]
 
-
-        df = df.sort_values(by=column,ascending=False)
-        df.index = [i for i in range(1,len(df.index)+1)]
+        df = df.sort_values(by=column, ascending=False)
+        df.index = [i for i in range(1, len(df.index) + 1)]
 
         if engine == "plotly":
+            fig = px.line(df)
+            fig.update_layout(**kwargs)
 
-                fig = px.line(df)
-                fig.update_layout(**kwargs)
-
-                return fig
+            return fig
 
         elif engine == "matplotlib":
-
-            ax = df.plot(kind="line",**kwargs)
+            ax = df.plot(kind="line", **kwargs)
 
             return ax
 
-    def error(self,base_column,validated_data):
+    def error(self, base_column, validated_data):
         """returns the error
 
         Parameters
@@ -497,11 +502,14 @@ class Plot:
             error in each time slice
         """
 
-        er =  (self.df[base_column] - self.df[validated_data])/self.df[validated_data].values * 100
+        er = (
+            (self.df[base_column] - self.df[validated_data])
+            / self.df[validated_data].values
+            * 100
+        )
         er = er.fillna(0)
 
         return er
-
 
     @property
     def peak(self):
@@ -515,34 +523,31 @@ class Plot:
 
         output = {}
 
-        for col,vals in self.df.items():
+        for col, vals in self.df.items():
             max = vals.loc[vals == vals.max()]
 
             output[col] = max
 
         return output
 
-
     def __repr__(self):
         return str(self)
 
     def __str__(self) -> str:
-        return (self.DataFrame.head(10).to_string() + "\n ......")
+        return self.DataFrame.head(10).to_string() + "\n ......"
 
     @property
     def DataFrame(self):
-        """returns the data of the Plot object
-        """
+        """returns the data of the Plot object"""
         return self.df
 
     @DataFrame.setter
-    def DataFrame(self,var):
-
-        self._validate_df(var,check_index=False)
+    def DataFrame(self, var):
+        self._validate_df(var, check_index=False)
 
         self.df = var
 
-    def add_column(self,var):
+    def add_column(self, var):
         """adds new column to the data
 
         Parameters
@@ -550,22 +555,20 @@ class Plot:
         var : pd.DataFrame
             a pd.DataFrame with similar index to the main dataset
         """
-        if isinstance(var,Plot):
+        if isinstance(var, Plot):
             var = var.DataFrame
 
         self._validate_df(var)
 
         self.df[var.columns] = var.values
 
-
-    def __getitem__(self,key):
-
-        if isinstance(key,str):
+    def __getitem__(self, key):
+        if isinstance(key, str):
             key = [key]
 
         return Plot(self.DataFrame[key])
 
-    def loc(self,index=slice(None),columns=slice(None)):
+    def loc(self, index=slice(None), columns=slice(None)):
         """loc method to filter the data
 
         Parameters
@@ -581,9 +584,9 @@ class Plot:
             a Plot object using the index and columns filters
         """
 
-        return Plot(self.DataFrame.loc[index,columns])
+        return Plot(self.DataFrame.loc[index, columns])
 
-    def iloc(self,index=slice(None),columns=slice(None)):
+    def iloc(self, index=slice(None), columns=slice(None)):
         """iloc method to filter the data based on position index
 
         Parameters
@@ -599,9 +602,9 @@ class Plot:
             a Plot object using the index and columns filters
         """
 
-        return Plot(self.DataFrame.iloc[index,columns])
+        return Plot(self.DataFrame.iloc[index, columns])
 
-    def head(self,var):
+    def head(self, var):
         """returns the top var numbers of data
 
         Parameters
@@ -616,7 +619,7 @@ class Plot:
         """
         return Plot(self.DataFrame.head(var))
 
-    def plot(self,**kwargs):
+    def plot(self, **kwargs):
         """returns a pd.DataFrame.plot object
 
         Returns
@@ -625,18 +628,19 @@ class Plot:
         """
         return self.DataFrame.plot(**kwargs)
 
-    def _validate_df(self,other,check_index=True):
-        if not isinstance(other,pd.DataFrame):
+    def _validate_df(self, other, check_index=True):
+        if not isinstance(other, pd.DataFrame):
             raise ValueError("only pd.DataFrame object is allowed")
 
-        if not(isinstance,other.index,pd.DatetimeIndex):
+        if not (isinstance, other.index, pd.DatetimeIndex):
             raise ValueError("a valid dataframe shoud has only a pd.DatatimeIndex")
         if check_index:
             if not self.index.equals(other.index):
-                raise ValueError("the new column should have identical index with the existing DataFrame")
+                raise ValueError(
+                    "the new column should have identical index with the existing DataFrame"
+                )
 
-
-    def to_excel(self,path):
+    def to_excel(self, path):
         """saves the data into excel
 
         Parameters
@@ -648,7 +652,7 @@ class Plot:
         with pd.ExcelWriter(path) as file:
             self.DataFrame.to_excel(file)
 
-    def to_csv(self,path,sep=','):
+    def to_csv(self, path, sep=","):
         """saves the data into csv
 
         Parameters
@@ -658,7 +662,7 @@ class Plot:
         sep : str,optional
             csv separator
         """
-        self.DataFrame.to_csv(path,sep=sep)
+        self.DataFrame.to_csv(path, sep=sep)
 
     def mean(self):
         """returns the mean of the columns
@@ -681,19 +685,16 @@ class Plot:
         return Plot(self.DataFrame.sum(1).to_frame("Sum"))
 
     def copy(self):
-        """returns a copy of the existing object
-        """
+        """returns a copy of the existing object"""
         return Plot(self.df.copy())
 
-    def _check_engine(self,engine):
-
+    def _check_engine(self, engine):
         if engine.lower() == "matplotlib":
-
             return "matplotlib"
 
         elif engine.lower() == "plotly":
-
             return "plotly"
 
-        raise ValueError(f"{engine} is not a valid plot engine. Only 'Plotly' and 'matplotlib are valid.'")
-
+        raise ValueError(
+            f"{engine} is not a valid plot engine. Only 'Plotly' and 'matplotlib are valid.'"
+        )

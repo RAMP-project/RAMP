@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#%% Import required libraries
+# %% Import required libraries
 import numpy as np
-import random 
+import random
 import math
 from ramp.core.initialise import initialise_inputs
 from ramp.core.core import UseCase
 
-#%% Core model stochastic script
+# %% Core model stochastic script
 
 
 def calc_peak_time_range(user_list, peak_enlarge=0.15):
@@ -44,16 +44,24 @@ def calc_peak_time_range(user_list, peak_enlarge=0.15):
     # Find the peak window within the theoretical max profile
     peak_window = np.squeeze(np.argwhere(tot_max_profile == np.amax(tot_max_profile)))
     # Within the peak_window, randomly calculate the peak_time using a gaussian distribution
-    peak_time = round(random.normalvariate(
-        mu=round(np.average(peak_window)),
-        sigma=1 / 3 * (peak_window[-1] - peak_window[0])
-    ))
-    rand_peak_enlarge = round(math.fabs(peak_time - random.gauss(mu=peak_time, sigma=peak_enlarge * peak_time)))
+    peak_time = round(
+        random.normalvariate(
+            mu=round(np.average(peak_window)),
+            sigma=1 / 3 * (peak_window[-1] - peak_window[0]),
+        )
+    )
+    rand_peak_enlarge = round(
+        math.fabs(
+            peak_time - random.gauss(mu=peak_time, sigma=peak_enlarge * peak_time)
+        )
+    )
     # The peak_time is randomly enlarged based on the calibration parameter peak_enlarge
     return np.arange(peak_time - rand_peak_enlarge, peak_time + rand_peak_enlarge)
 
 
-def stochastic_process(j=None, fname=None, num_profiles=None, day_type=None, parallel=False):
+def stochastic_process(
+    j=None, fname=None, num_profiles=None, day_type=None, parallel=False
+):
     """Generate num_profiles load profile for the usecase
 
         Covers steps 1. and 2. of the algorithm described in [1], p.6-7
@@ -77,8 +85,12 @@ def stochastic_process(j=None, fname=None, num_profiles=None, day_type=None, par
     uc = UseCase(users=user_list)
 
     if parallel is True:
-        profiles = uc.generate_daily_load_profiles_parallel(num_profiles, peak_time_range, day_type)
+        profiles = uc.generate_daily_load_profiles_parallel(
+            num_profiles, peak_time_range, day_type
+        )
     else:
-        profiles = uc.generate_daily_load_profiles(num_profiles, peak_time_range, day_type)
+        profiles = uc.generate_daily_load_profiles(
+            num_profiles, peak_time_range, day_type
+        )
 
     return profiles

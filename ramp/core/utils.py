@@ -166,6 +166,7 @@ def random_choice(var, t1, p1, t2, p2):
         ]
     )
 
+
 def get_day_type(day):
     """Given a datetime object return 0 for weekdays or 1 for weekends"""
     if day.weekday() > 4:
@@ -188,7 +189,11 @@ def yearly_pattern(year=None):
         year_behaviour = year_behaviour.tolist()
     else:
         # a list with 0 for weekdays and 1 for weekends
-        year_behaviour = pd.date_range(start=f"{year}-01-01", end=f"{year}-12-31", freq="D").map(get_day_type).to_list()
+        year_behaviour = (
+            pd.date_range(start=f"{year}-01-01", end=f"{year}-12-31", freq="D")
+            .map(get_day_type)
+            .to_list()
+        )
     return year_behaviour
 
 
@@ -205,11 +210,18 @@ def within_peak_time_window(win_start, win_stop, peak_win_start, peak_win_stop):
 
 
 def calc_time_taken(func):
-    """ Calculates the time elapsed during the execution of a function"""
+    """Calculates the time elapsed during the execution of a function"""
+
     def wrapper(*args, **kwargs):
         start = time.time()
         result = func(*args, **kwargs)
         end = time.time()
-        print(func.__name__ + ' required ' + str((end-start)*1) + ' seconds for execution. ')
+        print(
+            func.__name__
+            + " required "
+            + str((end - start) * 1)
+            + " seconds for execution. "
+        )
         return result
+
     return wrapper

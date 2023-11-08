@@ -57,11 +57,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--ext",
-    dest="extension",
-    type=str,
-    help="Format of input files",
-    default="xlsx"
+    "--ext", dest="extension", type=str, help="Format of input files", default="xlsx"
 )
 
 parser.add_argument(
@@ -76,7 +72,6 @@ parser.add_argument(
 
 
 def main():
-
     args = vars(parser.parse_args())
     fnames = args["fname_path"]
     ofnames = args["ofname_path"]
@@ -100,7 +95,9 @@ def main():
 
     if years is not None:
         if date_start is not None or date_end is not None:
-            raise ValueError("You cannot use the option -y in combinaison with --date-start and/or --date-end")
+            raise ValueError(
+                "You cannot use the option -y in combinaison with --date-start and/or --date-end"
+            )
         else:
             date_start = datetime.date(years[0], 1, 1)
             date_end = datetime.date(years[-1], 12, 31)
@@ -109,19 +106,26 @@ def main():
             # Triggers the special mode "one input file per month"
             if os.path.isdir(fnames[0]):
                 dir_path = fnames[0]
-                fnames = [os.path.join(dir_path, f) for f in os.listdir(fnames[0]) if f.endswith(ext)]
-                fnames.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
+                fnames = [
+                    os.path.join(dir_path, f)
+                    for f in os.listdir(fnames[0])
+                    if f.endswith(ext)
+                ]
+                fnames.sort(key=lambda f: int("".join(filter(str.isdigit, f))))
 
                 if len(fnames) == 12:
-                    print("The following input files were found and will be used in this exact order for month inputs")
+                    print(
+                        "The following input files were found and will be used in this exact order for month inputs"
+                    )
                     print("\n".join(fnames))
                     month_files = True
                     year = years[0]
                 else:
-                    raise ValueError(f"You want to simulate a whole year, yet the folder {dir_path} only contains {len(fnames)} out of the 12 monthes required")
+                    raise ValueError(
+                        f"You want to simulate a whole year, yet the folder {dir_path} only contains {len(fnames)} out of the 12 monthes required"
+                    )
             else:
                 print("You selected a single year but the input path is not a folder.")
-
 
     if date_start is not None and date_end is not None:
         days = pd.date_range(start=date_start, end=date_end)
@@ -132,7 +136,9 @@ def main():
         ofnames = [None]
 
     if fnames is None:
-        print("Please provide path to input file with option -i, \n\nDefault to old version of RAMP input files\n")
+        print(
+            "Please provide path to input file with option -i, \n\nDefault to old version of RAMP input files\n"
+        )
         # Files are specified as numbers in a list (e.g. [1,2] will consider input_file_1.py and input_file_2.py)
         from ramp.ramp_run import input_files_to_run
 
@@ -142,7 +148,8 @@ def main():
             else:
                 if len(num_profiles) != len(input_files_to_run):
                     raise ValueError(
-                        "The number of profiles parameters  should match the number of input files provided")
+                        "The number of profiles parameters  should match the number of input files provided"
+                    )
         else:
             num_profiles = [None] * len(input_files_to_run)
 
@@ -167,34 +174,49 @@ def main():
             else:
                 if len(num_profiles) != len(fnames):
                     raise ValueError(
-                        "The number of profiles parameters  should match the number of input files provided")
+                        "The number of profiles parameters  should match the number of input files provided"
+                    )
         else:
             num_profiles = [None] * len(fnames)
         if month_files is True:
             year_profile = []
             for i, fname in enumerate(fnames):
-                month_start = datetime.date(year, i+1, 1)
-                month_end = datetime.date(year, i+1, pd.Period(month_start, freq="D").days_in_month)
-                days = pd.date_range(start=month_start, end=month_end, freq='D')
-                monthly_profiles = run_usecase(fname=fname, num_profiles=num_profiles[i], days=days, plot=False, parallel=parallel_processing)
+                month_start = datetime.date(year, i + 1, 1)
+                month_end = datetime.date(
+                    year, i + 1, pd.Period(month_start, freq="D").days_in_month
+                )
+                days = pd.date_range(start=month_start, end=month_end, freq="D")
+                monthly_profiles = run_usecase(
+                    fname=fname,
+                    num_profiles=num_profiles[i],
+                    days=days,
+                    plot=False,
+                    parallel=parallel_processing,
+                )
                 year_profile.append(np.hstack(monthly_profiles))
 
             # Create a dataFrame to save the year profile with timestamps every minutes
             series_frame = pd.DataFrame(
                 np.hstack(year_profile),
-                index=pd.date_range(start=f"{year}-1-1", end=f"{year}-12-31 23:59", freq="T")
+                index=pd.date_range(
+                    start=f"{year}-1-1", end=f"{year}-12-31 23:59", freq="T"
+                ),
             )
             # Save to minute and hour resolution
             # TODO let the user choose where to save the files/file_name, make sure the user wants to overwrite the file
             # if it already exists
-            series_frame.to_csv(os.path.join(BASE_PATH, 'yearly_profile_min_resolution.csv'))
+            series_frame.to_csv(
+                os.path.join(BASE_PATH, "yearly_profile_min_resolution.csv")
+            )
             resampled = pd.DataFrame()
 
             resampled["mean"] = series_frame.resample("H").mean()
             resampled["max"] = series_frame.resample("H").max()
             resampled["min"] = series_frame.resample("H").min()
-            #TODO add more columns with other resampled functions (do this in Jupyter)
-            resampled.to_csv(os.path.join(BASE_PATH, 'yearly_profile_hourly_resolution.csv'))
+            # TODO add more columns with other resampled functions (do this in Jupyter)
+            resampled.to_csv(
+                os.path.join(BASE_PATH, "yearly_profile_hourly_resolution.csv")
+            )
         else:
             if len(ofnames) == 1:
                 ofnames = ofnames * len(fnames)
@@ -214,5 +236,4 @@ def main():
 
 
 if __name__ == "__main__":
-
     main()

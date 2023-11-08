@@ -10,7 +10,7 @@ import numpy as np
 import scipy.stats as stats
 from ramp.core.initialise import user_defined_inputs
 from ramp.core.stochastic_process import calc_peak_time_range
-    
+
 
 def test_peak_time_range_values():
     """
@@ -25,22 +25,22 @@ def test_peak_time_range_values():
     """
 
     user_list = user_defined_inputs(j=1, fname=None)
-    
+
     num_repetitions = 100  # Set the desired number of repetitions
     results = []
-    
+
     for _ in range(num_repetitions):
         peak_time_range = calc_peak_time_range(user_list, peak_enlarge=0.15)
         results.append(peak_time_range)
-    
+
     statistics_dict = {}
-    
+
     # Performing statistical analysis on the results
     for i, arr in enumerate(results):
-        statistics_dict[i] = {'mean': np.mean(arr)}
+        statistics_dict[i] = {"mean": np.mean(arr)}
 
     # Extract the mean values
-    mean_sample = [inner_dict['mean'] for inner_dict in statistics_dict.values()]
+    mean_sample = [inner_dict["mean"] for inner_dict in statistics_dict.values()]
     # Perform the normality test (Shapiro-Wilk in this sample)
     _, p_value = stats.shapiro(mean_sample)
     assert p_value > 0.05
