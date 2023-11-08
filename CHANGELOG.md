@@ -1,18 +1,24 @@
 Release History
 ===============
 
-0.4.2 (dev)
+0.4.3 (dev)
 ------------------
 
-**|new|**       continuous integration setup
+0.4.2 (2023-11-09)
+------------------
+**|new|**       classes to plot and save RAMP simulation results for post-processing (#89)
 
-**|new|**       first automated tests
+**|new|**       continuous integration setup (#94 and #96)
 
-**|fixed|**     installation options have been debugged and the documentation updated accordingly
+**|new|**       first automated tests (#93)
 
-**|fixed|**     automated download of example applications via the `download_example` functions now includes previously missing .csv files
+**|fixed|**     moved the randomization of daily preference from appliance to user level (#92)
 
-0.4.1 (2023-10-XX)
+**|fixed|**     installation options have been debugged and the documentation updated accordingly (#76, #95)
+
+**|fixed|**     automated download of example applications via the `download_example` functions now includes previously missing .csv files (#69)
+
+0.4.1 (2023-10-08)
 ------------------
 
 **|hotfix|**    added option `-o` to the terminal command line interface to enable the user to provide output path to save ramp results. This option is also accessible to python users using `ofname` argument of the `ramp/ramp_run.py::run_usecase` or the `ramp/post_process/post_process.py::export_series` functions. 
