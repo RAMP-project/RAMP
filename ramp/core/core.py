@@ -12,12 +12,26 @@ import multiprocessing
 import warnings
 import random
 import math
-from ramp.core.constants import NEW_TO_OLD_MAPPING, APPLIANCE_ATTRIBUTES, APPLIANCE_ARGS, WINDOWS_PARAMETERS, DUTY_CYCLE_PARAMETERS, switch_on_parameters
-from ramp.core.utils import random_variation, duty_cycle, random_choice, read_input_file, within_peak_time_window
+from ramp.core.constants import (
+    NEW_TO_OLD_MAPPING,
+    APPLIANCE_ATTRIBUTES,
+    APPLIANCE_ARGS,
+    WINDOWS_PARAMETERS,
+    DUTY_CYCLE_PARAMETERS,
+    switch_on_parameters,
+)
+from ramp.core.utils import (
+    random_variation,
+    duty_cycle,
+    random_choice,
+    read_input_file,
+    within_peak_time_window,
+)
 
 
-from typing import List, Union,Iterable
-from ramp.errors_logs.errors import InvalidType,InvalidWindow
+from typing import List, Union, Iterable
+from ramp.errors_logs.errors import InvalidType, InvalidWindow
+
 
 def single_appliance_daily_load_profile(args):
     app, args = args
@@ -27,8 +41,8 @@ def single_appliance_daily_load_profile(args):
 
 
 class UseCase:
-    def __init__(self, name:str="", users:Union[List,None]=None):
-        """ Creates a UseCase instance for gathering a list of User instances which own Appliance instances
+    def __init__(self, name: str = "", users: Union[List, None] = None):
+        """Creates a UseCase instance for gathering a list of User instances which own Appliance instances
 
         Parameters
         ----------
@@ -60,14 +74,15 @@ class UseCase:
         if isinstance(user, User):
             self.users.append(user)
         else:
-            raise InvalidType(f"{type(user)} is not valid. Only 'User' type is acceptable.")
+            raise InvalidType(
+                f"{type(user)} is not valid. Only 'User' type is acceptable."
+            )
 
     def collect_appliances_from_users(self):
         appliances = []
         for user in self.users:
             appliances = appliances + user.App_list
         self.appliances = appliances
-
 
     def generate_daily_load_profiles(self, num_profiles, peak_time_range, day_types):
         profiles = []
@@ -78,15 +93,19 @@ class UseCase:
             # for each User instance generate a load profile, iterating through all user of this instance and
             # all appliances they own, corresponds to step 2. of [1], p.7
             for user in self.users:
-                user.generate_aggregated_load_profile(prof_i, peak_time_range, day_types)
+                user.generate_aggregated_load_profile(
+                    prof_i, peak_time_range, day_types
+                )
                 # aggregate the user load to the usecase load
                 usecase_load = usecase_load + user.load
             profiles.append(usecase_load)
             # screen update about progress of computation
-            #print('Profile', prof_i+1, '/', num_profiles, 'completed')
+            # print('Profile', prof_i+1, '/', num_profiles, 'completed')
         return profiles
 
-    def generate_daily_load_profiles_parallel(self, num_profiles, peak_time_range, day_types):
+    def generate_daily_load_profiles_parallel(
+        self, num_profiles, peak_time_range, day_types
+    ):
         max_parallel_processes = multiprocessing.cpu_count()
         tasks = []
         t = 0
@@ -103,12 +122,13 @@ class UseCase:
 
         with multiprocessing.Pool(max_parallel_processes) as pool:
             with tqdm(
-                    total=len(tasks),
-                    desc=f"Computing appliances profiles",
-                    unit="unit",
+                total=len(tasks),
+                desc=f"Computing appliances profiles",
+                unit="unit",
             ) as pbar:
-
-                imap_unordered_it = pool.imap_unordered(single_appliance_daily_load_profile, tasks, chunksize=4)
+                imap_unordered_it = pool.imap_unordered(
+                    single_appliance_daily_load_profile, tasks, chunksize=4
+                )
                 for prof_i, daily_load in imap_unordered_it:
                     if prof_i in daily_profiles_dict:
                         daily_profiles_dict[prof_i].append(daily_load)
@@ -119,11 +139,13 @@ class UseCase:
             daily_profiles = np.zeros((num_profiles, 1440))
 
             for day_id in range(num_profiles):
-                daily_profiles[day_id, :] = np.vstack(daily_profiles_dict[day_id]).sum(axis=0)
+                daily_profiles[day_id, :] = np.vstack(daily_profiles_dict[day_id]).sum(
+                    axis=0
+                )
 
         return daily_profiles
 
-    def save(self, filename:str=None) -> Union[pd.DataFrame,None]:
+    def save(self, filename: str = None) -> Union[pd.DataFrame, None]:
         """Saves/returns the model databas including all the users and their appliances as a single pd.DataFrame or excel file.
 
         Parameters
@@ -161,7 +183,7 @@ class UseCase:
         """
         return self.save()
 
-    def load(self, filename:str) -> None:
+    def load(self, filename: str) -> None:
         """Open an .xlsx file which was produced via the save method and create instances of Users and Appliances
 
         Parameters
@@ -247,11 +269,10 @@ class UseCase:
         self.collect_appliances_from_users()
 
 
-
-
-
 class User:
-    def __init__(self, user_name:str="", num_users:int=1, user_preference:int=0):
+    def __init__(
+        self, user_name: str = "", num_users: int = 1, user_preference: int = 0
+    ):
         """Creates a User instance (User Category)
 
         Parameters
@@ -268,10 +289,14 @@ class User:
         self.user_preference = user_preference
         self.rand_daily_pref = 0
         self.load = None
-        self.App_list = []  # each instance of User (i.e. each user class) has its own list of Appliances
+        self.App_list = (
+            []
+        )  # each instance of User (i.e. each user class) has its own list of Appliances
 
     def __repr__(self):
-        return self.save()[["user_name","num_users","name","number","power"]].to_string()
+        return self.save()[
+            ["user_name", "num_users", "name", "number", "power"]
+        ].to_string()
 
     def add_appliance(self, *args, **kwargs):
         """adds an appliance to the user category with all the appliance characteristics in a single function
@@ -302,7 +327,7 @@ class User:
                 if k in kwargs:
                     cycle_parameters[k] = kwargs.pop(k)
             if cycle_parameters:
-                duty_cycle_parameters[i+1] = cycle_parameters
+                duty_cycle_parameters[i + 1] = cycle_parameters
 
         app = Appliance(self, **kwargs)
 
@@ -324,11 +349,15 @@ class User:
         user_max_profile = np.zeros(1440)
         for appliance in self.App_list:
             # Calculate windows curve, i.e. the theoretical maximum curve that can be obtained, for each app, by switching-on always all the 'n' apps altogether in any time-step of the functioning windows
-            app_max_profile = appliance.maximum_profile  # this computes the curve for the specific App
-            user_max_profile = np.vstack([user_max_profile, app_max_profile])  # this stacks the specific App curve in an overall curve comprising all the Apps within a User class
+            app_max_profile = (
+                appliance.maximum_profile
+            )  # this computes the curve for the specific App
+            user_max_profile = np.vstack(
+                [user_max_profile, app_max_profile]
+            )  # this stacks the specific App curve in an overall curve comprising all the Apps within a User class
         return np.transpose(np.sum(user_max_profile, axis=0)) * self.num_users
 
-    def save(self, filename:str=None) -> Union[pd.DataFrame,None]:
+    def save(self, filename: str = None) -> Union[pd.DataFrame, None]:
         """Saves/returns the model databas including allappliances as a single pd.DataFrame or excel file.
 
         Parameters
@@ -397,7 +426,6 @@ class User:
                 if len(answer) > 0:
                     answer = answer.all()
                 else:
-
                     if len(self.App_list) > 0:
                         answer = False
                     else:
@@ -428,7 +456,6 @@ class User:
         Appliances are added to the user-type only if **'windows'** method of the Appliance is called.
         """
         return self.save()
-
 
     def Appliance(
         self,
@@ -470,7 +497,9 @@ class User:
             name=name,
         )
 
-    def generate_single_load_profile(self, prof_i:int, peak_time_range:np.array, day_type:int):
+    def generate_single_load_profile(
+        self, prof_i: int, peak_time_range: np.array, day_type: int
+    ):
         """Generates a load profile for a single user taking all its appliances into consideration
 
         Parameters
@@ -491,17 +520,24 @@ class User:
         """
 
         if prof_i not in range(365):
-            raise ValueError(f'prof_i should be an integer in range of 0 to 364')
+            raise ValueError(f"prof_i should be an integer in range of 0 to 364")
 
         single_load = np.zeros(1440)
 
-        self.rand_daily_pref = 0 if self.user_preference == 0 else random.randint(1, self.user_preference)
+        self.rand_daily_pref = (
+            0 if self.user_preference == 0 else random.randint(1, self.user_preference)
+        )
 
-        for App in self.App_list:  # iterates for all the App types in the given User class
+        for (
+            App
+        ) in self.App_list:  # iterates for all the App types in the given User class
+            App.generate_load_profile(
+                prof_i, peak_time_range, day_type, power=App.power[prof_i]
+            )
 
-            App.generate_load_profile(prof_i, peak_time_range, day_type, power=App.power[prof_i])
-
-            single_load = single_load + App.daily_use  # adds the Appliance load profile to the single User load profile
+            single_load = (
+                single_load + App.daily_use
+            )  # adds the Appliance load profile to the single User load profile
         return single_load
 
     def generate_aggregated_load_profile(self, prof_i, peak_time_range, day_type):
@@ -529,34 +565,36 @@ class User:
         """
 
         if prof_i not in range(365):
-            raise ValueError(f'prof_i should be an integer in range of 0 to 364')
-
+            raise ValueError(f"prof_i should be an integer in range of 0 to 364")
 
         self.load = np.zeros(1440)  # initialise empty load for User instance
         for _ in range(self.num_users):
             # iterates for every single user within a User class.
-            self.load = self.load + self.generate_single_load_profile(prof_i, peak_time_range, day_type)
+            self.load = self.load + self.generate_single_load_profile(
+                prof_i, peak_time_range, day_type
+            )
 
         return self.load
+
 
 class Appliance:
     def __init__(
         self,
         user,
-        number:int=1,
-        power:Union[float,pd.DataFrame]=0,
-        num_windows:int=1,
-        func_time:int=0,
-        time_fraction_random_variability:float=0,
-        func_cycle:int=1,
-        fixed:str="no",
-        fixed_cycle:int=0,
-        occasional_use:float=1,
-        flat:str="no",
-        thermal_p_var:int=0,
-        pref_index:int=0,
-        wd_we_type:int=2,
-        name:str="",
+        number: int = 1,
+        power: Union[float, pd.DataFrame] = 0,
+        num_windows: int = 1,
+        func_time: int = 0,
+        time_fraction_random_variability: float = 0,
+        func_cycle: int = 1,
+        fixed: str = "no",
+        fixed_cycle: int = 0,
+        occasional_use: float = 1,
+        flat: str = "no",
+        thermal_p_var: int = 0,
+        pref_index: int = 0,
+        wd_we_type: int = 2,
+        name: str = "",
     ):
         """Creates an appliance for a given user
 
@@ -620,29 +658,25 @@ class Appliance:
         self.num_windows = num_windows
         self.func_time = func_time
         self.time_fraction_random_variability = time_fraction_random_variability
-        self.func_cycle = (
-            func_cycle
-        )
+        self.func_cycle = func_cycle
         self.fixed = fixed
         self.fixed_cycle = fixed_cycle
         self.occasional_use = occasional_use
         self.flat = flat
-        self.thermal_p_var = (
-            thermal_p_var
-        )
+        self.thermal_p_var = thermal_p_var
         self.pref_index = pref_index
         self.wd_we_type = wd_we_type
 
-        if isinstance(power,pd.DataFrame):
-            if power.shape == (365,1):
-                power = power.values[:,0]
+        if isinstance(power, pd.DataFrame):
+            if power.shape == (365, 1):
+                power = power.values[:, 0]
             else:
                 raise ValueError("wrong size of array. array size should be (365,1).")
 
-        elif isinstance(power,str):
-            power = pd.read_json(power).values[:,0]
+        elif isinstance(power, str):
+            power = pd.read_json(power).values[:, 0]
 
-        elif isinstance(power,(float,int)):
+        elif isinstance(power, (float, int)):
             # TODO change this automatic value depending on the range of the usecase
             power = power * np.ones(366)
 
@@ -703,7 +737,6 @@ class Appliance:
         for user_attribute in ("user_name", "num_users", "user_preference"):
             dm[user_attribute] = getattr(self.user, user_attribute)
         for attribute in APPLIANCE_ATTRIBUTES:
-
             if hasattr(self, attribute):
                 if "window_" in attribute or "cw" in attribute:
                     window_value = getattr(self, attribute)
@@ -720,7 +753,7 @@ class Appliance:
                     dm[attribute] = getattr(self, attribute)
             else:
                 # this is for legacy purpose, so that people can export their old models to new format
-                old_attribute = NEW_TO_OLD_MAPPING.get(attribute,attribute)
+                old_attribute = NEW_TO_OLD_MAPPING.get(attribute, attribute)
                 if hasattr(self, old_attribute):
                     if "window_" in attribute or "cw" in attribute:
                         window_value = getattr(self, old_attribute)
@@ -754,12 +787,12 @@ class Appliance:
         return self.save()
 
     def __repr__(self):
-
         try:
-            return self.save()[["user_name","num_users","name","number","power"]].to_string()
+            return self.save()[
+                ["user_name", "num_users", "name", "number", "power"]
+            ].to_string()
         except Exception:
             return ""
-
 
     def __eq__(self, other_appliance) -> bool:
         """checks the equality of two appliances
@@ -793,7 +826,13 @@ class Appliance:
                 np.append(answer, False)
         return answer.all()
 
-    def windows(self, window_1:Iterable=None, window_2:Iterable=None,random_var_w:float=0 ,window_3:Iterable=None):
+    def windows(
+        self,
+        window_1: Iterable = None,
+        window_2: Iterable = None,
+        random_var_w: float = 0,
+        window_3: Iterable = None,
+    ):
         """assings functioning windows to the appliance and adds the appliance to the user class
 
         Parameters
@@ -835,20 +874,28 @@ class Appliance:
         """
 
         if window_1 is None:
-            warnings.warn(UserWarning("No windows is declared, default window of 24 hours is selected"))
+            warnings.warn(
+                UserWarning(
+                    "No windows is declared, default window of 24 hours is selected"
+                )
+            )
             self.window_1 = np.array([0, 1440])
         else:
             self.window_1 = window_1
 
         if window_2 is None:
             if self.num_windows >= 2:
-                raise InvalidWindow("Windows 2 is not provided although 2 windows were declared")
+                raise InvalidWindow(
+                    "Windows 2 is not provided although 2 windows were declared"
+                )
         else:
             self.window_2 = window_2
 
         if window_3 is None:
             if self.num_windows == 3:
-                raise InvalidWindow("Windows 3 is not provided although 3 windows were declared")
+                raise InvalidWindow(
+                    "Windows 3 is not provided although 3 windows were declared"
+                )
         else:
             self.window_3 = window_3
 
@@ -857,18 +904,30 @@ class Appliance:
         for i in range(1, self.num_windows + 1, 1):
             window_time = window_time + np.diff(getattr(self, f"window_{i}"))[0]
         if window_time < self.func_time:
-            raise InvalidWindow(f"The sum of all windows time intervals for the appliance '{self.name}' of user '{self.user.user_name}' is smaller than the time the appliance is supposed to be on ({window_time} < {self.func_time}). Please check your input file for typos.")
+            raise InvalidWindow(
+                f"The sum of all windows time intervals for the appliance '{self.name}' of user '{self.user.user_name}' is smaller than the time the appliance is supposed to be on ({window_time} < {self.func_time}). Please check your input file for typos."
+            )
 
         self.random_var_w = random_var_w
-        self.daily_use = np.zeros(1440) #create an empty daily use profile
-        self.daily_use[self.window_1[0]:(self.window_1[1])] = np.full(np.diff(self.window_1),0.001) #fills the daily use profile with infinitesimal values that are just used to identify the functioning windows
-        self.daily_use[self.window_2[0]:(self.window_2[1])] = np.full(np.diff(self.window_2),0.001) #same as above for window2
-        self.daily_use[self.window_3[0]:(self.window_3[1])] = np.full(np.diff(self.window_3),0.001) #same as above for window3
+        self.daily_use = np.zeros(1440)  # create an empty daily use profile
+        self.daily_use[self.window_1[0] : (self.window_1[1])] = np.full(
+            np.diff(self.window_1), 0.001
+        )  # fills the daily use profile with infinitesimal values that are just used to identify the functioning windows
+        self.daily_use[self.window_2[0] : (self.window_2[1])] = np.full(
+            np.diff(self.window_2), 0.001
+        )  # same as above for window2
+        self.daily_use[self.window_3[0] : (self.window_3[1])] = np.full(
+            np.diff(self.window_3), 0.001
+        )  # same as above for window3
 
-        self.random_var_1 = int(random_var_w*np.diff(self.window_1)) #calculate the random variability of window1, i.e. the maximum range of time they can be enlarged or shortened
-        self.random_var_2 = int(random_var_w*np.diff(self.window_2)) #same as above
-        self.random_var_3 = int(random_var_w*np.diff(self.window_3)) #same as above
-        self.user.App_list.append(self) #automatically appends the appliance to the user's appliance list
+        self.random_var_1 = int(
+            random_var_w * np.diff(self.window_1)
+        )  # calculate the random variability of window1, i.e. the maximum range of time they can be enlarged or shortened
+        self.random_var_2 = int(random_var_w * np.diff(self.window_2))  # same as above
+        self.random_var_3 = int(random_var_w * np.diff(self.window_3))  # same as above
+        self.user.App_list.append(
+            self
+        )  # automatically appends the appliance to the user's appliance list
 
         if self.fixed_cycle == 1:
             self.cw11 = self.window_1
@@ -879,24 +938,46 @@ class Appliance:
         Calculates randomised cycles taking the random variability in the duty cycle duration
         """
         if self.fixed_cycle >= 1:
-            p_11 = random_variation(var=self.thermal_p_var, norm=self.p_11) #randomly variates the power of thermal apps, otherwise variability is 0
-            p_12 = random_variation(var=self.thermal_p_var, norm=self.p_12) #randomly variates the power of thermal apps, otherwise variability is 0
-            self.random_cycle1 = duty_cycle(var=self.r_c1, t1=self.t_11, p1=p_11, t2=self.t_12, p2=p_12) #randomise also the fixed cycle
+            p_11 = random_variation(
+                var=self.thermal_p_var, norm=self.p_11
+            )  # randomly variates the power of thermal apps, otherwise variability is 0
+            p_12 = random_variation(
+                var=self.thermal_p_var, norm=self.p_12
+            )  # randomly variates the power of thermal apps, otherwise variability is 0
+            self.random_cycle1 = duty_cycle(
+                var=self.r_c1, t1=self.t_11, p1=p_11, t2=self.t_12, p2=p_12
+            )  # randomise also the fixed cycle
             self.random_cycle2 = self.random_cycle1
             self.random_cycle3 = self.random_cycle1
             if self.fixed_cycle >= 2:
-                p_21 = random_variation(var=self.thermal_p_var, norm=self.p_21) #randomly variates the power of thermal apps, otherwise variability is 0
-                p_22 = random_variation(var=self.thermal_p_var, norm=self.p_22) #randomly variates the power of thermal apps, otherwise variability is 0
-                self.random_cycle2 = duty_cycle(var=self.r_c2, t1=self.t_21, p1=p_21, t2=self.t_22, p2=p_22) #randomise also the fixed cycle
+                p_21 = random_variation(
+                    var=self.thermal_p_var, norm=self.p_21
+                )  # randomly variates the power of thermal apps, otherwise variability is 0
+                p_22 = random_variation(
+                    var=self.thermal_p_var, norm=self.p_22
+                )  # randomly variates the power of thermal apps, otherwise variability is 0
+                self.random_cycle2 = duty_cycle(
+                    var=self.r_c2, t1=self.t_21, p1=p_21, t2=self.t_22, p2=p_22
+                )  # randomise also the fixed cycle
 
                 if self.fixed_cycle >= 3:
-                    p_31 = random_variation(var=self.thermal_p_var, norm=self.p_31) #randomly variates the power of thermal apps, otherwise variability is 0
-                    p_32 = random_variation(var=self.thermal_p_var, norm=self.p_32) #randomly variates the power of thermal apps, otherwise variability is 0
-                    self.random_cycle1 = random_choice(self.r_c1, t1=self.t_11, p1=p_11, t2=self.t_12, p2=p_12)
+                    p_31 = random_variation(
+                        var=self.thermal_p_var, norm=self.p_31
+                    )  # randomly variates the power of thermal apps, otherwise variability is 0
+                    p_32 = random_variation(
+                        var=self.thermal_p_var, norm=self.p_32
+                    )  # randomly variates the power of thermal apps, otherwise variability is 0
+                    self.random_cycle1 = random_choice(
+                        self.r_c1, t1=self.t_11, p1=p_11, t2=self.t_12, p2=p_12
+                    )
 
-                    self.random_cycle2 = random_choice(self.r_c2, t1=self.t_21, p1=p_21, t2=self.t_22, p2=p_22)
+                    self.random_cycle2 = random_choice(
+                        self.r_c2, t1=self.t_21, p1=p_21, t2=self.t_22, p2=p_22
+                    )
 
-                    self.random_cycle3 = random_choice(self.r_c3, t1=self.t_31, p1=p_31, t2=self.t_32, p2=p_32)
+                    self.random_cycle3 = random_choice(
+                        self.r_c3, t1=self.t_31, p1=p_31, t2=self.t_32, p2=p_32
+                    )
 
     def update_available_time_for_switch_on_events(self, indexes):
         """Remove the given time indexes from the ranges available to switch appliance on
@@ -923,10 +1004,14 @@ class Appliance:
                 pass  # nothing to do as the whole range should be removed, which is already the case from line above
             elif indexes[0] == spot_to_split.start:
                 # reinsert a range going from end of indexes up to the end of picked range
-                self.free_spots.insert(spot_idx, slice(indexes[-1] + 1, spot_to_split.stop, None))
+                self.free_spots.insert(
+                    spot_idx, slice(indexes[-1] + 1, spot_to_split.stop, None)
+                )
             elif indexes[-1] == spot_to_split.stop:
                 # reinsert a range going from beginning of picked range up to the beginning of indexes
-                self.free_spots.insert(spot_idx, slice(spot_to_split.start, indexes[0], None))
+                self.free_spots.insert(
+                    spot_idx, slice(spot_to_split.start, indexes[0], None)
+                )
             else:
                 # split the range into 2 smaller ranges
                 new_spot1 = slice(spot_to_split.start, indexes[0], None)
@@ -946,26 +1031,38 @@ class Appliance:
 
         """
 
-        if self.fixed_cycle > 0:  # evaluates if the app has some duty cycles to be considered
+        if (
+            self.fixed_cycle > 0
+        ):  # evaluates if the app has some duty cycles to be considered
             evaluate = np.round(np.mean(indexes)) if indexes.size > 0 else 0
             # selects the proper duty cycle and puts the corresponding power values in the indexes range
-            if evaluate in range(self.cw11[0], self.cw11[1]) or evaluate in range(self.cw12[0], self.cw12[1]):
+            if evaluate in range(self.cw11[0], self.cw11[1]) or evaluate in range(
+                self.cw12[0], self.cw12[1]
+            ):
                 np.put(self.daily_use, indexes, (self.random_cycle1 * coincidence))
-            elif evaluate in range(self.cw21[0], self.cw21[1]) or evaluate in range(self.cw22[0], self.cw22[1]):
+            elif evaluate in range(self.cw21[0], self.cw21[1]) or evaluate in range(
+                self.cw22[0], self.cw22[1]
+            ):
                 np.put(self.daily_use, indexes, (self.random_cycle2 * coincidence))
             else:
                 np.put(self.daily_use, indexes, (self.random_cycle3 * coincidence))
         else:  # if no duty cycles are specified, a regular switch_on event is modelled
             # randomises also the App Power if thermal_p_var is on
-            np.put(self.daily_use, indexes, (random_variation(var=self.thermal_p_var, norm=coincidence * power)))
+            np.put(
+                self.daily_use,
+                indexes,
+                (random_variation(var=self.thermal_p_var, norm=coincidence * power)),
+            )
         # updates the time ranges remaining for switch on events, excluding the current switch_on event
         self.update_available_time_for_switch_on_events(indexes)
 
     def calc_rand_window(self, window_idx=1, window_range_limits=[0, 1440]):
-        _window = self.__getattribute__(f'window_{window_idx}')
-        _random_var = self.__getattribute__(f'random_var_{window_idx}')
-        rand_window = [random.randint(_window[0] - _random_var, _window[0] + _random_var),
-                                random.randint(_window[1] - _random_var, _window[1] + _random_var)]
+        _window = self.__getattribute__(f"window_{window_idx}")
+        _random_var = self.__getattribute__(f"random_var_{window_idx}")
+        rand_window = [
+            random.randint(_window[0] - _random_var, _window[0] + _random_var),
+            random.randint(_window[1] - _random_var, _window[1] + _random_var),
+        ]
         if rand_window[0] < window_range_limits[0]:
             rand_window[0] = window_range_limits[0]
         if rand_window[1] > window_range_limits[1]:
@@ -1010,7 +1107,9 @@ class Appliance:
         elif cycle_num == 3:
             self.specific_cycle_3(**kwargs)
 
-    def specific_cycle_1(self, p_11 = 0, t_11 = 0, p_12 = 0, t_12 = 0, r_c1 = 0, cw11=None, cw12=None):
+    def specific_cycle_1(
+        self, p_11=0, t_11=0, p_12=0, t_12=0, r_c1=0, cw11=None, cw12=None
+    ):
         """assigining the frist specific duty cycle for the appliace (maximum of three cycles can be assigned)
 
         Parameters
@@ -1046,10 +1145,13 @@ class Appliance:
         if cw12 is not None:
             self.cw12 = cw12
         # Below is not used
-        self.fixed_cycle1 = np.concatenate(((np.ones(self.t_11)*p_11),(np.ones(self.t_12)*p_12))) #create numpy array representing the duty cycle
+        self.fixed_cycle1 = np.concatenate(
+            ((np.ones(self.t_11) * p_11), (np.ones(self.t_12) * p_12))
+        )  # create numpy array representing the duty cycle
 
-    def specific_cycle_2(self, p_21 = 0, t_21 = 0, p_22 = 0, t_22 = 0, r_c2 = 0, cw21=None, cw22=None):
-
+    def specific_cycle_2(
+        self, p_21=0, t_21=0, p_22=0, t_22=0, r_c2=0, cw21=None, cw22=None
+    ):
         """assigining the frist specific duty cycle for the appliace (maximum of three cycles can be assigned)
 
         Parameters
@@ -1085,9 +1187,13 @@ class Appliance:
         if cw22 is not None:
             self.cw22 = cw22
         # Below is not used
-        self.fixed_cycle2 = np.concatenate(((np.ones(self.t_21)*p_21),(np.ones(self.t_22)*p_22)))
+        self.fixed_cycle2 = np.concatenate(
+            ((np.ones(self.t_21) * p_21), (np.ones(self.t_22) * p_22))
+        )
 
-    def specific_cycle_3(self, p_31 = 0, t_31 = 0, p_32 = 0, t_32 = 0, r_c3 = 0, cw31=None, cw32=None):
+    def specific_cycle_3(
+        self, p_31=0, t_31=0, p_32=0, t_32=0, r_c3=0, cw31=None, cw32=None
+    ):
         """assigining the frist specific duty cycle for the appliace (maximum of three cycles can be assigned)
 
         Parameters
@@ -1123,10 +1229,20 @@ class Appliance:
         if cw32 is not None:
             self.cw32 = cw32
         # Below is not used
-        self.fixed_cycle3 = np.concatenate(((np.ones(self.t_31)*p_31),(np.ones(self.t_32)*p_32)))
+        self.fixed_cycle3 = np.concatenate(
+            ((np.ones(self.t_31) * p_31), (np.ones(self.t_32) * p_32))
+        )
 
-    #different time windows can be associated with different specific duty cycles
-    def cycle_behaviour(self, cw11 = np.array([0,0]), cw12 = np.array([0,0]), cw21 = np.array([0,0]), cw22 = np.array([0,0]), cw31 = np.array([0,0]), cw32 = np.array([0,0])):
+    # different time windows can be associated with different specific duty cycles
+    def cycle_behaviour(
+        self,
+        cw11=np.array([0, 0]),
+        cw12=np.array([0, 0]),
+        cw21=np.array([0, 0]),
+        cw22=np.array([0, 0]),
+        cw31=np.array([0, 0]),
+        cw32=np.array([0, 0]),
+    ):
         """_summary_
 
         Parameters
@@ -1145,11 +1261,11 @@ class Appliance:
             Window time range for the second part of third duty cycle number, by default np.array([0,0])
         """
         # only used around line 223
-        self.cw11 = cw11 #first window associated with cycle1
-        self.cw12 = cw12 #second window associated with cycle1
-        self.cw21 = cw21 #same for cycle2
+        self.cw11 = cw11  # first window associated with cycle1
+        self.cw12 = cw12  # second window associated with cycle1
+        self.cw21 = cw21  # same for cycle2
         self.cw22 = cw22
-        self.cw31 = cw31 #same for cycle 3
+        self.cw31 = cw31  # same for cycle 3
         self.cw32 = cw32
 
     def rand_total_time_of_use(
@@ -1157,9 +1273,8 @@ class Appliance:
         rand_window_1: Iterable[int],
         rand_window_2: Iterable[int],
         rand_window_3: Iterable[int],
-        ) -> int:
-        """Randomised total time of use of the Appliance instance
-        """
+    ) -> int:
+        """Randomised total time of use of the Appliance instance"""
 
         random_var_t = random_variation(var=self.time_fraction_random_variability)
 
@@ -1182,10 +1297,12 @@ class Appliance:
             rand_time = int(0.99 * total_time)
 
         if rand_time < self.func_cycle:
-            raise ValueError(f"The func_cycle you choose for appliance {self.name} might be too large to fit in the available time for appliance usage, please either reduce func_cycle or increase the windows of use of the appliance")
+            raise ValueError(
+                f"The func_cycle you choose for appliance {self.name} might be too large to fit in the available time for appliance usage, please either reduce func_cycle or increase the windows of use of the appliance"
+            )
         return rand_time
 
-    def rand_switch_on_window(self, rand_time:int):
+    def rand_switch_on_window(self, rand_time: int):
         """Identifies a random switch on window within the available functioning windows
 
         This corresponds to step 2c. of:
@@ -1198,23 +1315,30 @@ class Appliance:
         indexes_choice = []
         for s in self.free_spots:
             if s.stop - s.start >= self.func_cycle:
-                indexes_choice += [*range(s.start, s.stop - self.func_cycle + 1)] # this will be fast with cython
+                indexes_choice += [
+                    *range(s.start, s.stop - self.func_cycle + 1)
+                ]  # this will be fast with cython
         n_choices = len(indexes_choice)
         if n_choices > 0:
             # Identifies a random switch on time within the available functioning windows
             # step 2c of [1]
-            switch_on = indexes_choice[random.randint(0, n_choices-1)]
+            switch_on = indexes_choice[random.randint(0, n_choices - 1)]
             spot_idx = None
             for i, fs in enumerate(self.free_spots):
                 if fs.start <= switch_on <= fs.stop - self.func_cycle:
                     spot_idx = i
                     break
 
-            largest_duration = min(rand_time, self.free_spots[spot_idx].stop - switch_on)
+            largest_duration = min(
+                rand_time, self.free_spots[spot_idx].stop - switch_on
+            )
 
             if largest_duration > self.func_cycle:
-                indexes = np.arange(switch_on, switch_on + (
-                    int(random.uniform(self.func_cycle, largest_duration))))  # TODO randint
+                indexes = np.arange(
+                    switch_on,
+                    switch_on
+                    + (int(random.uniform(self.func_cycle, largest_duration))),
+                )  # TODO randint
             elif largest_duration == self.func_cycle:
                 indexes = np.arange(switch_on, switch_on + largest_duration)
             else:
@@ -1222,14 +1346,16 @@ class Appliance:
                 print("max window", self.free_spots[spot_idx].stop)
                 print("rand_time", rand_time)
                 print("upper_limit", largest_duration)
-                raise ValueError("There is something fishy with upper limit in switch on...")
+                raise ValueError(
+                    "There is something fishy with upper limit in switch on..."
+                )
         else:
             indexes = None
             # there are no available windows anymore
 
         return indexes
 
-    def calc_coincident_switch_on(self, inside_peak_window:bool=True):
+    def calc_coincident_switch_on(self, inside_peak_window: bool = True):
         """Computes how many of the 'n' Appliance instance are switched on simultaneously
 
         Implement eqs. 3 and 4 of [1]
@@ -1241,12 +1367,23 @@ class Appliance:
         s_peak, mu_peak, op_factor = switch_on_parameters()
 
         # check if indexes are within peak window
-        if inside_peak_window is True and self.fixed == 'no':
+        if inside_peak_window is True and self.fixed == "no":
             # calculates coincident behaviour within the peak time range
             # eq. 4 of [1]
-            coincidence = min(self.number, max(1, math.ceil(random.gauss(mu=(self.number * mu_peak + 0.5), sigma=(s_peak * self.number * mu_peak)))))
+            coincidence = min(
+                self.number,
+                max(
+                    1,
+                    math.ceil(
+                        random.gauss(
+                            mu=(self.number * mu_peak + 0.5),
+                            sigma=(s_peak * self.number * mu_peak),
+                        )
+                    ),
+                ),
+            )
         # check if indexes are off-peak
-        elif inside_peak_window is False and self.fixed == 'no':
+        elif inside_peak_window is False and self.fixed == "no":
             # calculates probability of coincident switch_ons off-peak
             # eq. 3 of [1]
             prob = random.uniform(0, (self.number - op_factor) / self.number)
@@ -1279,12 +1416,11 @@ class Appliance:
 
         # skip this appliance in any of the following applies
         if (
-                # evaluates if occasional use happens or not
-                (random.uniform(0, 1) > self.occasional_use
-                 # evaluates if daily preference coincides with the randomised daily preference number
-                 or (self.pref_index != 0 and self.user.rand_daily_pref != self.pref_index)
-                 # checks if the app is allowed in the given yearly behaviour pattern
-                 or self.wd_we_type not in [day_type, 2])
+            random.uniform(0, 1) > self.occasional_use
+            # evaluates if daily preference coincides with the randomised daily preference number
+            or (self.pref_index != 0 and self.user.rand_daily_pref != self.pref_index)
+            # checks if the app is allowed in the given yearly behaviour pattern
+            or self.wd_we_type not in [day_type, 2]
         ):
             return
 
@@ -1297,82 +1433,73 @@ class Appliance:
         # random variability is applied to the total functioning time and to the duration
         # of the duty cycles provided they have been specified
         # step 2a of [1]
-        rand_time = self.rand_total_time_of_use(rand_window_1, rand_window_2, rand_window_3)
+        rand_time = self.rand_total_time_of_use(
+            rand_window_1, rand_window_2, rand_window_3
+        )
 
         # redefines functioning windows based on the previous randomisation of the boundaries
         # step 2b of [1]
-        if self.flat == 'yes':
+        if self.flat == "yes":
             # for "flat" appliances the algorithm stops right after filling the newly
             # created windows without applying any further stochasticity
             total_power_value = self.power[prof_i] * self.number
             for rand_window in rand_windows:
-                self.daily_use[rand_window[0]:rand_window[1]] = np.full(np.diff(rand_window),
-                                                                       total_power_value)
-            #single_load = single_load + self.daily_use
+                self.daily_use[rand_window[0] : rand_window[1]] = np.full(
+                    np.diff(rand_window), total_power_value
+                )
+            # single_load = single_load + self.daily_use
             return
         else:
             # "non-flat" appliances a mask is applied on the newly defined windows and
             # the algorithm goes further on
             for rand_window in rand_windows:
-                self.daily_use[rand_window[0]:rand_window[1]] = np.full(np.diff(rand_window), 0.001)
+                self.daily_use[rand_window[0] : rand_window[1]] = np.full(
+                    np.diff(rand_window), 0.001
+                )
 
         # calculates randomised cycles taking the random variability in the duty cycle duration
         self.assign_random_cycles()
 
         # steps 2c-2e repeated until the sum of the durations of all the switch-on events equals rand_time
 
-
-
-        self.free_spots = [slice(rw[0], rw[1], None) for rw in rand_windows if rw[0] != rw[1]]
+        self.free_spots = [
+            slice(rw[0], rw[1], None) for rw in rand_windows if rw[0] != rw[1]
+        ]
 
         tot_time = 0
         while tot_time <= rand_time:
-
-
-
             # one option could be to generate a lot of them at once
             indexes = self.rand_switch_on_window(
-                rand_time=rand_time, #TODO maybe only consider rand_time-tot_time ...
+                rand_time=rand_time,  # TODO maybe only consider rand_time-tot_time ...
             )
             if indexes is None:
-                break # exit cycle and go to next Appliance as there are no available windows anymore
-
+                break  # exit cycle and go to next Appliance as there are no available windows anymore
 
             # the count of total time is updated with the size of the indexes array
             tot_time = tot_time + indexes.size
 
             if tot_time > rand_time:
                 # the total functioning time is reached, a correction is applied to avoid overflow of indexes
-                indexes_adj = indexes[:-(tot_time - rand_time)]
+                indexes_adj = indexes[: -(tot_time - rand_time)]
                 if len(indexes_adj) > 0:
-                    inside_peak_window = within_peak_time_window(indexes_adj[0], indexes_adj[-1], peak_time_range[0], peak_time_range[-1])
+                    inside_peak_window = within_peak_time_window(
+                        indexes_adj[0],
+                        indexes_adj[-1],
+                        peak_time_range[0],
+                        peak_time_range[-1],
+                    )
 
                     # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
-                    coincidence = self.calc_coincident_switch_on(
-                        inside_peak_window
-                    )
+                    coincidence = self.calc_coincident_switch_on(inside_peak_window)
                     # Update the daily use depending on existence of duty cycles of the Appliance instance
-                    self.update_daily_use(
-                        coincidence,
-                        power=power,
-                        indexes=indexes_adj
-                    )
+                    self.update_daily_use(coincidence, power=power, indexes=indexes_adj)
                 break  # exit cycle and go to next Appliance
 
             else:
-                inside_peak_window = within_peak_time_window(indexes[0], indexes[-1], peak_time_range[0], peak_time_range[-1])
-
-
-
-                coincidence = self.calc_coincident_switch_on(
-                    inside_peak_window
+                inside_peak_window = within_peak_time_window(
+                    indexes[0], indexes[-1], peak_time_range[0], peak_time_range[-1]
                 )
+
+                coincidence = self.calc_coincident_switch_on(inside_peak_window)
                 # Update the daily use depending on existence of duty cycles of the Appliance instance
-                self.update_daily_use(
-                    coincidence,
-                    power=power,
-                    indexes=indexes
-                )
-
-
-
+                self.update_daily_use(coincidence, power=power, indexes=indexes)

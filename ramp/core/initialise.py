@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#%% Initialisation of a model instance
+# %% Initialisation of a model instance
 
 import numpy as np
 import importlib
 from ramp.core.core import UseCase
-
 
 
 def user_defined_inputs(j=None, fname=None):

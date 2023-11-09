@@ -1,28 +1,27 @@
-
-from setuptools import find_packages,setup
+from setuptools import find_packages, setup
 
 exec(open("ramp/_version.py").read())
 
 
 setup(
-    name = "rampdemand",
-    description= "An open-source python package for building bottom-up stochastic model for generating multi-energy load profiles",
-    long_description = open("README.rst",encoding="utf8").read(),
-    author_email = "f.lombardi@tudelft.nl",
-    url= "https://github.com/RAMP-project/RAMP",
-    version = __version__,
-    packages= find_packages(),
+    name="rampdemand",
+    description="An open-source python package for building bottom-up stochastic model for generating multi-energy load profiles",
+    long_description=open("README.rst", encoding="utf8").read(),
+    author_email="f.lombardi@tudelft.nl",
+    url="https://github.com/RAMP-project/RAMP",
+    version=__version__,
+    packages=find_packages(),
     license="European Union Public License 1.2",
-    python_requires = ">=3.6.0",
-    package_data={"": ["*.txt", "*.dat", "*.doc", "*.rst","*.xlsx","*.csv"]},
-    install_requires = [
+    python_requires=">=3.6.0",
+    package_data={"": ["*.txt", "*.dat", "*.doc", "*.rst", "*.xlsx", "*.csv"]},
+    install_requires=[
         "pandas >= 1.3.3",
         "numpy >= 1.21.2",
         "xlsxwriter >= 1.3.7",
         "matplotlib >= 3.3.4",
         "openpyxl >= 3.0.6",
         "tqdm",
-        "plotly"
+        "plotly",
     ],
     # classifiers=[
     #     "Programming Language :: Python :: 3.7",
@@ -36,11 +35,9 @@ setup(
     #     "Programming Language :: Python",
     #     "Topic :: Scientific/Engineering",
     # ],
-
     entry_points={
-    "console_scripts": [
-        "ramp=ramp.cli:main",
-    ],
-},
-
+        "console_scripts": [
+            "ramp=ramp.cli:main",
+        ],
+    },
 )

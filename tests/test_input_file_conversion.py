@@ -9,9 +9,7 @@ from ramp.ramp_convert_old_input_files import convert_old_user_input_file
 
 
 def load_usecase(j=None, fname=None):
-    peak_enlarge, user_list, num_profiles = initialise_inputs(
-        j, fname, num_profiles=1
-    )
+    peak_enlarge, user_list, num_profiles = initialise_inputs(j, fname, num_profiles=1)
     return user_list
 
 
@@ -20,11 +18,11 @@ class TestConversion:
         self.input_files_to_run = [1, 2, 3]
         self.file_suffix = "_test"
         self.py_fnames = [
-            os.path.join("ramp","example", f"input_file_{i}.py")
+            os.path.join("ramp", "example", f"input_file_{i}.py")
             for i in self.input_files_to_run
         ]
         self.xlsx_fnames = [
-            os.path.join("ramp","test", f"input_file_{i}{self.file_suffix}.xlsx")
+            os.path.join("ramp", "test", f"input_file_{i}{self.file_suffix}.xlsx")
             for i in self.input_files_to_run
         ]
         for fname in self.xlsx_fnames:
@@ -53,7 +51,9 @@ class TestConversion:
         for i, j in enumerate(self.input_files_to_run):
             old_user_list = load_usecase(j=j)
             convert_old_user_input_file(
-                self.py_fnames[i], output_path=os.path.join("ramp","test"), suffix=self.file_suffix
+                self.py_fnames[i],
+                output_path=os.path.join("ramp", "test"),
+                suffix=self.file_suffix,
             )
             new_user_list = load_usecase(fname=self.xlsx_fnames[i])
             for old_user, new_user in zip(old_user_list, new_user_list):
@@ -133,10 +133,17 @@ def test_A():
     appliance1 = user.Appliance(user, **old_params)
     appliance1.windows(window_1=[win_start, win_stop])
 
-    params = dict(number=1, power=200, num_windows=1, func_time=0, window_1=np.array([win_start, win_stop]))
+    params = dict(
+        number=1,
+        power=200,
+        num_windows=1,
+        func_time=0,
+        window_1=np.array([win_start, win_stop]),
+    )
     appliance2 = user.add_appliance(**params)
 
     assert appliance1 == appliance2
+
 
 def test_B():
     user = User("test user", 1)
