@@ -12,6 +12,7 @@ import multiprocessing
 import warnings
 import random
 import math
+import datetime
 from ramp.core.constants import (
     NEW_TO_OLD_MAPPING,
     APPLIANCE_ATTRIBUTES,
@@ -21,6 +22,7 @@ from ramp.core.constants import (
     switch_on_parameters,
 )
 from ramp.core.utils import (
+    get_day_type,
     random_variation,
     duty_cycle,
     random_choice,
@@ -224,16 +226,47 @@ class UseCase:
         # The peak_time is randomly enlarged based on the calibration parameter peak_enlarge
         return np.arange(peak_time - rand_peak_enlarge, peak_time + rand_peak_enlarge)
 
+    def generate_daily_load_profiles(self, day_types=None):
+        if self.days is None:
+            if day_types is not None:
+                self.days = day_types
+            else:
+                raise ValueError("You must either provide day types or days")
+        if self.parallel_processing is True:
+            daily_profiles = self.generate_daily_load_profiles_parallel(
+                day_types=[get_day_type(day) for day in self.days]
+            )
+        else:
+            daily_profiles = np.zeros((self.num_days, 1440))
+            for day_idx, day in enumerate(self.days):
+                # initialise an empty daily profile (or profile load)
+                # that will be filled with the sum of the daily profiles of each User instance
+                usecase_load = np.zeros(1440)
+                # for each User instance generate a load profile, iterating through all user of this instance and
+                # all appliances they own, corresponds to step 2. of [1], p.7
+                for user in self.users:
+                    user.generate_aggregated_load_profile(
+                        day_idx, self.peak_time_range, get_day_type(day)
+                    )
+                    # aggregate the user load to the usecase load
+                    usecase_load = usecase_load + user.load
+                daily_profiles[day_idx, :] = usecase_load
+                # screen update about progress of computation
+                print("Day", day_idx + 1, "/", self.num_days, "completed")
+            daily_profiles = np.array(daily_profiles)
+        return daily_profiles
+
+    def generate_daily_load_profiles_parallel(self, day_types):
         max_parallel_processes = multiprocessing.cpu_count()
         tasks = []
         t = 0
-        for day_id in range(num_profiles):
-            day_type = day_types[day_id]
+        for day_idx in range(self.num_days):
+            day_type = day_types[day_idx]
             for user in self.users:
                 for app in user.App_list:
                     for _ in range(user.num_users):
                         t = t + 1
-                        tasks.append((app, (day_id, peak_time_range, day_type)))
+                        tasks.append((app, (day_idx, self.peak_time_range, day_type)))
 
         daily_profiles_dict = {}
         timeout = 1
@@ -254,12 +287,12 @@ class UseCase:
                         daily_profiles_dict[prof_i] = [daily_load]
                     pbar.update()
 
-            daily_profiles = np.zeros((num_profiles, 1440))
+            daily_profiles = np.zeros((self.num_days, 1440))
 
-            for day_id in range(num_profiles):
-                daily_profiles[day_id, :] = np.vstack(daily_profiles_dict[day_id]).sum(
-                    axis=0
-                )
+            for day_idx in range(self.num_days):
+                daily_profiles[day_idx, :] = np.vstack(
+                    daily_profiles_dict[day_idx]
+                ).sum(axis=0)
 
         return daily_profiles
 
