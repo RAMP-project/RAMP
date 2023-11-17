@@ -77,7 +77,7 @@ class UseCase:
         self.parallel_processing = parallel_processing
         self.peak_time_range = None
         self.days = None
-        self._num_days = None
+        self.__num_days = None
         self.daily_profiles = None
 
         self.appliances = []
@@ -120,9 +120,9 @@ class UseCase:
 
     @property
     def num_days(self):
-        if self._num_days is None:
+        if self.__num_days is None:
             self.initialize()
-        return self._num_days
+        return self.__num_days
 
     def initialize(self, num_days=None, peak_enlarge=0.15):
         if num_days is not None:
@@ -131,18 +131,18 @@ class UseCase:
                 print(
                     "You want to initialize the usecase with num_days but you already have provided days"
                 )
-                self.num_days = None
-            self._num_days = num_days
+                self.__num_days = None
+            self.__num_days = num_days
         else:
             if self.date_start is not None and self.date_end is not None:
                 self.days = pd.date_range(
                     start=self.date_start, end=self.date_end
                 )  # TODO add one extra day
-                self._num_days = len(self.days)
+                self.__num_days = len(self.days)
 
-        if self._num_days is None:
+        if self.__num_days is None:
             # asks the user how many days (i.e. code runs) they want
-            self._num_days = int(
+            self.__num_days = int(
                 input("please indicate the number of days to be generated: ")
             )
             print("Please wait...")
@@ -150,14 +150,18 @@ class UseCase:
         if self.days is None:
             # TODO add 24 hours to date end in the display
             if self.date_start is not None:
-                self.days = pd.date_range(start=self.date_start, periods=self._num_days)
+                self.days = pd.date_range(
+                    start=self.date_start, periods=self.__num_days
+                )
                 # logging info
                 print(
                     f"You will simulate {self.num_days} days from {self.date_start} until {self.days[-1]}"
                 )
             else:
                 if self.date_end is not None:
-                    self.days = pd.date_range(end=self.date_end, periods=self._num_days)
+                    self.days = pd.date_range(
+                        end=self.date_end, periods=self.__num_days
+                    )
                     # logging info
                     print(
                         f"You will simulate {self.num_days} days from {self.days[0]} until {self.date_end}"
@@ -165,7 +169,7 @@ class UseCase:
 
                 else:
                     self.days = pd.date_range(
-                        start=datetime.datetime.today(), periods=self._num_days
+                        start=datetime.datetime.today(), periods=self.__num_days
                     )
                     # logging info
                     print(
