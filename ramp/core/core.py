@@ -389,7 +389,11 @@ class UseCase:
 
 class User:
     def __init__(
-        self, user_name: str = "", num_users: int = 1, user_preference: int = 0
+        self,
+        user_name: str = "",
+        num_users: int = 1,
+        user_preference: int = 0,
+        usecase=None,
     ):
         """Creates a User instance (User Category)
 
@@ -402,6 +406,8 @@ class User:
         user_preference : int {0,1,2,3}, optional
             Related to cooking behaviour, how many types of meal a user wants a day (number of user preferences has to be defined here and will be further specified with pref_index parameter), by default 0
         """
+        # TODO check type of Usecase
+        self.usecase = usecase
         self.user_name = user_name
         self.num_users = num_users
         self.user_preference = user_preference
