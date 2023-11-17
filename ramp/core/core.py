@@ -41,7 +41,14 @@ def single_appliance_daily_load_profile(args):
 
 
 class UseCase:
-    def __init__(self, name: str = "", users: Union[List, None] = None):
+    def __init__(
+        self,
+        name: str = "",
+        users: Union[List, None] = None,
+        date_start: str = None,
+        date_end: str = None,
+        parallel_processing: bool = False,
+    ):
         """Creates a UseCase instance for gathering a list of User instances which own Appliance instances
 
         Parameters
@@ -50,12 +57,33 @@ class UseCase:
             name of the usecase instance, by default ""
         users : Union[Iterable,None], optional
             a list of users to be added to the usecase instance, by default None
+        date_start: str, optional
+        date_end: str, optional
+
         """
         self.name = name
+        self.date_start = (
+            datetime.date.fromisoformat(date_start)
+            if isinstance(date_start, str)
+            else date_start
+        )
+        self.date_end = (
+            datetime.date.fromisoformat(date_end)
+            if isinstance(date_end, str)
+            else date_end
+        )
+        self.parallel_processing = parallel_processing
+        self.peak_time_range = None
+        self.days = None
+        self._num_days = None
+        self.daily_profiles = None
+
         self.appliances = []
+        self.users = []
         if users is None:
             users = []
-        self.users = users
+        self.add_user(users)
+
         self.collect_appliances_from_users()
 
     def add_user(self, user) -> None:
@@ -72,7 +100,11 @@ class UseCase:
             any type rather than User will raise the error.
         """
         if isinstance(user, User):
+            user.usecase = self
             self.users.append(user)
+        elif isinstance(user, list):
+            for u in user:
+                self.add_user(u)
         else:
             raise InvalidType(
                 f"{type(user)} is not valid. Only 'User' type is acceptable."
@@ -84,28 +116,65 @@ class UseCase:
             appliances = appliances + user.App_list
         self.appliances = appliances
 
-    def generate_daily_load_profiles(self, num_profiles, peak_time_range, day_types):
-        profiles = []
-        for prof_i in range(num_profiles):
-            # initialise an empty daily profile (or profile load)
-            # that will be filled with the sum of the daily profiles of each User instance
-            usecase_load = np.zeros(1440)
-            # for each User instance generate a load profile, iterating through all user of this instance and
-            # all appliances they own, corresponds to step 2. of [1], p.7
-            for user in self.users:
-                user.generate_aggregated_load_profile(
-                    prof_i, peak_time_range, day_types
-                )
-                # aggregate the user load to the usecase load
-                usecase_load = usecase_load + user.load
-            profiles.append(usecase_load)
-            # screen update about progress of computation
-            # print('Profile', prof_i+1, '/', num_profiles, 'completed')
-        return profiles
+    @property
+    def num_days(self):
+        if self._num_days is None:
+            self.initialize()
+        return self._num_days
 
-    def generate_daily_load_profiles_parallel(
-        self, num_profiles, peak_time_range, day_types
-    ):
+    def initialize(self, num_days=None, peak_enlarge=0.15):
+        if num_days is not None:
+            if self.days is not None:
+                # logging.error
+                print(
+                    "You want to initialize the usecase with num_days but you already have provided days"
+                )
+                self.num_days = None
+            self._num_days = num_days
+        else:
+            if self.date_start is not None and self.date_end is not None:
+                self.days = pd.date_range(
+                    start=self.date_start, end=self.date_end
+                )  # TODO add one extra day
+                self._num_days = len(self.days)
+
+        if self._num_days is None:
+            # asks the user how many days (i.e. code runs) they want
+            self._num_days = int(
+                input("please indicate the number of days to be generated: ")
+            )
+            print("Please wait...")
+
+        if self.days is None:
+            # TODO add 24 hours to date end in the display
+            if self.date_start is not None:
+                self.days = pd.date_range(start=self.date_start, periods=self._num_days)
+                # logging info
+                print(
+                    f"You will simulate {self.num_days} days from {self.date_start} until {self.days[-1]}"
+                )
+            else:
+                if self.date_end is not None:
+                    self.days = pd.date_range(end=self.date_end, periods=self._num_days)
+                    # logging info
+                    print(
+                        f"You will simulate {self.num_days} days from {self.days[0]} until {self.date_end}"
+                    )
+
+                else:
+                    self.days = pd.date_range(
+                        start=datetime.datetime.today(), periods=self._num_days
+                    )
+                    # logging info
+                    print(
+                        f"You will simulate {self.num_days} days from {self.days[0]} until {self.days[-1]}"
+                    )
+
+        else:
+            print(
+                f"You will simulate {self.num_days} days from {self.days[0]} until {self.days[-1]}"
+            )
+
         max_parallel_processes = multiprocessing.cpu_count()
         tasks = []
         t = 0
