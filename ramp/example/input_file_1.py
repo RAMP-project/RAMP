@@ -254,3 +254,31 @@ S_DVD.windows([510, 750], [810, 1080], 0.35)
 
 S_Stereo = School.Appliance(1, 150, 2, 90, 0.1, 5, occasional_use=0.33)
 S_Stereo.windows([510, 750], [810, 1080], 0.35)
+
+if __name__ == "__main__":
+    from ramp.core.core import UseCase
+
+    uc = UseCase(
+        users=User_list,
+        parallel_processing=False,
+    )
+    uc.initialize(peak_enlarge=0.15)
+
+    Profiles_list = uc.generate_daily_load_profiles()
+
+    # post-processing
+    from ramp.post_process import post_process as pp
+
+    Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(
+        Profiles_list
+    )
+    pp.Profile_series_plot(
+        Profiles_series
+    )  # by default, profiles are plotted as a series
+    if (
+        len(Profiles_list) > 1
+    ):  # if more than one daily profile is generated, also cloud plots are shown
+        pp.Profile_cloud_plot(Profiles_list, Profiles_avg)
+
+    # this would be a new method using work of @mohammadamint
+    # results = uc.export_results()

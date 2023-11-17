@@ -89,3 +89,32 @@ HH_breakfast_coffee.windows([6 * 60, 9 * 60], [0, 0], 0.15)
 
 HH_mate = HH.Appliance(1, 1800, 1, 30, 0.3, 2, thermal_P_var=0.2, pref_index=0)
 HH_mate.windows([7 * 60, 20 * 60], [0, 0], 0.15)
+
+
+if __name__ == "__main__":
+    from ramp.core.core import UseCase
+
+    uc = UseCase(
+        users=User_list,
+        parallel_processing=False,
+    )
+    uc.initialize(peak_enlarge=0.15)
+
+    Profiles_list = uc.generate_daily_load_profiles()
+
+    # post-processing
+    from ramp.post_process import post_process as pp
+
+    Profiles_avg, Profiles_list_kW, Profiles_series = pp.Profile_formatting(
+        Profiles_list
+    )
+    pp.Profile_series_plot(
+        Profiles_series
+    )  # by default, profiles are plotted as a series
+    if (
+        len(Profiles_list) > 1
+    ):  # if more than one daily profile is generated, also cloud plots are shown
+        pp.Profile_cloud_plot(Profiles_list, Profiles_avg)
+
+    # this would be a new method using work of @mohammadamint
+    # results = uc.export_results()
