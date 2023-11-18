@@ -99,6 +99,19 @@ def export_series(stoch_profiles_series, j=None, fname=None, ofname=None):
         print("No path to a file was provided to write the results")
 
 
+def old_post_process(Profiles_list, fname, ofname):
+    # Post-processes the results and generates plots
+    Profiles_avg, Profiles_list_kW, Profiles_series = Profile_formatting(Profiles_list)
+    Profile_series_plot(Profiles_series)  # by default, profiles are plotted as a series
+
+    export_series(Profiles_series, None, fname, ofname)
+
+    if (
+        len(Profiles_list) > 1
+    ):  # if more than one daily profile is generated, also cloud plots are shown
+        Profile_cloud_plot(Profiles_list, Profiles_avg)
+
+
 valid_units = ("kW", "W", "MW", "GW", "TW")
 
 
