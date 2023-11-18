@@ -1,15 +1,24 @@
 import os
 import pytest
 import numpy as np
+import importlib
 
-from ramp.core.core import User, Appliance
-from ramp.core.initialise import initialise_inputs
+from ramp.core.core import UseCase, User
 
 from ramp.ramp_convert_old_input_files import convert_old_user_input_file
 
 
-def load_usecase(j=None, fname=None):
-    peak_enlarge, user_list, num_profiles = initialise_inputs(j, fname, num_profiles=1)
+def load_py_usecase(j=None):
+    file_module = importlib.import_module(f"ramp.example.input_file_{j}")
+    user_list = file_module.User_list
+    return user_list
+
+
+def load_xlsx_usecase(fname=None):
+    usecase = UseCase()
+    usecase.initialize(num_days=1)
+    usecase.load(fname)
+    user_list = usecase.users
     return user_list
 
 
@@ -49,13 +58,13 @@ class TestConversion:
     def test_convert_py_to_xlsx(self):
         """Convert the 3 example .py input files to xlsx and compare each appliance of each user"""
         for i, j in enumerate(self.input_files_to_run):
-            old_user_list = load_usecase(j=j)
+            old_user_list = load_py_usecase(j=j)
             convert_old_user_input_file(
                 self.py_fnames[i],
                 output_path=os.path.join("ramp", "test"),
                 suffix=self.file_suffix,
             )
-            new_user_list = load_usecase(fname=self.xlsx_fnames[i])
+            new_user_list = load_xlsx_usecase(fname=self.xlsx_fnames[i])
             for old_user, new_user in zip(old_user_list, new_user_list):
                 if old_user != new_user:
                     pytest.fail()
