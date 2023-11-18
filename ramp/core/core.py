@@ -518,6 +518,14 @@ class User:
             )  # this stacks the specific App curve in an overall curve comprising all the Apps within a User class
         return np.transpose(np.sum(user_max_profile, axis=0)) * self.num_users
 
+    @property
+    def num_days(self):
+        if self.usecase is not None:
+            answer = self.usecase.num_days
+        else:
+            answer = 365
+        return answer
+
     def save(self, filename: str = None) -> Union[pd.DataFrame, None]:
         """Saves/returns the model databas including allappliances as a single pd.DataFrame or excel file.
 
@@ -829,7 +837,9 @@ class Appliance:
         self.wd_we_type = wd_we_type
 
         if isinstance(power, pd.DataFrame):
-            if power.shape == (365, 1):
+            # TODO change this automatic value depending on the range of the usecase if provided
+            # with self.user.usecase.num_days
+            if power.shape == (self.user.num_days, 1):
                 power = power.values[:, 0]
             else:
                 raise ValueError("wrong size of array. array size should be (365,1).")
@@ -839,7 +849,7 @@ class Appliance:
 
         elif isinstance(power, (float, int)):
             # TODO change this automatic value depending on the range of the usecase
-            power = power * np.ones(366)
+            power = power * np.ones(self.user.num_days + 1)
 
         else:
             raise ValueError("wrong data type for power.")
