@@ -20,6 +20,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations
 under the License.
 """
+import os
 
 # %% Import required modules
 
@@ -58,5 +59,12 @@ def run_usecase(
             pp.old_post_process(Profiles_list, fname, ofname)
         else:
             return Profiles_list
+    elif fname.endswith(".py"):
+        if os.path.exists(fname):
+            os.system(f"python {fname}")
+        else:
+            raise FileNotFoundError(f"{fname} is not an existing file")
     else:
-        raise TypeError("Only the .xlsx file format is supported for ramp command line")
+        raise TypeError(
+            "Only the .py and .xlsx file format are supported for ramp command line"
+        )
