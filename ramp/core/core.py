@@ -29,6 +29,7 @@ from ramp.core.utils import (
     read_input_file,
     within_peak_time_window,
 )
+from ramp.post_process.post_process import Plot
 
 
 from typing import List, Union, Iterable
@@ -78,6 +79,7 @@ class UseCase:
         self.peak_time_range = None
         self.days = None
         self.__num_days = None
+        self.__datetimeindex = None
         self.daily_profiles = None
 
         self.appliances = []
@@ -124,7 +126,15 @@ class UseCase:
             self.initialize()
         return self.__num_days
 
+    @property
+    def datetimeindex(self):
+        if self.__datetimeindex is None:
+            self.initialize()
+        return self.__datetimeindex
+
     def initialize(self, num_days=None, peak_enlarge=0.15):
+        # TODO allow calendar years multi-year inputs
+
         if num_days is not None:
             self.__num_days = num_days
             if self.days is not None:
@@ -181,6 +191,12 @@ class UseCase:
                 f"You will simulate {self.__num_days} days from {self.days[0]} until {self.days[-1]}"
             )
         self.peak_time_range = self.calc_peak_time_range(peak_enlarge=peak_enlarge)
+        # format datetimeindex in minutes
+        self.__datetimeindex = pd.date_range(
+            start=self.days[0],
+            end=self.days[-1] + pd.Timedelta(1, "d") - pd.Timedelta(1, "T"),
+            freq="T",
+        )
 
     def calc_peak_time_range(self, peak_enlarge=0.15):
         """
@@ -230,35 +246,67 @@ class UseCase:
         # The peak_time is randomly enlarged based on the calibration parameter peak_enlarge
         return np.arange(peak_time - rand_peak_enlarge, peak_time + rand_peak_enlarge)
 
-    def generate_daily_load_profiles(self, day_types=None):
-        if self.days is None:
-            if day_types is not None:
-                self.days = day_types
-            else:
-                raise ValueError("You must either provide day types or days")
-        if self.parallel_processing is True:
-            daily_profiles = self.generate_daily_load_profiles_parallel(
-                day_types=[get_day_type(day) for day in self.days]
-            )
+    def generate_daily_load_profiles(
+        self, days=None, flat=False, cases=None, verbose=False
+    ):
+        """
+        Iterate over the days and generate a daily profile for each of the days
+
+        Parameters
+        ----------
+        days: datetimeindex
+            a list of days for which to generate daily profiles, if None, then self.days is used instead
+        flat: boolean
+            flaten the daily profiles into a 1 dimensional array via reshaping
+        cases: iterable
+            a list of label of the different cases. This is used if one would like to compare several independent runs
+            of a ramp UseCase, in that case the method returns a ramp.Plot object
+        """
+        if cases is not None:
+            results = {}
+            for case in cases:
+                profiles = self.generate_daily_load_profiles(days=days, flat=True)
+                results[f"case {case}"] = pd.Series(
+                    index=self.datetimeindex, data=profiles
+                )
+            answer = Plot(pd.concat(results, axis=1))
         else:
-            daily_profiles = np.zeros((self.num_days, 1440))
-            for day_idx, day in enumerate(self.days):
-                # initialise an empty daily profile (or profile load)
-                # that will be filled with the sum of the daily profiles of each User instance
-                usecase_load = np.zeros(1440)
-                # for each User instance generate a load profile, iterating through all user of this instance and
-                # all appliances they own, corresponds to step 2. of [1], p.7
-                for user in self.users:
-                    user.generate_aggregated_load_profile(
-                        day_idx, self.peak_time_range, get_day_type(day)
+            if self.days is None:
+                if days is not None:
+                    self.days = days  # TODO this might be wrong need to update the date_start, end num_days etc
+                else:
+                    raise ValueError(
+                        "You must provide days either with start and end date and run initialize() method of UseCase instance or as an argument of 'generate_daily_load_profiles'"
                     )
-                    # aggregate the user load to the usecase load
-                    usecase_load = usecase_load + user.load
-                daily_profiles[day_idx, :] = usecase_load
-                # screen update about progress of computation
-                print("Day", day_idx + 1, "/", self.num_days, "completed")
-            daily_profiles = np.array(daily_profiles)
-        return daily_profiles
+            if self.parallel_processing is True:
+                daily_profiles = self.generate_daily_load_profiles_parallel(
+                    day_types=[get_day_type(day) for day in self.days]
+                )
+            else:
+                daily_profiles = np.zeros((self.num_days, 1440))
+                for day_idx, day in enumerate(self.days):
+                    # initialise an empty daily profile (or profile load)
+                    # that will be filled with the sum of the daily profiles of each User instance
+                    usecase_load = np.zeros(1440)
+                    # for each User instance generate a load profile, iterating through all user of this instance and
+                    # all appliances they own, corresponds to step 2. of [1], p.7
+                    for user in self.users:
+                        user.generate_aggregated_load_profile(
+                            day_idx, self.peak_time_range, get_day_type(day)
+                        )
+                        # aggregate the user load to the usecase load
+                        usecase_load = usecase_load + user.load
+                    daily_profiles[day_idx, :] = usecase_load
+                    # screen update about progress of computation
+                    if verbose is True:
+                        # logging.info
+                        print("Day", day_idx + 1, "/", self.num_days, "completed")
+
+            if flat is True:
+                answer = daily_profiles.reshape(1, self.num_days * 1440).squeeze()
+            else:
+                answer = daily_profiles
+        return answer
 
     def generate_daily_load_profiles_parallel(self, day_types):
         max_parallel_processes = multiprocessing.cpu_count()

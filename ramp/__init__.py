@@ -18,7 +18,7 @@ from ramp._version import __version__
 from ramp.core.core import UseCase, User, Appliance
 from ramp.core.utils import yearly_pattern
 from ramp.example.examples import load_data, download_example
-from ramp.post_process.post_process import Run, Plot
+from ramp.post_process.post_process import Plot
 
 __authors__ = "Listed in AUTHORS"
 __copyright__ = (
