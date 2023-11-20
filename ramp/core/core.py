@@ -739,6 +739,16 @@ class User:
         if prof_i not in range(365):
             raise ValueError(f"prof_i should be an integer in range of 0 to 364")
 
+        if peak_time_range is None:
+            if self.usecase is None:
+                # logging warning
+                print(
+                    "You are generating ramp demand from a User not bounded to a UseCase instance, a default one has been created for you "
+                )
+                UseCase(name=f"{self.user_name} default usecase", users=[self])
+                self.usecase.initialize(num_days=1)
+            peak_time_range = self.usecase.peak_time_range
+
         single_load = np.zeros(1440)
 
         self.rand_daily_pref = (
@@ -757,7 +767,9 @@ class User:
             )  # adds the Appliance load profile to the single User load profile
         return single_load
 
-    def generate_aggregated_load_profile(self, prof_i, peak_time_range, day_type):
+    def generate_aggregated_load_profile(
+        self, prof_i, peak_time_range=None, day_type=None
+    ):
         """Generates an aggregated load profile from single load profile of each user
 
 

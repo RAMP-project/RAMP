@@ -138,6 +138,14 @@ To have a look to the python files, you can download them using the `download_ex
    file is used in `this
    publication <https://doi.org/10.1109/PTC.2019.8810571>`__
 
+You can execute python input files within an IDE, in your terminal with python command
+
+.. code-block:: bash
+
+   python <path to .py input file>
+
+or in your terminal with the ``ramp`` command, see :ref:`Command line options` below for more information.
+
 Spreadsheet input files
 -----------------------
 
@@ -149,18 +157,20 @@ need to run the ``ramp`` command with the option ``-i``:
    ramp -i <path to .xlsx input file>
 
 
-.. note:: You can input several files, separated from each others by a single blank space
+.. note:: You can input several files, separated from each others by a single blank space you can also input python files
 
-If you already know how many profile you want to simulate you can indicate it with the ``-n`` option:
+Command line options
+--------------------
+
+In the command line you can also run .py input files
+If you already know how many daily profiles you want to simulate you can indicate it with the ``-n`` option:
 
 .. code-block:: bash
 
-   ramp -i <path to .xlsx input file> -n 10
+   ramp -i <path to .xlsx or .py input file> -n 10
 
-will simulate 10 profiles. Note that you can use this option without
-providing a ``.xlsx`` input file with the ``-i`` option, this will then
-be equivalent to running ``python ramp_run.py`` from the ``ramp`` folder
-without being prompted for the number of profile within the console.
+will simulate 10 daily profiles. Note that if you do not provide this option you will being prompted for the
+number of daily profiles within the console.
 
 
 If you want to save ramp results to a custom file, you can provide it with the option `-o`
@@ -193,10 +203,10 @@ Building a model with a python script
 .. code-block:: python
 
    # importing functions
-   from ramp import User,calc_peak_time_range,yearly_pattern
+   from ramp import UseCase, User
 
    # Create a user category
-   low_income_households = User(
+   low_income_household = User(
     user_name = "low_income_household", # an optional feature for the User class
     num_users = 10, # Specifying the number of specific user category in the community
    )
@@ -229,10 +239,9 @@ Now you can generate your **stochastic profiles**:
 .. code-block:: python
 
    # generating load_curves
-   load = low_income_household.generate_aggregated_load_profiles(
+   load = low_income_household.generate_aggregated_load_profile(
       prof_i = 1, # the ith day profile
-      peak_time_range = calc_peak_time_range(), # the peak time range
-      Year_behaviour = yearly_pattern(), # defining the yearly pattern (like weekdays/weekends)
+      day_type = yearly_pattern()[1], # defining the yearly pattern (like weekdays/weekends)
    )
 
 Contributing
