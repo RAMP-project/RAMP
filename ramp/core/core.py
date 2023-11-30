@@ -63,6 +63,7 @@ class UseCase:
             a list of users to be added to the usecase instance, by default None
         date_start: str, optional
         date_end: str, optional
+        parallel_processing: bool, optional
         peak_enlarge: float, optional
 
         """
@@ -322,9 +323,7 @@ class UseCase:
                         "You must provide days either with start and end date and run initialize() method of UseCase instance or as an argument of 'generate_daily_load_profiles'"
                     )
             if self.parallel_processing is True:
-                daily_profiles = self.generate_daily_load_profiles_parallel(
-                    day_types=[get_day_type(day) for day in self.days]
-                )
+                daily_profiles = self.generate_daily_load_profiles_parallel(flat=False)
             else:
                 daily_profiles = np.zeros((self.num_days, 1440))
                 for day_idx, day in enumerate(self.days):
@@ -351,12 +350,20 @@ class UseCase:
                 answer = daily_profiles
         return answer
 
-    def generate_daily_load_profiles_parallel(self, day_types):
+    def generate_daily_load_profiles_parallel(self, days=None, flat=True):
+        if self.days is None:
+            if days is not None:
+                self.days = days  # TODO this might be wrong need to update the date_start, end num_days etc
+            else:
+                raise ValueError(
+                    "You must provide days either with start and end date and run initialize() method of UseCase instance or as an argument of 'generate_daily_load_profiles'"
+                )
+
         max_parallel_processes = multiprocessing.cpu_count()
         tasks = []
         t = 0
-        for day_idx in range(self.num_days):
-            day_type = day_types[day_idx]
+        for day_idx, day in enumerate(self.days):
+            day_type = get_day_type(day)
             for user in self.users:
                 for app in user.App_list:
                     for _ in range(user.num_users):
@@ -389,7 +396,12 @@ class UseCase:
                     daily_profiles_dict[day_idx]
                 ).sum(axis=0)
 
-        return daily_profiles
+        if flat is True:
+            answer = daily_profiles.reshape(1, self.num_days * 1440).squeeze()
+        else:
+            answer = daily_profiles
+
+        return answer
 
     def save(self, filename: str = None) -> Union[pd.DataFrame, None]:
         """Saves/returns the model databas including all the users and their appliances as a single pd.DataFrame or excel file.
