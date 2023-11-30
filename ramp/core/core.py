@@ -65,12 +65,12 @@ class UseCase:
 
         """
         self.name = name
-        self.date_start = (
+        self._date_start = (
             datetime.date.fromisoformat(date_start)
             if isinstance(date_start, str)
             else date_start
         )
-        self.date_end = (
+        self._date_end = (
             datetime.date.fromisoformat(date_end)
             if isinstance(date_end, str)
             else date_end
@@ -89,6 +89,32 @@ class UseCase:
         self.add_user(users)
 
         self.collect_appliances_from_users()
+        if self.date_start is not None and self.date_end is not None:
+            self.initialize()
+
+    @property
+    def date_start(self):
+        return self._date_start
+
+    @date_start.setter
+    def date_start(self, new_date):
+        self._date_start = (
+            datetime.date.fromisoformat(new_date)
+            if isinstance(new_date, str)
+            else new_date
+        )
+
+    @property
+    def date_end(self):
+        return self._date_end
+
+    @date_end.setter
+    def date_end(self, new_date):
+        self._date_end = (
+            datetime.date.fromisoformat(new_date)
+            if isinstance(new_date, str)
+            else new_date
+        )
 
     def add_user(self, user) -> None:
         """adds new user to the user property list
