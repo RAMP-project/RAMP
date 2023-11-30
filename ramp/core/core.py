@@ -238,6 +238,16 @@ class UseCase:
         )
 
     def calc_peak_time_range(self, peak_enlarge=0.15):
+    @property
+    def is_initialized(self):
+        answer = False
+        if (
+            self.__num_days is not None
+            and self.__datetimeindex is not None
+            and self.peak_time_range is not None
+        ):
+            answer = True
+        return answer
 
     def calc_peak_time_range(self, peak_enlarge=None):
         """
