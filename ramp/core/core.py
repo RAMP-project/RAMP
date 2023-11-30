@@ -780,7 +780,7 @@ class User:
         )
 
     def generate_single_load_profile(
-        self, prof_i: int, peak_time_range: np.array, day_type: int
+        self, prof_i: int = 0, peak_time_range: np.array = None, day_type: int = 0
     ):
         """Generates a load profile for a single user taking all its appliances into consideration
 
@@ -811,7 +811,7 @@ class User:
                     "You are generating ramp demand from a User not bounded to a UseCase instance, a default one has been created for you "
                 )
                 UseCase(name=f"{self.user_name} default usecase", users=[self])
-                self.usecase.initialize(num_days=1)
+                self.usecase.peak_time_range = self.usecase.calc_peak_time_range()
             peak_time_range = self.usecase.peak_time_range
 
         single_load = np.zeros(1440)
@@ -833,7 +833,7 @@ class User:
         return single_load
 
     def generate_aggregated_load_profile(
-        self, prof_i, peak_time_range=None, day_type=None
+        self, prof_i=0, peak_time_range=None, day_type=0
     ):
         """Generates an aggregated load profile from single load profile of each user
 
