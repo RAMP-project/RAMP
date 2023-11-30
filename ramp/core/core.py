@@ -594,10 +594,10 @@ class User:
 
     @property
     def num_days(self):
+        answer = 366
         if self.usecase is not None:
-            answer = self.usecase.num_days
-        else:
-            answer = 365
+            if self.usecase.is_initialized is True:
+                answer = self.usecase.num_days
         return answer
 
     def save(self, filename: str = None) -> Union[pd.DataFrame, None]:
@@ -747,8 +747,8 @@ class User:
 
         Parameters
         ----------
-        prof_i: int[0,365]
-            ith profile (day) requested by the user. 0 is the first day of the year and 364 is the last day.
+        prof_i: int[0,366]
+            ith profile (day) requested by the user. 0 is the first day of the year and 365 is the last day.
 
         peak_time_range: np.array
             randomised peak time range calculated using calc_peak_time_range function.
@@ -762,7 +762,7 @@ class User:
             load profile for the requested day
         """
 
-        if prof_i not in range(365):
+        if prof_i not in range(366):
             raise ValueError(f"prof_i should be an integer in range of 0 to 364")
 
         if peak_time_range is None:
@@ -802,8 +802,8 @@ class User:
         Parameters
         ----------
 
-        prof_i: int[0,365]
-            ith profile (day) requested by the user. 0 is the first day of the year and 364 is the last day.
+        prof_i: int[0,366]
+            ith profile (day) requested by the user. 0 is the first day of the year and 365 is the last day.
         peak_time_range: numpy array
             randomised peak time range calculated using calc_peak_time_range function
         day_type: int[0,1]
@@ -819,7 +819,7 @@ class User:
         Each single load profile has its own separate randomisation
         """
 
-        if prof_i not in range(365):
+        if prof_i not in range(366):
             raise ValueError(f"prof_i should be an integer in range of 0 to 364")
 
         self.load = np.zeros(1440)  # initialise empty load for User instance
@@ -862,7 +862,7 @@ class Appliance:
             number of appliances of the specified kind, by default 1
 
         power : Union[float.pd.DataFrame], optional
-            Power rating of appliance (average). If the appliance has variant daily power, a series (with the size of 365) can be passed., by default 0
+            Power rating of appliance (average). If the appliance has variant daily power, a series (with the size of 366) can be passed., by default 0
 
         num_windows : int [1,2,3], optional
             Number of distinct time windows, by default 1
@@ -904,7 +904,7 @@ class Appliance:
         --------
         ValueError
             1. if power is not passed as a number of series.
-            2. power array size is not (365,1)
+            2. power array size is not (366,1)
         """
 
         self.user = user
@@ -923,22 +923,21 @@ class Appliance:
         self.wd_we_type = wd_we_type
 
         if isinstance(power, pd.DataFrame):
-            # TODO change this automatic value depending on the range of the usecase if provided
-            # with self.user.usecase.num_days
-            if power.shape == (self.user.num_days, 1):
+            if len(power) >= self.user.num_days:
                 power = power.values[:, 0]
             else:
-                raise ValueError("wrong size of array. array size should be (365,1).")
+                raise ValueError(
+                    f"Wrong number of power values for appliance '{self.name}'. Number should be at least {self.user.num_days} values or a constant value."
+                )
 
         elif isinstance(power, str):
             power = pd.read_json(power).values[:, 0]
 
         elif isinstance(power, (float, int)):
-            # TODO change this automatic value depending on the range of the usecase
             power = power * np.ones(self.user.num_days + 1)
 
         else:
-            raise ValueError("wrong data type for power.")
+            raise ValueError(f"Wrong data type for power of appliance '{self.name}'.")
 
         self.power = power
 
