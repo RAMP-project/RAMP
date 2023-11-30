@@ -51,6 +51,7 @@ class UseCase:
         date_start: str = None,
         date_end: str = None,
         parallel_processing: bool = False,
+        peak_enlarge: float = 0.15,
     ):
         """Creates a UseCase instance for gathering a list of User instances which own Appliance instances
 
@@ -62,6 +63,7 @@ class UseCase:
             a list of users to be added to the usecase instance, by default None
         date_start: str, optional
         date_end: str, optional
+        peak_enlarge: float, optional
 
         """
         self.name = name
@@ -76,6 +78,7 @@ class UseCase:
             else date_end
         )
         self.parallel_processing = parallel_processing
+        self._peak_enlarge = peak_enlarge
         self.peak_time_range = None
         self.days = None
         self.__num_days = None
@@ -115,6 +118,15 @@ class UseCase:
             if isinstance(new_date, str)
             else new_date
         )
+
+    @property
+    def peak_enlarge(self):
+        return self._peak_enlarge
+
+    @peak_enlarge.setter
+    def peak_enlarge(self, new_peak_enlarge):
+        self._peak_enlarge = new_peak_enlarge
+        self.peak_time_range = self.calc_peak_time_range()
 
     def add_user(self, user) -> None:
         """adds new user to the user property list
@@ -158,7 +170,7 @@ class UseCase:
             self.initialize()
         return self.__datetimeindex
 
-    def initialize(self, num_days=None, peak_enlarge=0.15):
+    def initialize(self, num_days=None, peak_enlarge=None, force=False):
         # TODO allow calendar years multi-year inputs
 
         if num_days is not None:
@@ -225,6 +237,8 @@ class UseCase:
         )
 
     def calc_peak_time_range(self, peak_enlarge=0.15):
+
+    def calc_peak_time_range(self, peak_enlarge=None):
         """
         Calculate the peak time range, which is used to discriminate between off-peak and on-peak coincident switch-on probability
         Calculate first the overall Peak Window (taking into account all User classes).
@@ -248,6 +262,9 @@ class UseCase:
         -------
         peak time range: numpy array
         """
+
+        if peak_enlarge is None:
+            peak_enlarge = self.peak_enlarge
 
         tot_max_profile = np.zeros(1440)  # creates an empty daily profile
         # Aggregate each User's theoretical max profile to the total theoretical max
