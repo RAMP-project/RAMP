@@ -61,20 +61,20 @@ def read_input_file(filename):
                             f"The provided range for the power timeseries of the appliance '{appliance_name}' of user '{user_name} spans more than two columns in '{filename}' (range {ts_range} of sheet '{ts_sheet_name}')\n{POSSIBLE_FORMATS}"
                         )
                     )
-                if cr.size["rows"] != 365:
+                if cr.size["rows"] != 366:
                     raise (
                         ValueError(
-                            f"The provided range for the power timeseries of the appliance '{appliance_name}' of user '{user_name}' in '{filename}' does not contain 365 values as expected  (range {ts_range} of sheet '{ts_sheet_name}')\n{POSSIBLE_FORMATS}"
+                            f"The provided range for the power timeseries of the appliance '{appliance_name}' of user '{user_name}' in '{filename}' does not contain 366 values as expected  (range {ts_range} of sheet '{ts_sheet_name}')\n{POSSIBLE_FORMATS}"
                         )
                     )
             # the timeseries is expected as an array in json format
             else:
                 try:
                     ts = json.loads(v)
-                    if len(ts) != 365:
+                    if len(ts) != 366:
                         raise (
                             ValueError(
-                                f"The provided power timeseries of the appliance '{appliance_name}' of user '{user_name}' in '{filename}' does not contain 365 values as expected\n{POSSIBLE_FORMATS}"
+                                f"The provided power timeseries of the appliance '{appliance_name}' of user '{user_name}' in '{filename}' does not contain 366 values as expected\n{POSSIBLE_FORMATS}"
                             )
                         )
                     ts = v
