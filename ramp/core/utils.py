@@ -1,6 +1,7 @@
 import json
 import random
 import time
+import datetime
 import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
@@ -169,6 +170,10 @@ def random_choice(var, t1, p1, t2, p2):
 
 def get_day_type(day):
     """Given a datetime object return 0 for weekdays or 1 for weekends"""
+
+    if isinstance(day, str):
+        day = datetime.date.fromisoformat(day)
+
     if day.weekday() > 4:
         answer = 1
     else:
