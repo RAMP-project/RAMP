@@ -69,12 +69,12 @@ class UseCase:
         """
         self.name = name
         self._date_start = (
-            datetime.date.fromisoformat(date_start)
+            datetime.datetime.fromisoformat(date_start)
             if isinstance(date_start, str)
             else date_start
         )
         self._date_end = (
-            datetime.date.fromisoformat(date_end)
+            datetime.datetime.fromisoformat(date_end)
             if isinstance(date_end, str)
             else date_end
         )
@@ -103,7 +103,7 @@ class UseCase:
     @date_start.setter
     def date_start(self, new_date):
         self._date_start = (
-            datetime.date.fromisoformat(new_date)
+            datetime.datetime.fromisoformat(new_date)
             if isinstance(new_date, str)
             else new_date
         )
@@ -115,7 +115,7 @@ class UseCase:
     @date_end.setter
     def date_end(self, new_date):
         self._date_end = (
-            datetime.date.fromisoformat(new_date)
+            datetime.datetime.fromisoformat(new_date)
             if isinstance(new_date, str)
             else new_date
         )
@@ -174,70 +174,96 @@ class UseCase:
     def initialize(self, num_days=None, peak_enlarge=None, force=False):
         # TODO allow calendar years multi-year inputs
 
-        if num_days is not None:
-            self.__num_days = num_days
-            if self.days is not None:
-                # logging.error
-                print(
-                    "You want to initialize the usecase with num_days but you already have provided days. This might be the case if you use UseCase.load before you used UseCase.initialize()"
-                )
-                self.__num_days = None
-
-        if self.date_start is not None and self.date_end is not None:
-            self.days = pd.date_range(
-                start=self.date_start, end=self.date_end
-            )  # TODO add one extra day
-            self.__num_days = len(self.days)
-
-        if self.__num_days is None:
-            # asks the user how many days (i.e. code runs) they want
-            self.__num_days = int(
-                input("please indicate the number of days to be generated: ")
-            )
-            print("Please wait...")
-
-        if self.days is None:
-            # TODO add 24 hours to date end in the display
-            if self.date_start is not None:
-                self.days = pd.date_range(
-                    start=self.date_start, periods=self.__num_days
-                )
-                # logging info
-                print(
-                    f"You will simulate {self.__num_days} days from {self.date_start} until {self.days[-1]}"
-                )
-            else:
-                if self.date_end is not None:
-                    self.days = pd.date_range(
-                        end=self.date_end, periods=self.__num_days
-                    )
-                    # logging info
-                    print(
-                        f"You will simulate {self.__num_days} days from {self.days[0]} until {self.date_end}"
-                    )
-
-                else:
-                    self.days = pd.date_range(
-                        start=datetime.datetime.today(), periods=self.__num_days
-                    )
-                    # logging info
-                    print(
-                        f"You will simulate {self.__num_days} days from {self.days[0]} until {self.days[-1]}"
-                    )
-
-        else:
+        if self.is_initialized is True and force is False:
+            # logging.warning
             print(
-                f"You will simulate {self.__num_days} days from {self.days[0]} until {self.days[-1]}"
+                f"The usecase '{self.name}' is already initialized. If you want to force the reinitialization, use argument `force=True`\n"
+                f"You will typically see this message if you provide 'date_start' and 'date_end' to a UseCase instance and want to call the method initialize() on top of that"
             )
-        self.peak_time_range = self.calc_peak_time_range(peak_enlarge=peak_enlarge)
-        # format datetimeindex in minutes
-        self.__datetimeindex = pd.date_range(
-            start=self.days[0],
-            end=self.days[-1] + pd.Timedelta(1, "d") - pd.Timedelta(1, "T"),
-            freq="T",
-        )
+        else:
+            if self.is_initialized is True and force is True:
+                # logging.info
+                print(
+                    f"The usecase '{self.name}' is already initialized but argument `force=True` was provided, reinitializing..."
+                )
+                self.days = None
 
-    def calc_peak_time_range(self, peak_enlarge=0.15):
+            if num_days is not None:
+                self.__num_days = num_days
+                if self.days is not None:
+                    # logging.error
+                    print(
+                        f"You want to initialize the usecase '{self.name}' with num_days but you already have provided days. This might be the case if you use UseCase.load before you used UseCase.initialize()"
+                    )
+                    self.__num_days = None
+
+            if self.date_start is not None and self.date_end is not None:
+                self.days = pd.date_range(
+                    start=self.date_start, end=self.date_end
+                )  # TODO add one extra day
+                if self.__num_days is not None:
+                    if self.__num_days != len(self.days):
+                        # logging.warning
+                        print(
+                            "You provided arguments 'date_start' and 'date_end' to your usecase. However you provided argument 'num_days' to 'initialize' method, this will build a date range from 'date_start' with 'num_days' days"
+                        )
+                        self.days = None
+                    else:
+                        self.__num_days = len(self.days)
+                else:
+                    self.__num_days = len(self.days)
+
+            if self.__num_days is None:
+                # asks the user how many days (i.e. code runs) they want
+                self.__num_days = int(
+                    input("please indicate the number of days to be generated: ")
+                )
+                print("Please wait...")
+
+            if self.days is None:
+                # TODO add 24 hours to date end in the display
+                if self.date_start is not None:
+                    self.days = pd.date_range(
+                        start=self.date_start, periods=self.__num_days
+                    )
+                    # logging info
+                    print(
+                        f"You will simulate {self.__num_days} day(s) from {self.date_start} until {self.days[-1]+datetime.timedelta(days=1)}"
+                    )
+                else:
+                    if self.date_end is not None:
+                        self.days = pd.date_range(
+                            end=self.date_end, periods=self.__num_days
+                        )
+                        # logging info
+                        print(
+                            f"You will simulate {self.__num_days} day(s) from {self.days[0]} until {self.date_end+datetime.timedelta(days=1)}"
+                        )
+
+                    else:
+                        today = datetime.datetime.today()
+
+                        self.days = pd.date_range(
+                            start=datetime.datetime(today.year, today.month, today.day),
+                            periods=self.__num_days,
+                        )
+                        # logging info
+                        print(
+                            f"You will simulate {self.__num_days} day(s) from {self.days[0]} until {self.days[-1]+datetime.timedelta(days=1)}"
+                        )
+
+            else:
+                print(
+                    f"You will simulate {self.__num_days} day(s) from {self.days[0]} until {self.days[-1]+datetime.timedelta(days=1)}"
+                )
+            self.peak_time_range = self.calc_peak_time_range(peak_enlarge=peak_enlarge)
+            # format datetimeindex in minutes
+            self.__datetimeindex = pd.date_range(
+                start=self.days[0],
+                end=self.days[-1] + pd.Timedelta(1, "d") - pd.Timedelta(1, "T"),
+                freq="T",
+            )
+
     @property
     def is_initialized(self):
         answer = False
@@ -301,7 +327,7 @@ class UseCase:
         return np.arange(peak_time - rand_peak_enlarge, peak_time + rand_peak_enlarge)
 
     def generate_daily_load_profiles(
-        self, days=None, flat=False, cases=None, verbose=False
+        self, days=None, flat=True, cases=None, verbose=False
     ):
         """
         Iterate over the days and generate a daily profile for each of the days
