@@ -12,9 +12,9 @@ from scipy import stats
 
 
 class TestRandSwitchOnWindow:
-
     def setup_method(self):
         self.user = User(user_name="Test User", num_users=1)
+
     # Test when self.fixed = yes, all the apps are switched on together (should return the total number of apps)
 
     def test_all_appliances_switched_on_together(self):
