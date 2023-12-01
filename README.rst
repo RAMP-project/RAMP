@@ -143,7 +143,7 @@ You can execute python input files within an IDE, in your terminal with python c
 
    python <path to .py input file>
 
-or in your terminal with the ``ramp`` command, see :ref:`Command line options` below for more information.
+or in your terminal with the ``ramp`` command, see `Command line options <cmd_option_>`_ below for more information.
 
 Spreadsheet input files
 -----------------------
@@ -157,6 +157,8 @@ need to run the ``ramp`` command with the option ``-i``:
 
 
 .. note:: You can input several files, separated from each others by a single blank space you can also input python files
+
+.. _cmd_option:
 
 Command line options
 --------------------

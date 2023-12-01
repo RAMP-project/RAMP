@@ -7,6 +7,7 @@ setup(
     name="rampdemand",
     description="An open-source python package for building bottom-up stochastic model for generating multi-energy load profiles",
     long_description=open("README.rst", encoding="utf8").read(),
+    long_description_content_type="text/x-rst",
     author_email="f.lombardi@tudelft.nl",
     url="https://github.com/RAMP-project/RAMP",
     version=__version__,
