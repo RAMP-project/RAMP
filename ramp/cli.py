@@ -1,7 +1,6 @@
 import argparse
 import datetime
 import os.path
-import time
 
 import pandas as pd
 import numpy as np
@@ -17,21 +16,21 @@ parser.add_argument(
     dest="fname_path",
     nargs="+",
     type=str,
-    help="path to the (xlsx) input files (including filename). Must be provided",
+    help="Path to the (.xlsx/.py) input files (including filename). Must be provided",
 )
 parser.add_argument(
     "-o",
     dest="ofname_path",
     nargs="+",
     type=str,
-    help=f"path to the csv output files (including filename). If not provided, default output will be provided in {os.path.join(BASE_PATH, 'results')}",
+    help=f"Path to the csv output files (including filename). If not provided, default output will be provided in {os.path.join(BASE_PATH, 'results')}",
 )
 parser.add_argument(
     "-n",
     dest="num_days",
     nargs="+",
     type=int,
-    help="number of daily profiles to be generated",
+    help="Number of daily profiles to be generated",
 )
 
 parser.add_argument(
@@ -57,7 +56,11 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--ext", dest="extension", type=str, help="Format of input files", default="xlsx"
+    "--ext",
+    dest="extension",
+    type=str,
+    help="Format of input files for monthly variability (only used in combination with -y option and when -i path is a directory)",
+    default="xlsx",
 )
 
 parser.add_argument(
