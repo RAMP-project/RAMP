@@ -20,7 +20,7 @@ def convert_notebook_to_rst(input_file, output_dir, file_name):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    output_file = f"{output_dir}/{file_name}.rst"
+    output_file = os.path.join(output_dir, f"{{file_name}.rst")
 
     # Write RST content to the output file
     with open(output_file, "w", encoding="utf-8") as f:
@@ -31,7 +31,7 @@ def convert_notebook_to_rst(input_file, output_dir, file_name):
     # Copy images to the output folder
     image_dir = output_dir
     for image_filename, image_data in resources["outputs"].items():
-        image_path = f"{output_dir}/{image_filename}"
+        image_path = os.path,join(output_dir, image_filename)
         with open(image_path, "wb") as img_file:
             img_file.write(image_data)
 
@@ -40,7 +40,7 @@ def get_all_ipynb_files(examples_path="notebooks"):
 
     all_files = os.listdir(examples_path)
     return [
-        (f"{path}/{examples_path}/{file}", file.split(".ipynb")[0])
+        (os.path.join(path, examples_path, file), file.split(".ipynb")[0])
         for file in all_files
         if file.endswith("ipynb")
     ]
@@ -51,4 +51,4 @@ if __name__ == "__main__":
     files = get_all_ipynb_files()
 
     for file, folder in files:
-        convert_notebook_to_rst(file, f"{path}/source/examples/{folder}", folder)
+        convert_notebook_to_rst(file, os.path.join(path, source, examples,folder), folder)
