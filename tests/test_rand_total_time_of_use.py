@@ -6,8 +6,7 @@ Created on Mon Aug 28 15:40:12 2023
 @author: claudia
 """
 
-from ramp.core.core import Appliance
-from ramp.core.core import User
+from ramp import User
 
 
 import pytest

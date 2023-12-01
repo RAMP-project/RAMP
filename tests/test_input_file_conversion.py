@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 import importlib
 
-from ramp.core.core import UseCase, User
+from ramp import UseCase, User
 
 from ramp.ramp_convert_old_input_files import convert_old_user_input_file
 
