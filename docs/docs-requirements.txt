@@ -15,3 +15,5 @@ sphinx-pdj-theme # TODO to comment
 sphinx-copybutton
 sphinxjp.themes.sphinxjp
 sphinxjp.themes.basicstrap
+nbformat
+nbconvert
