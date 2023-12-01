@@ -106,16 +106,15 @@ To have a look to the python files, you can download them using the `download_ex
 
    download_example("the specfic folder directory to save the files")
 
--  ``input_file_1.py``: represents the most basic electric appliances,
-   is an example of how to model lightbulbs, radios, TVs, fridges, and
+-  ``input_file_1.py``: represents the most basic electric appliances; it is 
+   an example of how to model lightbulbs, radios, TVs, fridges, and
    other electric appliances. This input file is based on the ones used
-   for `this
-   publication <https://doi.org/10.1016/j.energy.2019.04.097>`__.
+   for `the first RAMP publication <https://doi.org/10.1016/j.energy.2019.04.097>`__.
 
--  ``input_file_2.py``: shows how to model thermal loads, with the
+-  ``input_file_2.py``: shows how to model user-driven thermal loads, with the
    example of a “shower” appliance. The peculiarity of thermal appliances
    is that the nominal power can be provided as external input as a
-   “csv” file (in this case, ``shower_P.csv``). For the example “shower”
+   “.csv” file (in this case, ``shower_P.csv``). For the example “shower”
    appliance, the varying nominal power accounts for the effect of
    groundwater temperature variation throughout the year. This input
    file is based on that used for `this
