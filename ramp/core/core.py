@@ -337,7 +337,7 @@ class UseCase:
         days: datetimeindex
             a list of days for which to generate daily profiles, if None, then self.days is used instead
         flat: boolean
-            flaten the daily profiles into a 1 dimensional array via reshaping
+            flatten the daily profiles into a 1 dimensional array via reshaping
         cases: iterable
             a list of label of the different cases. This is used if one would like to compare several independent runs
             of a ramp UseCase, in that case the method returns a ramp.Plot object
