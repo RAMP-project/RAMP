@@ -74,7 +74,6 @@ Utilities
 .. autosummary::
     :toctree: api_document/
 
-    yearly_pattern
     load_data
     download_example
 
