@@ -207,8 +207,8 @@ Building a model with a python script
    from ramp import UseCase, User
 
    # Create a user category
-   low_income_household = User(
-    user_name = "low_income_household", # an optional feature for the User class
+   household_1 = User(
+    user_name = "Household type 1", # an optional feature for the User class
     num_users = 10, # Specifying the number of specific user category in the community
    )
 
@@ -217,13 +217,14 @@ You can add appliances to a user category by:
 .. code-block:: python
 
    # adding some appliances for the household
-   radio = low_income_household.add_appliance(
+   radio = household_1.add_appliance(
     name = "Small Radio", # optional feature for the appliance class
-    number = 1, # how many radio each low income household holds
-    power = 10, # RAMP does not take care of unit of measures , watt
+    number = 1, # how many radio each household type 1 has
+    power = 10, # RAMP does not take care of units of measure (e.g., Watts), you must be consistent
     func_time = 120, # Total functioning time of appliance in minutes
-    num_windows = 2, # in how many time-windows the appliance is used
+    num_windows = 2, # how many time-windows the appliance is used in
    )
+
 
 The use time frames can be specified using the 'window' method for each appliance of the user category:
 
@@ -235,15 +236,44 @@ The use time frames can be specified using the 'window' method for each applianc
     window_2 = [1320,1380], # from 10 PM to 11 PM
    )
 
-Now you can generate your **stochastic profiles**:
+You can also add another, different user to the simulation. In this case,
+we use a more compact formulation:
 
 .. code-block:: python
 
-   # generating load_curves
-   load = low_income_household.generate_aggregated_load_profile(
-      prof_i = 1, # the ith day profile
-      day_type = yearly_pattern()[1], # defining the yearly pattern (like weekdays/weekends)
-   )
+   # Create a second user category
+   household_2 = User(
+    user_name = "Household type 2", # an optional feature for the User class
+    num_users = 13, # Specifying the number of specific user category in the community
+    )
+
+   # adding some appliances for the new household type in compact form, with windows specified directly and random variability
+   light_bulbs = household_2.add_appliance(
+    name = "Light bulbs", # optional feature for the appliance class
+    number = 5, # how many light bulbs each household type 2 has
+    power = 7, # RAMP does not take care of units of measure (e.g., Watts), you must be consistent
+    func_time = 120, # total functioning time of appliance in minutes
+    time_fraction_random_variability=0.2, # 20% random variability associated to the total functioning time
+    num_windows = 2, # how many time-windows the appliance is used in
+    window_1 = [390,480], # from 6.30 AM to 8 AM
+    window_2 = [1020,1440], # from 5 PM to 12 PM
+    random_var_w=0.35 # 35% randomness assigned to the size of the functioning windows
+    )
+
+At this point, we can group our different users into a "use case" and run the simulation, 
+for instance for a whole year.
+
+.. code-block:: python
+
+   use_case = UseCase(users=[household_1,household_2], date_start="2020-01-01", date_end="2020-12-31")
+   whole_year_profile = use_case.generate_daily_load_profiles()
+
+Here is your first load for a community including two types of housholds,
+for a total of 23 individual users. Of course, more variations and many more 
+features are possible! For instance, you can simulate loads even for 
+an individual appliance or user. In addition, you can use in-built plotting 
+functionalities to explore your results. Check out the documentation 
+for all the possibilities.
 
 Contributing
 ============
