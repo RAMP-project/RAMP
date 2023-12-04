@@ -1461,7 +1461,7 @@ class Appliance:
         return self.daily_use * np.mean(self.power) * self.number
 
     def specific_cycle(self, cycle_num, **kwargs):
-        """assigining specific duty cycle for the appliace (maximum of three cycles can be assigned)
+        """assigining specific duty cycle for the appliance (maximum of three cycles can be assigned)
 
         Parameters
         ----------
@@ -1469,7 +1469,7 @@ class Appliance:
             represents the number of the specific cycle to be assigned. acceptable values are [1,2,3]
 
         **kwargs :
-            additional features passed tp each specific cycle function. For example iff cycle_num = 1, **kwargs represents the arguments of function 'spefici_cycle_1' which are:
+            additional features passed tp each specific cycle function. For example iff cycle_num = 1, **kwargs represents the arguments of function 'specific_cycle_1' which are:
                 * p_11
                 * t_11
                 * p_12
