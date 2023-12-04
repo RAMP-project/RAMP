@@ -15,6 +15,16 @@ Use Case class
     UseCase.save
     UseCase.export_to_dataframe
     UseCase.load
+    UseCase.collect_appliances_from_users
+    UseCase.initialize
+    UseCase.calc_peak_time_range
+    UseCase.generate_daily_load_profiles
+    UseCase.generate_daily_load_profiles_parallel
+    UseCase.date_start
+    UseCase.date_end
+    UseCase.peak_enlarge
+    UseCase.num_days
+    UseCase.datetimeindex
 
 
 **********
@@ -65,7 +75,6 @@ Utilities
     :toctree: api_document/
 
     yearly_pattern
-    calc_peak_time_range
     load_data
     download_example
 
@@ -87,7 +96,6 @@ Visualization
     Plot.shadow
     Plot.area
     Plot.load_duration_curve
-    Plot.validate_results
     Plot.error
     Plot.peak
     Plot.DataFrame
