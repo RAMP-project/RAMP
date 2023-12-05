@@ -1,10 +1,11 @@
 Release History
 ===============
 
-0.4.2 (dev)
+0.5.1 (dev)
 -----------
 
-
+0.5.0 (2023-12-06)
+------------------
 
 **|fixed|**     jupyter notebooks are up to date with the UseCase class
 
