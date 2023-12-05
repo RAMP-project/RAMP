@@ -6,13 +6,13 @@ Release History
 
 
 
-**|fixed|**     jupyter notebook are up to date with the UseCase class
+**|fixed|**     jupyter notebooks are up to date with the UseCase class
 
-**|fixed|**     UseCase class usage is now documented and 
+**|fixed|**     UseCase class usage is now documented
 
 **|changed|**   num_profile variable was changed to num_days
 
-**|changed|**   User class get assigned automatically a to a default UseCase instance if not provided
+**|changed|**   User class get assigned automatically to a default UseCase instance if not provided
 
 **|changed|**   Delete ramp.core.initialize and ramp.core.stochastic_process, move calc_peak_time_range inside UseCase method
 
