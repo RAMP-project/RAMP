@@ -6,8 +6,7 @@ Created on Mon Aug 28 15:40:12 2023
 @author: claudia
 """
 
-from ramp.core.core import Appliance
-from ramp.core.core import User
+from ramp import User
 
 
 import pytest
@@ -17,8 +16,7 @@ import pytest
 def appliance_instance():
     # Create a User instance (you may need to provide the required arguments for User)
     user = User(user_name="Test User", num_users=1)
-    appliance = Appliance(
-        user="Test User",
+    appliance = user.add_appliance(
         name="Test Appliance",
         func_time=100,  # Set an appropriate func_time
         func_cycle=20,

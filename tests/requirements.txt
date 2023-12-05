@@ -1,2 +1,5 @@
 pytest
 scipy
+nbconvert
+ipykernel
+-e .

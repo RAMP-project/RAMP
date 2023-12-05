@@ -1,6 +1,8 @@
-######################################
+Model Parameters
+================
+
 Excel input file parameter description
-######################################
+--------------------------------------
 
 The table below displays the input parameters of RAMP. If **NA** is displayed in the table below, it means that the corresponding column is not applicable to the parameter.
 
@@ -227,7 +229,7 @@ The **"allowed values"** column provide information about the format one should 
      - 0
 
 Python input file parameter description
-=======================================
+---------------------------------------
 
 A new instance of class ``User`` requires the parameters ``user_name``,
 ``num_users``, ``user_preference`` from the table above. To add an

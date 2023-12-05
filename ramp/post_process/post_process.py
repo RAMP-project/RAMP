@@ -99,71 +99,20 @@ def export_series(stoch_profiles_series, j=None, fname=None, ofname=None):
         print("No path to a file was provided to write the results")
 
 
+def old_post_process(Profiles_list, fname, ofname):
+    # Post-processes the results and generates plots
+    Profiles_avg, Profiles_list_kW, Profiles_series = Profile_formatting(Profiles_list)
+    Profile_series_plot(Profiles_series)  # by default, profiles are plotted as a series
+
+    export_series(Profiles_series, None, fname, ofname)
+
+    if (
+        len(Profiles_list) > 1
+    ):  # if more than one daily profile is generated, also cloud plots are shown
+        Profile_cloud_plot(Profiles_list, Profiles_avg)
+
+
 valid_units = ("kW", "W", "MW", "GW", "TW")
-
-
-class Run:
-    def __init__(self, user, unit, calendar_years):
-        self.user = user
-        self.unit = unit
-
-        if isinstance(calendar_years, int):
-            calendar_years = [calendar_years]
-
-        self.calendar_years = calendar_years
-
-        datatimeIndexes = [
-            pd.date_range(
-                start=f"{year}-01-01", periods=365 * 60 * 24, freq="1min", name="date"
-            )
-            for year in self.calendar_years
-        ]
-        self._datetimeIndex = datatimeIndexes[0]
-
-        for year, Index in enumerate(datatimeIndexes):
-            if year != 0:
-                self._datetimeIndex = self._datetimeIndex.append(Index)
-
-    @property
-    def unit(self):
-        return self._unit
-
-    @unit.setter
-    def unit(self, var):
-        if var not in valid_units:
-            raise ValueError(f"valid units are: {valid_units}")
-
-        self._unit = var
-
-    def _get_DatetimeIndex(self, starting_day, n_days):
-        request = pd.date_range(
-            start=starting_day, periods=n_days * 24 * 60, freq="1min"
-        )
-
-        request_intersection = self._datetimeIndex.intersection(request)
-
-        if not request.equals(request_intersection):
-            raise ValueError("not a valid date")
-
-        return request
-
-    def generate_profiles(
-        self, starting_day, n_days, peak_time_range, columns=["Baseline"]
-    ):
-        idx = self._get_DatetimeIndex(starting_day, n_days)
-        results = {}
-        for profile in columns:
-            profiles = []
-            for prof_i in idx.day_of_year.unique():
-                result = self.user.generate_aggregated_load_profile(
-                    prof_i=prof_i, day_type=1, peak_time_range=peak_time_range
-                )
-
-                profiles.extend(result.tolist())
-
-            results[profile] = pd.Series(index=idx, data=profiles)
-
-        return Plot(pd.concat(results, axis=1))
 
 
 class Plot:

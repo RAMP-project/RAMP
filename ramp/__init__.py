@@ -16,10 +16,9 @@ Package dependencies:
 
 from ramp._version import __version__
 from ramp.core.core import UseCase, User, Appliance
-from ramp.core.stochastic_process import calc_peak_time_range
-from ramp.core.utils import yearly_pattern
+from ramp.core.utils import yearly_pattern, get_day_type
 from ramp.example.examples import load_data, download_example
-from ramp.post_process.post_process import Run, Plot
+from ramp.post_process.post_process import Plot
 
 __authors__ = "Listed in AUTHORS"
 __copyright__ = (

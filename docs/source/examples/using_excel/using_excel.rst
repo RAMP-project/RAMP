@@ -1,32 +1,31 @@
 Using tabular inputs to build a model
-============================
+=====================================
 
-When the number of users or appliances is high, it can be difficult 
-to create a model using python scripts. Therefore, RAMP allows you 
-to create inputs in tabular format (.xlsx). In this example we show
-a use case of this functionality.
+When the number of users or appliances is high, it can be difficult to
+create a model using Python scripts. Therefore, RAMP allows you to
+create inputs in tabular format (``.xlsx``). On the other hand, it is
+still possible to use Python to generate a large tabular file with
+default parameter values, which can then be more easily customised. In
+this example, we show a possible utilisation of this functionality.
 
 .. code:: ipython3
 
-    from ramp import User, Appliance, UseCase
-    from ramp import calc_peak_time_range,yearly_pattern
+    from ramp import User, Appliance, UseCase, get_day_type
     import pandas as pd
 
-At the first step, user needs to creat User classes and assign
-Appliances to the user class without assiging any detailed appliance
-characteristics
+As a first step, one must create ``User`` classes and assign
+``Appliances`` to the user class without assigning detailed appliance
+characteristics. Hence, users and their appliances are added to a
+``UseCase``.
 
-Buidling a model database
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Building a tabular file populated with default data
+---------------------------------------------------
 
 .. code:: ipython3
 
     # Defining a dict of users with their appliances
     
-    user_app = {
-        "household" : ["light","tv"],
-        "school": ["light","computer"]
-    }
+    user_app = {"household": ["light", "tv"], "school": ["light", "computer"]}
 
 .. code:: ipython3
 
@@ -36,26 +35,25 @@ Buidling a model database
 .. code:: ipython3
 
     # assinging the appliances to users
-    for user,apps in user_app.items():
-        
-        user_instance = User(user_name = user)
-        
+    for user, apps in user_app.items():
+        user_instance = User(user_name=user)
+    
         for app in apps:
             app_instance = user_instance.add_appliance(name=app)
             app_instance.windows()
-            
+    
         use_case.add_user(user_instance)
 
 
 .. parsed-literal::
 
-    UserWarning: No windows is declared, default window of 24 hours is selected
-      warnings.warn(UserWarning("No windows is declared, default window of 24 hours is selected"))
+    /home/fl/GitHub-repos/RAMP/ramp/core/core.py:1198: UserWarning: No windows is declared, default window of 24 hours is selected
+      warnings.warn(
 
 
-Once the users and appliances are added to the :code:`use_case` instance, the
-user can get a pd.DataFrame or an .xlsx file of all the data with the
-default values.
+Once the ``Users`` and ``Appliances`` are added to the ``use_case``
+instance, the model user can get a ``pd.DataFrame`` or an ``.xlsx`` file
+of all the data with the default values.
 
 Exporting the database
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -218,11 +216,12 @@ Exporting the database
 .. code:: ipython3
 
     # Printing out the database to an .xlsx file
-    use_case.save("path/name_of_file")
+    use_case.save("example_excel_usecase")
 
-Once the function is used, an .xlsx file will be created in the given
-path. Now you can easily fill-out the information in the .xlsx file and
-load the data into the model database as detailed below.
+Once the function is used, an ``.xlsx`` file will be created in the
+given path. Now, you can easily fill out the information in the
+``.xlsx`` file and load the data into the model database as detailed
+below.
 
 Loading the database
 ~~~~~~~~~~~~~~~~~~~~
@@ -231,54 +230,88 @@ Loading the database
 
     # loading data
     
-    use_case = UseCase() # creating a new UseCase instance
-    use_case.load("path/name_of_file.xlsx")
+    use_case = UseCase()  # creating a new UseCase instance
+    use_case.load("example_excel_usecase_filled.xlsx")
 
 Generating load profiles
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 Once the database is loaded, the user can continue with the normal
-analysis like generating aggregated profiles
-
-.. code:: ipython3
-
-    peak_time_range = calc_peak_time_range(
-        user_list = use_case.users
-    )
-    
-    year_behaviour = yearly_pattern()
+analysis, for instance, generating aggregated profiles
 
 .. code:: ipython3
 
     n_days = 30
-    
-    
-    
-    for user in use_case.users:
-        user_profiles = []
-        for day in range(n_days):
-            profile = user.generate_aggregated_load_profile(
-                            prof_i = day,
-                            peak_time_range = peak_time_range,
-                            Year_behaviour = year_behaviour
-                        )
-            
-            user_profiles.extend(profile)
-            
-        profiles = pd.DataFrame(   
-            data = user_profiles,
-            index = pd.date_range(start = "2020-01-01",periods = 1440*n_days,freq="T"),
-        )
-        
-        profiles.plot(title = user.user_name)
-        
-            
+    date_start = "2020-01-01"
+    use_case.date_start = date_start
+    use_case.initialize(num_days=n_days, force=True)
+    use_case.generate_daily_load_profiles()
+
+
+.. parsed-literal::
+
+    You will simulate 30 day(s) from 2020-01-01 00:00:00 until 2020-01-31 00:00:00
 
 
 
-.. image:: output_17_0.png
+
+.. parsed-literal::
+
+    array([0.   , 0.   , 0.   , ..., 0.002, 0.002, 0.002])
+
+
+
+.. code:: ipython3
+
+    profiles = pd.DataFrame(
+        data=use_case.generate_daily_load_profiles(flat=True),
+        index=pd.date_range(start=date_start, periods=1440 * n_days, freq="T"),
+    )
+    
+    profiles.plot(title="Usecase")
+
+
+
+
+.. parsed-literal::
+
+    <Axes: title={'center': 'Usecase'}>
+
 
 
 
 .. image:: output_17_1.png
+
+
+Generating load profiles for the single users of the usecase
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: ipython3
+
+    for user in use_case.users:
+        user_profiles = []
+        for day_idx, day in enumerate(use_case.days):
+            profile = user.generate_aggregated_load_profile(
+                prof_i=day_idx,
+                peak_time_range=use_case.peak_time_range,
+                day_type=get_day_type(day),
+            )
+    
+            user_profiles.extend(profile)
+    
+        profiles = pd.DataFrame(
+            data=user_profiles,
+            index=pd.date_range(start=date_start, periods=1440 * n_days, freq="T"),
+        )
+    
+        profiles.plot(title=user.user_name)
+
+
+
+.. image:: output_19_0.png
+
+
+
+.. image:: output_19_1.png
+
 

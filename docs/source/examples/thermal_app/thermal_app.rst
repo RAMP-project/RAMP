@@ -3,13 +3,17 @@ Thermal loads
 
 This example input file represents a single household user whose only
 load is the “shower”. The example showcases how to model thermal loads
-by means of the :code:`thermal_P_var` attribute.
+by: 1) using a time-varying average ``power`` attribute, pre-calculated
+as a function of the average daily groundwater temperature; and 2) using
+the ``thermal_p_var`` attribute to add further variability to the actual
+power absorbed by the appliance in each usage event, which reflects the
+randomness of user behaviour in preferring a slightly warmer or colder
+shower temperature.
 
 .. code:: ipython3
 
     # importing functions
-    from ramp import User,calc_peak_time_range,yearly_pattern
-    from ramp import load_data
+    from ramp import User, UseCase, load_data, get_day_type
     import pandas as pd
 
 Creating a user category and appliances
@@ -19,10 +23,11 @@ Creating a user category and appliances
 
     household = User()
 
-When the power is varying during the day, the “power” parameter needs to
-be passed as a pd.DataFrame or np.array with a daily profile (365 rows
-of data). For this exercise, data can be loaded from the default
-examples in ramp:
+When the power varies across days of the year, for instance, as a
+function of the average daily groundwater temperature, the “power”
+parameter can be passed as a ``pd.DataFrame`` or ``np.array`` with a
+daily profile (365 rows of data). For this exercise, data can be loaded
+from the default examples in ramp:
 
 .. code:: ipython3
 
@@ -38,7 +43,7 @@ examples in ramp:
 
 .. parsed-literal::
 
-    <AxesSubplot:>
+    <Axes: >
 
 
 
@@ -49,68 +54,55 @@ examples in ramp:
 .. code:: ipython3
 
     shower = household.add_appliance(
-        name = "Shower",
-        number = 1,
-        power  = shower_power,
-        num_windows = 2,
-        func_time = 15,
-        time_fraction_random_variability = 0.1,
-        func_cycle = 3,
-        window_1 = [390,540],
-        window_2 = [1080,1200],
-        random_var_w = 0.2
+        name="Shower",
+        number=1,
+        power=shower_power,
+        num_windows=2,
+        func_time=15,
+        time_fraction_random_variability=0.1,
+        func_cycle=3,
+        window_1=[390, 540],
+        window_2=[1080, 1200],
+        random_var_w=0.2,
     )
 
-
-Generating profiles
-~~~~~~~~~~~~~~~~~~~
-
-.. code:: ipython3
-
-    peak_time_range = calc_peak_time_range(
-        user_list = [household]
-    )
-    year_behaviour = yearly_pattern()
+Generating profiles for increasing degrees of ``thermal_p_var``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
 
-    # generating the yearly profiles for different thermal_P_var
+    usecase = UseCase(users=[household], date_start="2020-01-01")
+    usecase.initialize(num_days=365)
+
+
+.. parsed-literal::
+
+    You will simulate 365 day(s) from 2020-01-01 00:00:00 until 2020-12-31 00:00:00
+
 
 .. code:: ipython3
 
-    def thermal_P_var_sensitivity(values):
-        
+    def thermal_p_var_sensitivity(values):
         # buidling a pd.DataFrame for saving sensitivity results
-        results = pd.DataFrame(    
-            index = pd.date_range(start = "2020-01-01",periods = 1440*365,freq="T"),
-            columns = [f"P_var = {value}" for value in values]
+        results = pd.DataFrame(
+            index=pd.date_range(start="2020-01-01", periods=1440 * 365, freq="T"),
+            columns=[f"p_var = {value}" for value in values],
         )
-        
+    
         for value in values:
-            
             # changing the thermal_P_var
-            household.thermal_P_var = value
-            
-            # creating a list to sotre profiles for all the years of the year
-            profiles = []
-            for day in range(365):
+            shower.thermal_p_var = value
     
-                profile = household.generate_single_load_profile(
-                        prof_i = day, 
-                        peak_time_range = peak_time_range,
-                        Year_behaviour = year_behaviour
-                    )
+            profiles = usecase.generate_daily_load_profiles(flat=True)
     
-                profiles.extend(profile)
-                
-            # assiging the yearly profile for a given sensitivity case
-            results[f"P_var = {value}"] = profiles
-            
+            # assigning the yearly profile for a given sensitivity case
+            results[f"p_var = {value}"] = profiles
+    
         return results
 
 .. code:: ipython3
 
-    sensitivity_results = thermal_P_var_sensitivity([0,0.25,0.5,0.75,1])
+    sensitivity_results = thermal_p_var_sensitivity([0, 0.25, 0.5, 0.75, 1])
 
 .. code:: ipython3
 
@@ -139,11 +131,11 @@ Generating profiles
       <thead>
         <tr style="text-align: right;">
           <th></th>
-          <th>P_var = 0</th>
-          <th>P_var = 0.25</th>
-          <th>P_var = 0.5</th>
-          <th>P_var = 0.75</th>
-          <th>P_var = 1</th>
+          <th>p_var = 0</th>
+          <th>p_var = 0.25</th>
+          <th>p_var = 0.5</th>
+          <th>p_var = 0.75</th>
+          <th>p_var = 1</th>
         </tr>
       </thead>
       <tbody>
@@ -256,10 +248,31 @@ Generating profiles
 
 .. parsed-literal::
 
-    <AxesSubplot:>
+    <Axes: >
+
+
+
+
+.. image:: output_14_1.png
+
+
+.. code:: ipython3
+
+    first_day = pd.date_range(
+        start="2020-01-01 00:00:00", freq="1min", periods=24 * 60  # a full day
+    )
+    sensitivity_results.loc[first_day].plot()
+
+
+
+
+.. parsed-literal::
+
+    <Axes: >
 
 
 
 
 .. image:: output_15_1.png
+
 
