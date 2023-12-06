@@ -13,3 +13,4 @@ RAMP examples
     examples/thermal_app/thermal_app
     examples/year_simulation/year_simulation
     examples/parallel_processing/parallel_processing
+    examples/plot_class/plot_class

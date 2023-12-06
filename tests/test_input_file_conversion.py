@@ -1,17 +1,24 @@
 import os
 import pytest
 import numpy as np
+import importlib
 
-from ramp.core.core import User, Appliance
-from ramp.core.initialise import initialise_inputs
-e
+from ramp import UseCase, User
+
 from ramp.ramp_convert_old_input_files import convert_old_user_input_file
 
 
-def load_usecase(j=None, fname=None):
-    peak_enlarge, user_list, num_profiles = initialise_inputs(
-        j, fname, num_profiles=1
-    )
+def load_py_usecase(j=None):
+    file_module = importlib.import_module(f"ramp.example.input_file_{j}")
+    user_list = file_module.User_list
+    return user_list
+
+
+def load_xlsx_usecase(fname=None):
+    usecase = UseCase()
+    usecase.initialize(num_days=1)
+    usecase.load(fname)
+    user_list = usecase.users
     return user_list
 
 
@@ -19,15 +26,12 @@ class TestConversion:
     def setup_method(self):
         self.input_files_to_run = [1, 2, 3]
         self.file_suffix = "_test"
-        os.chdir(
-            "ramp"
-        )  # for legacy code to work the loading of the input file has to happen from the ramp folder
         self.py_fnames = [
-            os.path.join("input_files", f"input_file_{i}.py")
+            os.path.join("ramp", "example", f"input_file_{i}.py")
             for i in self.input_files_to_run
         ]
         self.xlsx_fnames = [
-            os.path.join("test", f"input_file_{i}{self.file_suffix}.xlsx")
+            os.path.join("ramp", "test", f"input_file_{i}{self.file_suffix}.xlsx")
             for i in self.input_files_to_run
         ]
         for fname in self.xlsx_fnames:
@@ -54,11 +58,13 @@ class TestConversion:
     def test_convert_py_to_xlsx(self):
         """Convert the 3 example .py input files to xlsx and compare each appliance of each user"""
         for i, j in enumerate(self.input_files_to_run):
-            old_user_list = load_usecase(j=j)
+            old_user_list = load_py_usecase(j=j)
             convert_old_user_input_file(
-                self.py_fnames[i], output_path="test", suffix=self.file_suffix
+                self.py_fnames[i],
+                output_path=os.path.join("ramp", "test"),
+                suffix=self.file_suffix,
             )
-            new_user_list = load_usecase(fname=self.xlsx_fnames[i])
+            new_user_list = load_xlsx_usecase(fname=self.xlsx_fnames[i])
             for old_user, new_user in zip(old_user_list, new_user_list):
                 if old_user != new_user:
                     pytest.fail()
@@ -130,16 +136,23 @@ def test_provide_no_appliance_window_when_declaring_one():
 def test_A():
     user = User("test user", 1)
 
-    old_params = dict(n=1, P=200, w=1, t=0)
+    old_params = dict(power=200, num_windows=1, func_time=0)
     win_start = 390
     win_stop = 540
     appliance1 = user.Appliance(user, **old_params)
     appliance1.windows(window_1=[win_start, win_stop])
 
-    params = dict(number=1, power=200, num_windows=1, func_time=0, window_1=np.array([win_start, win_stop]))
+    params = dict(
+        number=1,
+        power=200,
+        num_windows=1,
+        func_time=0,
+        window_1=np.array([win_start, win_stop]),
+    )
     appliance2 = user.add_appliance(**params)
 
     assert appliance1 == appliance2
+
 
 def test_B():
     user = User("test user", 1)

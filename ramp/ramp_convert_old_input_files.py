@@ -1,4 +1,4 @@
-#%% Import required modules
+# %% Import required modules
 
 import sys, os, importlib
 
@@ -28,7 +28,7 @@ parser.add_argument(
     dest="suffix",
     type=str,
     help="suffix appended to the converted filename",
-    default=""
+    default="",
 )
 
 
@@ -60,7 +60,9 @@ def convert_old_user_input_file(
             if "from core import" in l:
                 line_to_change = i
         # Change import statement by explicitly naming the full package path
-        lines[line_to_change] = lines[line_to_change].replace("from core import", "from ramp.core.core import")
+        lines[line_to_change] = lines[line_to_change].replace(
+            "from core import", "from ramp.core.core import"
+        )
 
     # Modify import statement in file
     if line_to_change != -1:
@@ -79,8 +81,6 @@ def convert_old_user_input_file(
     output_fname = fname_path.split(os.path.sep)[-1].replace(".py", suffix)
     output_fname = os.path.join(output_path, output_fname)
 
-    if "ramp" not in fname:
-        fname = f"ramp.{fname}"
     file_module = importlib.import_module(fname)
 
     user_list = file_module.User_list
@@ -89,7 +89,6 @@ def convert_old_user_input_file(
 
 
 if __name__ == "__main__":
-
     args = vars(parser.parse_args())
     fname = args["fname_path"]
     output_path = args.get("output_path")

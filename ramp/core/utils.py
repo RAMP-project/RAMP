@@ -1,6 +1,7 @@
 import json
 import random
 import time
+import datetime
 import numpy as np
 import pandas as pd
 from openpyxl import load_workbook
@@ -60,20 +61,20 @@ def read_input_file(filename):
                             f"The provided range for the power timeseries of the appliance '{appliance_name}' of user '{user_name} spans more than two columns in '{filename}' (range {ts_range} of sheet '{ts_sheet_name}')\n{POSSIBLE_FORMATS}"
                         )
                     )
-                if cr.size["rows"] != 365:
+                if cr.size["rows"] != 366:
                     raise (
                         ValueError(
-                            f"The provided range for the power timeseries of the appliance '{appliance_name}' of user '{user_name}' in '{filename}' does not contain 365 values as expected  (range {ts_range} of sheet '{ts_sheet_name}')\n{POSSIBLE_FORMATS}"
+                            f"The provided range for the power timeseries of the appliance '{appliance_name}' of user '{user_name}' in '{filename}' does not contain 366 values as expected  (range {ts_range} of sheet '{ts_sheet_name}')\n{POSSIBLE_FORMATS}"
                         )
                     )
             # the timeseries is expected as an array in json format
             else:
                 try:
                     ts = json.loads(v)
-                    if len(ts) != 365:
+                    if len(ts) != 366:
                         raise (
                             ValueError(
-                                f"The provided power timeseries of the appliance '{appliance_name}' of user '{user_name}' in '{filename}' does not contain 365 values as expected\n{POSSIBLE_FORMATS}"
+                                f"The provided power timeseries of the appliance '{appliance_name}' of user '{user_name}' in '{filename}' does not contain 366 values as expected\n{POSSIBLE_FORMATS}"
                             )
                         )
                     ts = v
@@ -166,8 +167,13 @@ def random_choice(var, t1, p1, t2, p2):
         ]
     )
 
+
 def get_day_type(day):
     """Given a datetime object return 0 for weekdays or 1 for weekends"""
+
+    if isinstance(day, str):
+        day = datetime.date.fromisoformat(day)
+
     if day.weekday() > 4:
         answer = 1
     else:
@@ -188,7 +194,11 @@ def yearly_pattern(year=None):
         year_behaviour = year_behaviour.tolist()
     else:
         # a list with 0 for weekdays and 1 for weekends
-        year_behaviour = pd.date_range(start=f"{year}-01-01", end=f"{year}-12-31", freq="D").map(get_day_type).to_list()
+        year_behaviour = (
+            pd.date_range(start=f"{year}-01-01", end=f"{year}-12-31", freq="D")
+            .map(get_day_type)
+            .to_list()
+        )
     return year_behaviour
 
 
@@ -205,11 +215,18 @@ def within_peak_time_window(win_start, win_stop, peak_win_start, peak_win_stop):
 
 
 def calc_time_taken(func):
-    """ Calculates the time elapsed during the execution of a function"""
+    """Calculates the time elapsed during the execution of a function"""
+
     def wrapper(*args, **kwargs):
         start = time.time()
         result = func(*args, **kwargs)
         end = time.time()
-        print(func.__name__ + ' required ' + str((end-start)*1) + ' seconds for execution. ')
+        print(
+            func.__name__
+            + " required "
+            + str((end - start) * 1)
+            + " seconds for execution. "
+        )
         return result
+
     return wrapper

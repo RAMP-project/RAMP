@@ -2,13 +2,13 @@ Cooking Appliances
 ==================
 
 In this example, appliances with multiple preferences index and
-attributes are modeled.
+attributes are modelled.
 
-To have a better understanding of RAMP features for modelling these
+To have a better understanding of RAMP features for modelling this
 category of appliances, two households are considered:
 
-1. First household with a fixed lunch habit of eating soup everyday.
-2. Second household with two lunch preferences: cooking soup or rice.
+1. A household with a fixed lunch habit of eating soup every day.
+2. A household with two lunch preferences: cooking soup or rice.
 
 The number of user preferences can be specified through
 **“user_preference”** parameter when initializing a **User** instance.
@@ -16,7 +16,7 @@ The number of user preferences can be specified through
 .. code:: ipython3
 
     # importing functions
-    from ramp import User,UseCase,calc_peak_time_range,yearly_pattern
+    from ramp import User, UseCase, get_day_type
     import pandas as pd
 
 Creating a user category
@@ -25,21 +25,21 @@ Creating a user category
 .. code:: ipython3
 
     user_1 = User(
-        user_name = "Household with single lunch habit",
-        num_users = 1,
-        user_preference = 1, # user_1 has only one lunch preference
+        user_name="Household with single lunch habit",
+        num_users=1,
+        user_preference=1,  # user_1 has only one lunch preference
     )
     
     user_2 = User(
-        user_name = "Household with different lunch habit",
-        num_users = 1,
-        user_preference = 2, # user_2 has two lunch preferences
+        user_name="Household with different lunch habits",
+        num_users=1,
+        user_preference=2,  # user_2 has two lunch preferences
     )
 
 Defining the cycles for cooking soup and rice
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-for cooking soup it is assumed that the user needs 25 minutes divided
+For cooking soup it is assumed that the user needs 25 minutes divided
 into two parts:
 
 ============= ===== ====
@@ -49,7 +49,7 @@ Boiling Water 1200  5
 Cooking soup  750   20
 ============= ===== ====
 
-for cooking rice it is assumed that the user needs 15 minutes divided
+For cooking rice it is assumed that the user needs 15 minutes divided
 into two parts:
 
 ============= ===== ====
@@ -63,77 +63,75 @@ Cooking rice  600   10
 
     # soup for lunch
     soup_1 = user_1.add_appliance(
-        name = "soup for lunch",
-        power = 1200,
-        func_time = 25,
-        func_cycle = 25,
-        thermal_p_var = 0.2,
-        fixed_cycle = 1,
-        window_1 = [12*60,15*60],
-        p_11 = 1200,   # power of the first cycle
-        t_11 = 5,      # time needed for the first cycle
-        p_12 = 750,    # power of the second cycle
-        t_12 = 20,     # time needed for the second cycle
-        cw11 = [12*60,15*60]
+        name="soup for lunch",
+        power=1200,
+        func_time=25,
+        func_cycle=25,
+        thermal_p_var=0.2,
+        fixed_cycle=1,
+        window_1=[12 * 60, 15 * 60],
+        p_11=1200,  # power of the first cycle
+        t_11=5,  # time needed for the first cycle
+        p_12=750,  # power of the second cycle
+        t_12=20,  # time needed for the second cycle
+        cw11=[12 * 60, 15 * 60],
     )
 
+The second user has two different preferences for lunch. Accordingly, we
+need to model these preferences and their characteristics as two
+different appliances.
 
-As second user has two different preferences for lunch, we need to model
-this preferences and their characterisitics as two different appliances.
-
-Each preference needs to be specified with the cooking energy needs like
-the power, functioning time and the duty cycles of the cooking process.
+Each preference needs to be specified with its associated cooking energy
+needs, such as the power, functioning time and the duty cycles of the
+cooking process.
 
 More importantly, for each preference, the user needs to specify the
-index of preference by using **pref_index** parameter. In this example,
-soup is the first prefernce of the user (pref_index = 1), and rice is
-the second one (pref_index = 2).
+index of preference by using the **pref_index** parameter. In this
+example, soup is the first preference of the user (pref_index = 1), and
+rice is the second one (pref_index = 2).
 
 .. code:: ipython3
 
     # soup for lunch
     soup_2 = user_2.add_appliance(
-        name = "soup for lunch",
-        power = 1200,
-        func_time = 25,
-        func_cycle = 25,
-        thermal_p_var = 0.2,
-        fixed_cycle = 1,
-        pref_index = 1, # the first preference
-        window_1 = [12*60,15*60],
-        p_11 = 1200,   # power of the first cycle
-        t_11 = 5,      # time needed for the first cycle
-        p_12 = 750,    # power of the second cycle
-        t_12 = 20,     # time needed for the second cycle
-        cw11 = [12*60,15*60]
+        name="soup for lunch",
+        power=1200,
+        func_time=25,
+        func_cycle=25,
+        thermal_p_var=0.2,
+        fixed_cycle=1,
+        pref_index=1,  # the first preference
+        window_1=[12 * 60, 15 * 60],
+        p_11=1200,  # power of the first cycle
+        t_11=5,  # time needed for the first cycle
+        p_12=750,  # power of the second cycle
+        t_12=20,  # time needed for the second cycle
+        cw11=[12 * 60, 15 * 60],
     )
-    
-
 
 .. code:: ipython3
 
     # rice for lunch
     rice_2 = user_2.add_appliance(
-        name = "rice for lunch",
-        power = 1200,
-        func_time = 15,
-        func_cycle = 15,
-        thermal_p_var = 0.2,
-        pref_index = 2,  # the second preference
-        fixed_cycle = 1,
-        window_1 = [12*60,15*60],
-        p_11 = 1200,   # power of the first cycle
-        t_11 = 5,      # time needed for the first cycle
-        p_12 = 600,    # power of the second cycle
-        t_12 = 10,     # time needed for the second cycle
-        cw11 = [12*60,15*60]
-        
+        name="rice for lunch",
+        power=1200,
+        func_time=15,
+        func_cycle=15,
+        thermal_p_var=0.2,
+        pref_index=2,  # the second preference
+        fixed_cycle=1,
+        window_1=[12 * 60, 15 * 60],
+        p_11=1200,  # power of the first cycle
+        t_11=5,  # time needed for the first cycle
+        p_12=600,  # power of the second cycle
+        t_12=10,  # time needed for the second cycle
+        cw11=[12 * 60, 15 * 60],
     )
 
 .. code:: ipython3
 
     # you can have an overview of data inputs by usering User.export_to_dataframe method
-    user_lunch = UseCase(users=[user_1,user_2])
+    user_lunch = UseCase(users=[user_1, user_2], date_start="2020-01-01")
     user_lunch.export_to_dataframe().T
 
 
@@ -482,57 +480,56 @@ Generating a profile for some months
 
 .. code:: ipython3
 
-    peak_time_range = calc_peak_time_range(
-        user_list = user_lunch.users
-    )
-    year_behaviour = yearly_pattern()
-
-
-.. code:: ipython3
-
     # number of days
     n_days = 90
     
+    user_lunch.initialize(num_days=n_days)
     # storing all the profiles for all the users
-    profiles = pd.DataFrame(index = pd.date_range(start = "2020-01-01",periods = 1440*n_days,freq="T"))
+    profiles = pd.DataFrame(
+        index=pd.date_range(start="2020-01-01", periods=1440 * n_days, freq="T")
+    )
+    
+    # here we need to use the
     
     for user in user_lunch.users:
-       
         # storing daily profiles for a user
         user_profiles = []
-        for day in range(n_days):
+        for day_idx, day in enumerate(user_lunch.days):
             single_profile = user.generate_single_load_profile(
-                prof_i = day, # the day to generate the profile
-                peak_time_range = peak_time_range,
-                Year_behaviour = year_behaviour
+                prof_i=day_idx,  # the day to generate the profile
+                day_type=get_day_type(day),
             )
     
             user_profiles.extend(single_profile)
-            
+    
         profiles[user.user_name] = user_profiles
-            
-        
 
 
-As the second user has the probability of cooking rice for lunch, and
-lunch has a less energy intensive cooking cycle, it is expected to see
-that the user with fixed lunch meal has higher energy consumption in
-most of the cases.
+.. parsed-literal::
+
+    You will simulate 90 day(s) from 2020-01-01 00:00:00 until 2020-03-31 00:00:00
+
+
+Considering that the second user has the possibility of cooking rice for
+lunch, which has a less energy-intensive cooking cycle, we expect to see
+a higher energy consumption for the user that only eats soup, in most of
+the cases.
 
 .. code:: ipython3
 
     # daily energy consumption
-    profiles.resample("1d").sum().plot(title = "daily energy consumption")
+    profiles.resample("1d").sum().plot(title="daily energy consumption")
 
 
 
 
 .. parsed-literal::
 
-    <AxesSubplot:title={'center':'daily energy consumption'}>
+    <Axes: title={'center': 'daily energy consumption'}>
 
 
 
 
-.. image:: output_14_1.png
+.. image:: output_13_1.png
+
 

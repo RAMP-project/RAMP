@@ -4,3 +4,4 @@ matplotlib
 openpyxl
 multiprocess
 tqdm
+plotly

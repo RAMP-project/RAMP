@@ -1,8 +1,33 @@
 Release History
 ===============
 
-0.4.2 (dev)
+0.5.1 (dev)
+-----------
+
+0.5.0 (2023-12-06)
 ------------------
+
+**|fixed|**     jupyter notebooks are up to date with the UseCase class
+
+**|fixed|**     UseCase class usage is now documented
+
+**|changed|**   num_profile variable was changed to num_days
+
+**|changed|**   User class get assigned automatically to a default UseCase instance if not provided
+
+**|changed|**   Delete ramp.core.initialize and ramp.core.stochastic_process, move calc_peak_time_range inside UseCase method
+
+**|fixed|**     conversion of .py files into .xlsx is fixed
+
+**|fixed|**     using .py files is now possible in the command line as well as from IDE
+
+**|new|**       tests for example jupyter notebook (smoke test to see if the notebooks run through)
+
+**|new|**       continuous integration setup
+
+**|new|**       first automated tests
+
+**|fixed|**     installation options have been debugged and the documentation updated accordingly
 
 **|fixed|**     automated download of example applications via the `download_example` functions now includes previously missing .csv files
 

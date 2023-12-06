@@ -15,6 +15,16 @@ Use Case class
     UseCase.save
     UseCase.export_to_dataframe
     UseCase.load
+    UseCase.collect_appliances_from_users
+    UseCase.initialize
+    UseCase.calc_peak_time_range
+    UseCase.generate_daily_load_profiles
+    UseCase.generate_daily_load_profiles_parallel
+    UseCase.date_start
+    UseCase.date_end
+    UseCase.peak_enlarge
+    UseCase.num_days
+    UseCase.datetimeindex
 
 
 **********
@@ -55,7 +65,7 @@ Appliance class
     Appliance.__eq__
 
 
-****
+
 
 *********
 Utilities
@@ -64,7 +74,35 @@ Utilities
 .. autosummary::
     :toctree: api_document/
 
-    yearly_pattern
-    calc_peak_time_range
     load_data
     download_example
+
+
+*************
+Visualization
+*************
+
+.. autosummary::
+    :toctree: api_document/
+
+    Plot.__init__
+    Plot.from_file
+    Plot.freq
+    Plot.columns
+    Plot.index
+    Plot.resample
+    Plot.line
+    Plot.shadow
+    Plot.area
+    Plot.load_duration_curve
+    Plot.error
+    Plot.peak
+    Plot.DataFrame
+    Plot.add_column
+    Plot.loc
+    Plot.head
+    Plot.plot
+    Plot.to_excel
+    Plot.to_csv
+    Plot.mean
+    Plot.sum
