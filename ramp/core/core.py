@@ -1425,12 +1425,21 @@ class Appliance:
             if evaluate in range(self.cw11[0], self.cw11[1]) or evaluate in range(
                 self.cw12[0], self.cw12[1]
             ):
+                # Correct selected switch_on windows for duty cycle duration (fix issue 78):
+                # Limit switch_on_window to duration of duty_cycle
+                indexes = indexes[0:len(self.random_cycle1)]
                 np.put(self.daily_use, indexes, (self.random_cycle1 * coincidence))
             elif evaluate in range(self.cw21[0], self.cw21[1]) or evaluate in range(
                 self.cw22[0], self.cw22[1]
             ):
+                # Correct selected switch_on windows for duty cycle duration (fix issue 78):
+                # Limit switch_on_window to duration of duty_cycle
+                indexes = indexes[0:len(self.random_cycle2)]
                 np.put(self.daily_use, indexes, (self.random_cycle2 * coincidence))
             else:
+                # Correct selected switch_on windows for duty cycle duration (fix issue 78):
+                # Limit switch_on_window to duration of duty_cycle
+                indexes = indexes[0:len(self.random_cycle3)]
                 np.put(self.daily_use, indexes, (self.random_cycle3 * coincidence))
         else:  # if no duty cycles are specified, a regular switch_on event is modelled
             # randomises also the App Power if thermal_p_var is on
@@ -1441,6 +1450,10 @@ class Appliance:
             )
         # updates the time ranges remaining for switch on events, excluding the current switch_on event
         self.update_available_time_for_switch_on_events(indexes)
+
+        # return corrected indexes (where operation was actually planned after correction for duty cycles)
+        # this is required to correctly track the functioning time of an appliance (fix issue 78)
+        return indexes
 
     def calc_rand_window(self, window_idx=1, window_range_limits=[0, 1440]):
         _window = self.__getattribute__(f"window_{window_idx}")
@@ -1863,9 +1876,6 @@ class Appliance:
             if indexes is None:
                 break  # exit cycle and go to next Appliance as there are no available windows anymore
 
-            # the count of total time is updated with the size of the indexes array
-            tot_time = tot_time + indexes.size
-
             if tot_time > rand_time:
                 # the total functioning time is reached, a correction is applied to avoid overflow of indexes
                 indexes_adj = indexes[: -(tot_time - rand_time)]
@@ -1880,7 +1890,9 @@ class Appliance:
                     # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
                     coincidence = self.calc_coincident_switch_on(inside_peak_window)
                     # Update the daily use depending on existence of duty cycles of the Appliance instance
-                    self.update_daily_use(coincidence, power=power, indexes=indexes_adj)
+                    # Fix issue 78: update_daily_use now returns the indexes at which a switch_on_event
+                    # actually occurred
+                    indexes = self.update_daily_use(coincidence, power=power, indexes=indexes_adj)
                 break  # exit cycle and go to next Appliance
 
             else:
@@ -1890,4 +1902,11 @@ class Appliance:
 
                 coincidence = self.calc_coincident_switch_on(inside_peak_window)
                 # Update the daily use depending on existence of duty cycles of the Appliance instance
-                self.update_daily_use(coincidence, power=power, indexes=indexes)
+                # Fix issue 78: update_daily_use now returns the indexes at which a switch_on_event
+                # actually occurred
+                indexes = self.update_daily_use(coincidence, power=power, indexes=indexes)
+
+            # the count of total time is updated with the size of the indexes array
+            # Fix issue 78: tot_time is now updated with the size of the indexes array after correction
+            # performed in update_daily_use
+            tot_time = tot_time + indexes.size
