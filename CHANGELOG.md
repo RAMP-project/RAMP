@@ -1,8 +1,12 @@
 Release History
 ===============
 
-0.5.1 (dev)
+0.5.2 (dev)
 -----------
+
+0.5.1 (2024-02-08)
+-----------
+**|fixed|**     Plotting a cloud of profiles from the command line is fixed
 
 0.5.0 (2023-12-06)
 ------------------
