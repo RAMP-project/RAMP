@@ -37,7 +37,7 @@ if __name__ == "__main__":
     )
     uc.initialize(peak_enlarge=0.15)
 
-    Profiles_list = uc.generate_daily_load_profiles()
+    Profiles_list = uc.generate_daily_load_profiles(flat=False)
 
     # post-processing
     from ramp.post_process import post_process as pp
