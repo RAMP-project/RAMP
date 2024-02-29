@@ -1035,7 +1035,7 @@ class Appliance:
         self.number = number
         self.num_windows = num_windows
 
-        if func_cycle == 0:
+        if func_time == 0:
             warnings.warn(
                 UserWarning(f"Func_time of appliance '{self.name}' is defined as 0. Ignore if this is intended")
             )
