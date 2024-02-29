@@ -1029,10 +1029,17 @@ class Appliance:
             2. power array size is not (366,1)
         """
 
+
         self.user = user
         self.name = name
         self.number = number
         self.num_windows = num_windows
+
+        if func_cycle == 0:
+            warnings.warn(
+                UserWarning(f"Func_time of appliance '{self.name}' is defined as 0. Ignore if this is intended")
+            )
+
         self.func_time = func_time
         self.time_fraction_random_variability = time_fraction_random_variability
         self.func_cycle = func_cycle
@@ -1847,7 +1854,7 @@ class Appliance:
         ]
 
         tot_time = 0
-        while tot_time <= rand_time and rand_time!=0:  # Check if rand_time is 0 (-> fix issue 114)
+        while tot_time <= rand_time and rand_time != 0:  # Check if rand_time is 0 (-> fix issue 114)
             # one option could be to generate a lot of them at once
             indexes = self.rand_switch_on_window(
                 rand_time=rand_time,  # TODO maybe only consider rand_time-tot_time ...
