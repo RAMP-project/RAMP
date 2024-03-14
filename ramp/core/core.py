@@ -1768,6 +1768,11 @@ class Appliance:
                     print(
                         f"The app {self.name} has duty cycle option on, however the switch on event fell outside the provided duty cycle windows"
                     )
+                    # TODO previously duty_cycle3 was always considered as default if the evaluate proxy did neither
+                    #  get selected by duty_cycle1 nor duty_cycle2, for default is kept but not silently anymore in
+                    #  order to see wheather this is an issue or not
+                    self.current_duty_cycle_id = 3
+                    duty_cycle_duration = len(self.random_cycle3)
 
                 if indexes.size > duty_cycle_duration:
                     # Limit switch_on_window to duration of duty_cycle
