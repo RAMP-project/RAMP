@@ -1111,6 +1111,10 @@ class Appliance:
         self.random_cycle2 = np.array([])
         self.random_cycle3 = np.array([])
 
+        # attribute used to know if a switch on event falls within a given duty cycle window
+        # if it is 0, then no switch on events happen within any duty cycle windows
+        self.current_duty_cycle_id = 0
+
     def save(self) -> pd.DataFrame:
         """returns a pd.DataFrame containing the appliance data
 
@@ -1420,27 +1424,19 @@ class Appliance:
         if (
             self.fixed_cycle > 0
         ):  # evaluates if the app has some duty cycles to be considered
-            evaluate = np.round(np.mean(indexes)) if indexes.size > 0 else 0
-            # selects the proper duty cycle and puts the corresponding power values in the indexes range
-            if evaluate in range(self.cw11[0], self.cw11[1]) or evaluate in range(
-                self.cw12[0], self.cw12[1]
-            ):
-                # Correct selected switch_on windows for duty cycle duration (fix issue 78):
-                # Limit switch_on_window to duration of duty_cycle
-                indexes = indexes[0 : len(self.random_cycle1)]
+            # the proper duty cycle was selected in self.rand_switch_on_window()
+            # now setting the corresponding power values in the indexes range
+            if self.current_duty_cycle_id == 1:
                 np.put(self.daily_use, indexes, (self.random_cycle1 * coincidence))
-            elif evaluate in range(self.cw21[0], self.cw21[1]) or evaluate in range(
-                self.cw22[0], self.cw22[1]
-            ):
-                # Correct selected switch_on windows for duty cycle duration (fix issue 78):
-                # Limit switch_on_window to duration of duty_cycle
-                indexes = indexes[0 : len(self.random_cycle2)]
+            elif self.current_duty_cycle_id == 2:
                 np.put(self.daily_use, indexes, (self.random_cycle2 * coincidence))
-            else:
-                # Correct selected switch_on windows for duty cycle duration (fix issue 78):
-                # Limit switch_on_window to duration of duty_cycle
-                indexes = indexes[0 : len(self.random_cycle3)]
+            elif self.current_duty_cycle_id == 3:
                 np.put(self.daily_use, indexes, (self.random_cycle3 * coincidence))
+            else:
+                print(
+                    f"The app {self.name} has duty cycle option on, however the switch on event fell outside the provided duty cycle windows"
+                )
+
         else:  # if no duty cycles are specified, a regular switch_on event is modelled
             # randomises also the App Power if thermal_p_var is on
             np.put(
@@ -1450,10 +1446,6 @@ class Appliance:
             )
         # updates the time ranges remaining for switch on events, excluding the current switch_on event
         self.update_available_time_for_switch_on_events(indexes)
-
-        # return corrected indexes (where operation was actually planned after correction for duty cycles)
-        # this is required to correctly track the functioning time of an appliance (fix issue 78)
-        return indexes
 
     def calc_rand_window(self, window_idx=1, window_range_limits=[0, 1440]):
         _window = self.__getattribute__(f"window_{window_idx}")
@@ -1748,6 +1740,38 @@ class Appliance:
                 raise ValueError(
                     "There is something fishy with upper limit in switch on..."
                 )
+
+            if (
+                self.fixed_cycle > 0
+            ):  # evaluates if the app has some duty cycles to be considered
+                evaluate = np.round(np.mean(indexes)) if indexes.size > 0 else 0
+                # selects the proper duty cycle
+                if (
+                    self.cw11[0] <= evaluate < self.cw11[1]
+                    or self.cw12[0] <= evaluate < self.cw12[1]
+                ):
+                    self.current_duty_cycle_id = 1
+                    duty_cycle_duration = len(self.random_cycle1)
+                elif (
+                    self.cw21[0] <= evaluate < self.cw21[1]
+                    or self.cw22[0] <= evaluate < self.cw22[1]
+                ):
+                    self.current_duty_cycle_id = 2
+                    duty_cycle_duration = len(self.random_cycle2)
+                elif (
+                    self.cw31[0] <= evaluate < self.cw31[1]
+                    or self.cw32[0] <= evaluate < self.cw32[1]
+                ):
+                    self.current_duty_cycle_id = 3
+                    duty_cycle_duration = len(self.random_cycle3)
+                else:
+                    print(
+                        f"The app {self.name} has duty cycle option on, however the switch on event fell outside the provided duty cycle windows"
+                    )
+
+                if indexes.size > duty_cycle_duration:
+                    # Limit switch_on_window to duration of duty_cycle
+                    indexes = indexes[0:duty_cycle_duration]
         else:
             indexes = None
             # there are no available windows anymore
@@ -1890,11 +1914,7 @@ class Appliance:
                     # Computes how many of the 'n' of the Appliance instance are switched on simultaneously
                     coincidence = self.calc_coincident_switch_on(inside_peak_window)
                     # Update the daily use depending on existence of duty cycles of the Appliance instance
-                    # Fix issue 78: update_daily_use now returns the indexes at which a switch_on_event
-                    # actually occurred
-                    indexes = self.update_daily_use(
-                        coincidence, power=power, indexes=indexes_adj
-                    )
+                    self.update_daily_use(coincidence, power=power, indexes=indexes_adj)
                 break  # exit cycle and go to next Appliance
 
             else:
@@ -1904,11 +1924,7 @@ class Appliance:
 
                 coincidence = self.calc_coincident_switch_on(inside_peak_window)
                 # Update the daily use depending on existence of duty cycles of the Appliance instance
-                # Fix issue 78: update_daily_use now returns the indexes at which a switch_on_event
-                # actually occurred
-                indexes = self.update_daily_use(
-                    coincidence, power=power, indexes=indexes
-                )
+                self.update_daily_use(coincidence, power=power, indexes=indexes)
 
             # the count of total time is updated with the size of the indexes array
             # Fix issue 78: tot_time is now updated with the size of the indexes array after correction

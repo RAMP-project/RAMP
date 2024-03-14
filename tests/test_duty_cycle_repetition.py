@@ -42,7 +42,6 @@ def test_use_case():
 class TestUseCase:
     @pytest.mark.usefixtures("test_use_case")
     def test_daily_load_profile(self, test_use_case):
-
         # Generate load profiles
         daily_load_profile = pd.DataFrame(
             test_use_case.generate_daily_load_profiles(),
