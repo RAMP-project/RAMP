@@ -1115,6 +1115,8 @@ class Appliance:
         # if it is 0, then no switch on events happen within any duty cycle windows
         self.current_duty_cycle_id = 0
 
+        self.continuous_duty_cycle = True
+
     def save(self) -> pd.DataFrame:
         """returns a pd.DataFrame containing the appliance data
 
@@ -1774,7 +1776,10 @@ class Appliance:
                     self.current_duty_cycle_id = 3
                     duty_cycle_duration = len(self.random_cycle3)
 
-                if indexes.size > duty_cycle_duration:
+                if (
+                    indexes.size > duty_cycle_duration
+                    and self.continuous_duty_cycle is False
+                ):
                     # Limit switch_on_window to duration of duty_cycle
                     indexes = indexes[0:duty_cycle_duration]
         else:
