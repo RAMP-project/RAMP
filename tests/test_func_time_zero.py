@@ -4,7 +4,6 @@ from ramp import UseCase, User
 
 
 def test_skip_when_func_time_zero():
-
     # Generate test user and appliance
     user = User(user_name="Test User", num_users=1)
     appliance = user.add_appliance(
@@ -34,13 +33,10 @@ def test_skip_when_func_time_zero():
 
 def test_warning_when_func_time_zero():
     user = User(user_name="Test User", num_users=1)
-    appliance = user.add_appliance(
-        name="Test Appliance",
-        func_time=0,  # Set func_time to be 0
-        func_cycle=20,
-        time_fraction_random_variability=0.1,
-    )
-
-
-with pytest.warns():
-    test_warning_when_func_time_zero()
+    with pytest.warns():
+        appliance = user.add_appliance(
+            name="Test Appliance",
+            func_time=0,  # Set func_time to be 0
+            func_cycle=20,
+            time_fraction_random_variability=0.1,
+        )
