@@ -1807,7 +1807,7 @@ class Appliance:
             or (self.pref_index != 0 and self.user.rand_daily_pref != self.pref_index)
             # checks if the app is allowed in the given yearly behaviour pattern
             or self.wd_we_type not in [day_type, 2]
-            # check if the app has a func_time of 0 (fix issue 114)
+            # skip if the app has a func_time of 0
             or self.func_time == 0
         ):
             return
@@ -1855,9 +1855,7 @@ class Appliance:
         ]
 
         tot_time = 0
-        while (
-            tot_time <= rand_time and rand_time != 0
-        ):  # Check if rand_time is 0 (-> fix issue 114)
+        while tot_time <= rand_time and rand_time != 0:
             # one option could be to generate a lot of them at once
             indexes = self.rand_switch_on_window(
                 rand_time=rand_time,  # TODO maybe only consider rand_time-tot_time ...
