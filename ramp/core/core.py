@@ -1900,6 +1900,9 @@ class Appliance:
             if indexes is None:
                 break  # exit cycle and go to next Appliance as there are no available windows anymore
 
+            # the count of total time is updated with the size of the indexes array
+            tot_time = tot_time + indexes.size
+
             if tot_time > rand_time:
                 # the total functioning time is reached, a correction is applied to avoid overflow of indexes
                 indexes_adj = indexes[: -(tot_time - rand_time)]
@@ -1925,8 +1928,3 @@ class Appliance:
                 coincidence = self.calc_coincident_switch_on(inside_peak_window)
                 # Update the daily use depending on existence of duty cycles of the Appliance instance
                 self.update_daily_use(coincidence, power=power, indexes=indexes)
-
-            # the count of total time is updated with the size of the indexes array
-            # Fix issue 78: tot_time is now updated with the size of the indexes array after correction
-            # performed in update_daily_use
-            tot_time = tot_time + indexes.size
