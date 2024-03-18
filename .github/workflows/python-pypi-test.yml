@@ -2,14 +2,12 @@ name: Deploy to Test PyPi
 
 on:
   push:
-      branches:
-        - development
-        - main
-
-  pull_request:
     branches:
       - development
       - main
+    tags: # Add tag event trigger
+      - '*'
+      
 jobs:
   build_and_deploy:
     name: Build the release and deploy to test pypi
