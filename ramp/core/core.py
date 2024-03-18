@@ -966,6 +966,7 @@ class Appliance:
         func_cycle: int = 1,
         fixed: str = "no",
         fixed_cycle: int = 0,
+        continuous_duty_cycle: int = 1,
         occasional_use: float = 1,
         flat: str = "no",
         thermal_p_var: int = 0,
@@ -997,6 +998,13 @@ class Appliance:
 
         func_cycle : int[0,1440], optional
             minimum time(minutes) the appliance is kept on after switch-on event, by default 1
+
+        continuous_duty_cycle : int[0,1], optional
+            if value is 0 : the duty cycle is executed once per switch on event (like a
+            welder, or other productive use appliances)
+            if value is 1 : whether the duty cycle are filling the whole switch on event of
+            the appliance (like a fridge or other continuous use appliance)
+            by default 1
 
         fixed : str, optional
             if 'yes', all the 'n' appliances of this kind are always switched-on together, by default "no"
@@ -1046,6 +1054,7 @@ class Appliance:
         self.func_cycle = func_cycle
         self.fixed = fixed
         self.fixed_cycle = fixed_cycle
+        self.continuous_duty_cycle = continuous_duty_cycle
         self.occasional_use = occasional_use
         self.flat = flat
         self.thermal_p_var = thermal_p_var
@@ -1114,8 +1123,6 @@ class Appliance:
         # attribute used to know if a switch on event falls within a given duty cycle window
         # if it is 0, then no switch on events happen within any duty cycle windows
         self.current_duty_cycle_id = 0
-
-        self.continuous_duty_cycle = True
 
     def save(self) -> pd.DataFrame:
         """returns a pd.DataFrame containing the appliance data
@@ -1778,7 +1785,7 @@ class Appliance:
 
                 if (
                     indexes.size > duty_cycle_duration
-                    and self.continuous_duty_cycle is False
+                    and self.continuous_duty_cycle == 0
                 ):
                     # Limit switch_on_window to duration of duty_cycle
                     indexes = indexes[0:duty_cycle_duration]
