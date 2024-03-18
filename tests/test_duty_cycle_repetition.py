@@ -31,7 +31,7 @@ def test_use_case():
         p_12=2000,  # power of the second cycle
         t_12=18,  # time needed for the second cycle
     )
-
+    test_appliance.continuous_duty_cycle = False
     # Create and initialize UseCase
     duty_cycle_test_uc = UseCase(name="duty_cycle_test", users=[test_user])
     duty_cycle_test_uc.initialize(num_days=3)
