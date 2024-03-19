@@ -584,7 +584,10 @@ class UseCase:
                 :, ~user_df.columns.isin(["user_name", "num_users", "user_preference"])
             ].to_dict(orient="records"):
                 # assign Appliance arguments
-                appliance_parameters = {k: row[k] for k in APPLIANCE_ARGS}
+                appliance_parameters = {}
+                for k in APPLIANCE_ARGS:
+                    if k in row:
+                        appliance_parameters[k] = row[k]
 
                 # assign windows arguments
                 for k in WINDOWS_PARAMETERS:
