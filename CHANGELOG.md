@@ -4,8 +4,11 @@ Release History
 0.5.2 (dev)
 -----------
 
+**|new|**       Introduction of an Appliance parameter to model productive use duty cycles: `continuous_use_duty_cycle`
+
 0.5.1 (2024-02-08)
------------
+------------------
+
 **|fixed|**     Plotting a cloud of profiles from the command line is fixed
 
 0.5.0 (2023-12-06)
