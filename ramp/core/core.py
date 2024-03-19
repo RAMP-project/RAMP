@@ -1033,6 +1033,14 @@ class Appliance:
         self.name = name
         self.number = number
         self.num_windows = num_windows
+
+        if func_time == 0:
+            warnings.warn(
+                UserWarning(
+                    f"Func_time of appliance '{self.name}' is defined as 0. Ignore if this is intended"
+                )
+            )
+
         self.func_time = func_time
         self.time_fraction_random_variability = time_fraction_random_variability
         self.func_cycle = func_cycle
@@ -1799,6 +1807,8 @@ class Appliance:
             or (self.pref_index != 0 and self.user.rand_daily_pref != self.pref_index)
             # checks if the app is allowed in the given yearly behaviour pattern
             or self.wd_we_type not in [day_type, 2]
+            # skip if the app has a func_time of 0
+            or self.func_time == 0
         ):
             return
 
@@ -1845,7 +1855,7 @@ class Appliance:
         ]
 
         tot_time = 0
-        while tot_time <= rand_time:
+        while tot_time <= rand_time and rand_time != 0:
             # one option could be to generate a lot of them at once
             indexes = self.rand_switch_on_window(
                 rand_time=rand_time,  # TODO maybe only consider rand_time-tot_time ...
