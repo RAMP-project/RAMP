@@ -108,6 +108,13 @@ The **"allowed values"** column provide information about the format one should 
      - integer
      - no
      - 0
+  * - continuous_use_duty_cycle
+     - NA
+     - {0,1}
+     - Duty cycle mode, 0 triggers once per switch-on event, 1 let the duty cycle repeat during the entire switch-on event
+     - integer
+     - no
+     - 1
    * - occasional_use
      - %
      - in [0,1]
