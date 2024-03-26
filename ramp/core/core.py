@@ -584,7 +584,10 @@ class UseCase:
                 :, ~user_df.columns.isin(["user_name", "num_users", "user_preference"])
             ].to_dict(orient="records"):
                 # assign Appliance arguments
-                appliance_parameters = {k: row[k] for k in APPLIANCE_ARGS}
+                appliance_parameters = {}
+                for k in APPLIANCE_ARGS:
+                    if k in row:
+                        appliance_parameters[k] = row[k]
 
                 # assign windows arguments
                 for k in WINDOWS_PARAMETERS:
@@ -966,6 +969,7 @@ class Appliance:
         func_cycle: int = 1,
         fixed: str = "no",
         fixed_cycle: int = 0,
+        continuous_duty_cycle: int = 1,
         occasional_use: float = 1,
         flat: str = "no",
         thermal_p_var: int = 0,
@@ -997,6 +1001,13 @@ class Appliance:
 
         func_cycle : int[0,1440], optional
             minimum time(minutes) the appliance is kept on after switch-on event, by default 1
+
+        continuous_duty_cycle : int[0,1], optional
+            if value is 0 : the duty cycle is executed once per switch on event (like a
+            welder, or other productive use appliances)
+            if value is 1 : whether the duty cycle are filling the whole switch on event of
+            the appliance (like a fridge or other continuous use appliance)
+            by default 1
 
         fixed : str, optional
             if 'yes', all the 'n' appliances of this kind are always switched-on together, by default "no"
@@ -1046,6 +1057,7 @@ class Appliance:
         self.func_cycle = func_cycle
         self.fixed = fixed
         self.fixed_cycle = fixed_cycle
+        self.continuous_duty_cycle = continuous_duty_cycle
         self.occasional_use = occasional_use
         self.flat = flat
         self.thermal_p_var = thermal_p_var
@@ -1110,6 +1122,10 @@ class Appliance:
         self.random_cycle1 = np.array([])
         self.random_cycle2 = np.array([])
         self.random_cycle3 = np.array([])
+
+        # attribute used to know if a switch on event falls within a given duty cycle window
+        # if it is 0, then no switch on events happen within any duty cycle windows
+        self.current_duty_cycle_id = 0
 
     def save(self) -> pd.DataFrame:
         """returns a pd.DataFrame containing the appliance data
@@ -1420,18 +1436,19 @@ class Appliance:
         if (
             self.fixed_cycle > 0
         ):  # evaluates if the app has some duty cycles to be considered
-            evaluate = np.round(np.mean(indexes)) if indexes.size > 0 else 0
-            # selects the proper duty cycle and puts the corresponding power values in the indexes range
-            if evaluate in range(self.cw11[0], self.cw11[1]) or evaluate in range(
-                self.cw12[0], self.cw12[1]
-            ):
+            # the proper duty cycle was selected in self.rand_switch_on_window()
+            # now setting the corresponding power values in the indexes range
+            if self.current_duty_cycle_id == 1:
                 np.put(self.daily_use, indexes, (self.random_cycle1 * coincidence))
-            elif evaluate in range(self.cw21[0], self.cw21[1]) or evaluate in range(
-                self.cw22[0], self.cw22[1]
-            ):
+            elif self.current_duty_cycle_id == 2:
                 np.put(self.daily_use, indexes, (self.random_cycle2 * coincidence))
-            else:
+            elif self.current_duty_cycle_id == 3:
                 np.put(self.daily_use, indexes, (self.random_cycle3 * coincidence))
+            else:
+                print(
+                    f"The app {self.name} has duty cycle option on, however the switch on event fell outside the provided duty cycle windows"
+                )
+
         else:  # if no duty cycles are specified, a regular switch_on event is modelled
             # randomises also the App Power if thermal_p_var is on
             np.put(
@@ -1735,6 +1752,46 @@ class Appliance:
                 raise ValueError(
                     "There is something fishy with upper limit in switch on..."
                 )
+
+            if (
+                self.fixed_cycle > 0
+            ):  # evaluates if the app has some duty cycles to be considered
+                evaluate = np.round(np.mean(indexes)) if indexes.size > 0 else 0
+                # selects the proper duty cycle
+                if (
+                    self.cw11[0] <= evaluate < self.cw11[1]
+                    or self.cw12[0] <= evaluate < self.cw12[1]
+                ):
+                    self.current_duty_cycle_id = 1
+                    duty_cycle_duration = len(self.random_cycle1)
+                elif (
+                    self.cw21[0] <= evaluate < self.cw21[1]
+                    or self.cw22[0] <= evaluate < self.cw22[1]
+                ):
+                    self.current_duty_cycle_id = 2
+                    duty_cycle_duration = len(self.random_cycle2)
+                elif (
+                    self.cw31[0] <= evaluate < self.cw31[1]
+                    or self.cw32[0] <= evaluate < self.cw32[1]
+                ):
+                    self.current_duty_cycle_id = 3
+                    duty_cycle_duration = len(self.random_cycle3)
+                else:
+                    print(
+                        f"The app {self.name} has duty cycle option on, however the switch on event fell outside the provided duty cycle windows"
+                    )
+                    # TODO previously duty_cycle3 was always considered as default if the evaluate proxy did neither
+                    #  get selected by duty_cycle1 nor duty_cycle2, for default is kept but not silently anymore in
+                    #  order to see wheather this is an issue or not
+                    self.current_duty_cycle_id = 3
+                    duty_cycle_duration = len(self.random_cycle3)
+
+                if (
+                    indexes.size > duty_cycle_duration
+                    and self.continuous_duty_cycle == 0
+                ):
+                    # Limit switch_on_window to duration of duty_cycle
+                    indexes = indexes[0:duty_cycle_duration]
         else:
             indexes = None
             # there are no available windows anymore
