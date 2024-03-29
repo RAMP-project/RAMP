@@ -660,10 +660,23 @@ class User:
             []
         )  # each instance of User (i.e. each user class) has its own list of Appliances
 
+    def __str__(self):
+
+        try:
+            return self.save()[
+                ["user_name", "num_users", "name", "number", "power"]
+            ].to_string()
+        
+        except Exception:
+            return (f"""
+user_name: {self.user_name} \n
+num_users: {self.num_users} \n
+appliances: no appliances assigned to the user.
+                    """)
+        
     def __repr__(self):
-        return self.save()[
-            ["user_name", "num_users", "name", "number", "power"]
-        ].to_string()
+
+        return self.__str__()
 
     def add_appliance(self, *args, **kwargs):
         """adds an appliance to the user category with all the appliance characteristics in a single function
