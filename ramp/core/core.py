@@ -1255,7 +1255,7 @@ class Appliance:
         answer = np.array([])
         for attribute in APPLIANCE_ATTRIBUTES:
             if hasattr(self, attribute) and hasattr(other_appliance, attribute):
-                np.append(
+                answer = np.append(
                     answer,
                     [getattr(self, attribute) == getattr(other_appliance, attribute)],
                 )
@@ -1263,7 +1263,7 @@ class Appliance:
                 hasattr(self, attribute) is False
                 and hasattr(other_appliance, attribute) is False
             ):
-                np.append(answer, True)
+                answer = np.append(answer, [True])
             else:
                 if hasattr(self, attribute) is False:
                     print(f"{attribute} of appliance {self.name} is not assigned")
@@ -1271,7 +1271,7 @@ class Appliance:
                     print(
                         f"{attribute} of appliance {other_appliance.name} is not assigned"
                     )
-                np.append(answer, False)
+                answer = np.append(answer, [False])
         return answer.all()
 
     def windows(
