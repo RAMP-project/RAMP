@@ -678,6 +678,17 @@ appliances: no appliances assigned to the user.
 
         return self.__str__()
 
+    def _add_appliance_instance(self, appliances):
+        if isinstance(appliances, Appliance):
+            appliances = [appliances]
+        for app in appliances:
+            if not isinstance(app, Appliance):
+                raise TypeError(
+                    f"You are trying to add an object of type {type(app)} as an appliance to the user {self.user_name}"
+                )
+            if app not in self.App_list:
+                self.App_list.append(app)
+
     def add_appliance(self, *args, **kwargs):
         """adds an appliance to the user category with all the appliance characteristics in a single function
 
@@ -690,7 +701,13 @@ appliances: no appliances assigned to the user.
 
         # parse the args into the kwargs
         if len(args) > 0:
+            if isinstance(args[0], Appliance):
+                # if the first argument is an Appliance instance, it is assumed all arguments are
+                # if this is not the case, error will be thrown by _add_appliance_instance method
+                self._add_appliance_instance(args)
+                return
             for a_name, a_val in zip(APPLIANCE_ARGS, args):
+                # TODO here we could do validation of the arguments
                 kwargs[a_name] = a_val
 
         # collects windows arguments
@@ -715,6 +732,8 @@ appliances: no appliances assigned to the user.
             app.windows(**windows_args)
         for i in duty_cycle_parameters:
             app.specific_cycle(i, **duty_cycle_parameters[i])
+
+        self._add_appliance_instance(app)
 
         return app
 
@@ -1354,9 +1373,9 @@ class Appliance:
         )  # calculate the random variability of window1, i.e. the maximum range of time they can be enlarged or shortened
         self.random_var_2 = int(random_var_w * np.diff(self.window_2))  # same as above
         self.random_var_3 = int(random_var_w * np.diff(self.window_3))  # same as above
-        self.user.App_list.append(
-            self
-        )  # automatically appends the appliance to the user's appliance list
+
+        # automatically appends the appliance to the user's appliance list
+        self.user._add_appliance_instance(self)
 
         if self.fixed_cycle == 1:
             self.cw11 = self.window_1
