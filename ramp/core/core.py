@@ -657,21 +657,19 @@ class User:
         )  # each instance of User (i.e. each user class) has its own list of Appliances
 
     def __str__(self):
-
         try:
             return self.save()[
                 ["user_name", "num_users", "name", "number", "power"]
             ].to_string()
-        
+
         except Exception:
-            return (f"""
+            return f"""
 user_name: {self.user_name} \n
 num_users: {self.num_users} \n
 appliances: no appliances assigned to the user.
-                    """)
-        
-    def __repr__(self):
+                    """
 
+    def __repr__(self):
         return self.__str__()
 
     def _add_appliance_instance(self, appliances):
