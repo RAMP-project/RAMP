@@ -290,6 +290,11 @@ class UseCase:
                 print(
                     f"You will simulate {self.__num_days} day(s) from {self.days[0]} until {self.days[-1]+datetime.timedelta(days=1)}"
                 )
+
+            # Verify that each appliance has long enough power data for the simulated time
+            for app in self.appliances:
+                app.check_power_values(self.__num_days)
+
             if peak_enlarge is not None:
                 self.peak_enlarge = peak_enlarge
             else:
@@ -724,7 +729,7 @@ class User:
         return answer
 
     def save(self, filename: str = None) -> Union[pd.DataFrame, None]:
-        """Saves/returns the model databas including allappliances as a single pd.DataFrame or excel file.
+        """Saves/returns the model database including all appliances as a single pd.DataFrame or excel file.
 
         Parameters
         ----------
@@ -888,9 +893,6 @@ class User:
             load profile for the requested day
         """
 
-        if prof_i not in range(366):
-            raise ValueError(f"prof_i should be an integer in range of 0 to 364")
-
         if peak_time_range is None:
             if self.usecase is None:
                 # logging warning
@@ -944,9 +946,6 @@ class User:
         ------
         Each single load profile has its own separate randomisation
         """
-
-        if prof_i not in range(366):
-            raise ValueError(f"prof_i should be an integer in range of 0 to 364")
 
         self.load = np.zeros(1440)  # initialise empty load for User instance
         for _ in range(self.num_users):
@@ -1048,19 +1047,17 @@ class Appliance:
         self.pref_index = pref_index
         self.wd_we_type = wd_we_type
 
+        self.__constant_power = False
+
         if isinstance(power, pd.DataFrame):
-            if len(power) >= self.user.num_days:
-                power = power.values[:, 0]
-            else:
-                raise ValueError(
-                    f"Wrong number of power values for appliance '{self.name}'. Number should be at least {self.user.num_days} values or a constant value."
-                )
+            power = power.values[:, 0]
 
         elif isinstance(power, str):
             power = pd.read_json(power).values[:, 0]
 
         elif isinstance(power, (float, int)):
             power = power * np.ones(self.user.num_days + 1)
+            self.__constant_power = True
 
         else:
             raise ValueError(f"Wrong data type for power of appliance '{self.name}'.")
@@ -1106,6 +1103,18 @@ class Appliance:
         self.random_cycle1 = np.array([])
         self.random_cycle2 = np.array([])
         self.random_cycle3 = np.array([])
+
+    def check_power_values(self, num_days):
+        if len(self.power) < num_days:
+            if self.__constant_power is True:
+                self.power = self.power[0] * np.ones(num_days + 1)
+                warnings.warn(
+                    f"Appliance {self.name} of user {self.user.user_name} of constant power had its power timeseries updated to match total number of days of the usecase {self.user.usecase.name}"
+                )
+            else:
+                raise ValueError(
+                    f"Wrong number of values for appliance '{self.name}''s power of user {self.user.user_name}: {len(self.power)}. Number of values should be at least match the total number of days: {num_days}. Alternatively the power of the appliance can be set to a constant value."
+                )
 
     def save(self) -> pd.DataFrame:
         """returns a pd.DataFrame containing the appliance data
