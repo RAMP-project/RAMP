@@ -53,6 +53,44 @@ class TestProcessUserArguments:
         )  # prevents the test to output figure
         ramp_main()
 
+    @mock.patch(
+        "argparse.ArgumentParser.parse_args",
+        return_value=ramp_parser.parse_args(
+            [
+                "-i",
+                os.path.join(TEST_OUTPUT_PATH),
+                "-y",
+                "2022",
+                "-n",
+                "1",
+            ]
+        ),
+    )
+    def test_month_variation_without_month_files(self, m_args):
+        with pytest.raises(ValueError):
+            ramp_main()
+
+    @mock.patch(
+        "argparse.ArgumentParser.parse_args",
+        return_value=ramp_parser.parse_args(
+            [
+                "-i",
+                os.path.join(TEST_OUTPUT_PATH),
+                "-y",
+                "2022",
+                "-n",
+                "1",
+            ]
+        ),
+    )
+    def test_month_variation_with_month_files(self, m_args):
+        for i in range(12):
+            shutil.copy(
+                os.path.join(TEST_PATH, "test_inputs", "example_excel_usecase.xlsx"),
+                os.path.join(TEST_OUTPUT_PATH, f"example_excel_usecase_{i}.xlsx"),
+            )
+        ramp_main()
+
     def teardown_method(self):
         if os.path.exists(TEST_OUTPUT_PATH):
             shutil.rmtree(TEST_OUTPUT_PATH, ignore_errors=True)
