@@ -1824,7 +1824,7 @@ class Appliance:
                     1,
                     math.ceil(
                         random.gauss(
-                            mu=(self.number * mu_peak + 0.5),
+                            mu=(self.number * mu_peak),
                             sigma=(s_peak * self.number * mu_peak),
                         )
                     ),
