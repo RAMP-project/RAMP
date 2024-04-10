@@ -42,6 +42,7 @@ def single_appliance_daily_load_profile(args):
 
     return args[0], app.daily_use
 
+warnings.simplefilter('always', DeprecationWarning)
 
 class UseCase:
     def __init__(
@@ -845,6 +846,9 @@ class User:
         ------
         refer to Appliance class docs
         """
+
+        warnings.warn("This function is deprecated and not supported since version v0.4.0. Instead use the add_appliance method.", DeprecationWarning)
+
         return self.add_appliance(
             number=number,
             power=power,
