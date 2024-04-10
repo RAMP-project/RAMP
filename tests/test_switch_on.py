@@ -7,7 +7,10 @@ Created on Tue Sep  5 10:47:58 2023
 """
 
 from ramp import User
-from scipy import stats
+import numpy as np
+import scipy.optimize as opt
+
+from ramp.core.constants import switch_on_parameters
 
 
 class TestRandSwitchOnWindow:
@@ -26,20 +29,64 @@ class TestRandSwitchOnWindow:
     def test_coincidence_normality_on_peak(self):
         # Create an instance of the Appliance class with the desired parameters
 
-        appliance = self.user.add_appliance(number=10, fixed="no")
+        N = 100
+        appliance = self.user.add_appliance(number=N, fixed="no")
 
         # Generate a sample of 'coincidence' values
-        sample_size = 30
+        sample_size = N * 10
         coincidence_sample = []
         for _ in range(sample_size):
             coincidence = appliance.calc_coincident_switch_on(inside_peak_window=True)
             coincidence_sample.append(coincidence)
 
-        # Perform the Shapiro-Wilk test for normality
-        _, p_value = stats.shapiro(coincidence_sample)
+        def normed_dist(bins, mu, sigma):
+            return (
+                1
+                / (sigma * np.sqrt(2 * np.pi))
+                * np.exp(-((bins - mu) ** 2) / (2 * sigma**2))
+            )
 
-        # Assert that the p-value is greater than a chosen significance level
-        assert p_value > 0.05, "The 'coincidence' values are not normally distributed."
+        # exclude the tail values i.e. only one appliance is switched on or all of them are, see https://github.com/RAMP-project/RAMP/issues/99 for illustrations
+        coincidence_sample = np.array(coincidence_sample)
+        max_val = np.max(coincidence_sample)
+        coincidence_sample_reduced = coincidence_sample[
+            np.where(coincidence_sample != 1)
+        ]
+        coincidence_sample_reduced = coincidence_sample_reduced[
+            np.where(coincidence_sample_reduced != max_val)
+        ]
+
+        # compute the experimental probability density function for appliance numbers from 2 to N-1
+        exp_pdf, bins = np.histogram(
+            coincidence_sample_reduced,
+            bins=[i for i in range(2, N + 1, 1)],
+            density=True,
+        )
+
+        s_peak, mu_peak, op_factor = switch_on_parameters()
+        mu = mu_peak * N
+        sigma = s_peak * N * mu_peak
+
+        p0 = [mu, sigma]  # Inital guess of mean and std
+        errfunc = (
+            lambda p, x, y: normed_dist(x, *p) - y
+        )  # Distance to the target function
+        p1, success = opt.leastsq(errfunc, p0[:], args=(bins[:-1], exp_pdf))
+
+        # if not then the fit did not succeed
+        assert success in [1, 2, 3, 4]
+
+        fit_mu, fit_stdev = p1
+        tolerance_mu = 0.05  # arbitrary
+        tolerance_sigma = 0.1  # arbitrary
+        err_mu = np.abs(mu - fit_mu) / mu
+        err_sigma = np.abs(sigma - fit_stdev) / sigma
+        assert (
+            err_mu < tolerance_mu
+        ), f"The mean value of a normal fit onto the sampled coincidence histogram ({fit_mu}) divert more than {tolerance_mu*100} % of the provided gaussian mean ({mu})"
+        assert (
+            err_sigma < tolerance_sigma
+        ), f"The std value of a normal fit onto the sampled coincidence histogram ({fit_stdev}) divert more than {tolerance_sigma*100} % of the provided gaussian std ({sigma})"
 
     # Tests that the method returns a list of indexes within the available functioning windows when there are multiple available functioning windows and the random time is larger than the duration of the appliance's function cycle.
 
