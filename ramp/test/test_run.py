@@ -91,6 +91,22 @@ from ramp.example.input_file_1 import User_list as User_list1
 from ramp.example.input_file_2 import User_list as User_list2
 from ramp.example.input_file_3 import User_list as User_list3
 
+TEST_OUTPUT_PATH = os.path.join(pp.BASE_PATH, "test", "results")
+
+remove_old_tests = False
+for file in os.listdir(TEST_OUTPUT_PATH):
+    if file.endswith(".csv"):
+        if remove_old_tests is False:
+            answer = input(
+                "Some result file for the qualitative testing exists already, do you want to overwrite them? (y/n)"
+            )
+            if answer == "y" or answer == "yes":
+                remove_old_tests = True
+            else:
+                break
+        if remove_old_tests is True:
+            os.remove(os.path.join(TEST_OUTPUT_PATH, file))
+
 for i, ul in enumerate([User_list1, User_list2, User_list3]):
     of_path = os.path.join(pp.BASE_PATH, "test", "results", f"output_file_{i + 1}.csv")
     if os.path.exists(of_path) is False:
