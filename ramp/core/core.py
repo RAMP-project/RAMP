@@ -1565,13 +1565,13 @@ class Appliance:
             Power rating for first part of first duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         t_11 : int[0,1440], optional
-            Duration (minutes) of first part of first duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+            Duration (minutes) of first part of first duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         p_12 : int, float, optional
             Power rating for second part of first duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         t_12 : int[0,1440], optional
-            Duration (minutes) of second part of first duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+            Duration (minutes) of second part of first duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         r_c1 : Percentage [0,1], optional
             randomization of the duty cycle parts duration. There will be a uniform random variation around t_i1 and t_i2. If this parameter is set to 0.1, then t_i1 and t_i2 will be randomly reassigned between 90% and 110% of their initial value; 0 means no randomisation, by default 0
@@ -1607,13 +1607,13 @@ class Appliance:
             Power rating for first part of second duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         t_21 : int[0,1440], optional
-            Duration (minutes) of first part of second duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+            Duration (minutes) of first part of second duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         p_22 : int, float, optional
             Power rating for second part of second duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         t_22 : int[0,1440], optional
-            Duration (minutes) of second part of second duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+            Duration (minutes) of second part of second duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         r_c2 : Percentage [0,1], optional
             randomization of the duty cycle parts duration. There will be a uniform random variation around t_i1 and t_i2. If this parameter is set to 0.1, then t_i1 and t_i2 will be randomly reassigned between 90% and 110% of their initial value; 0 means no randomisation, by default 0
@@ -1645,25 +1645,25 @@ class Appliance:
 
         Parameters
         ----------
-        p_21 : float, optional
+        p_31 : float, optional
             Power rating for first part of third duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
-        t_21 : int[0,1440], optional
-            Duration (minutes) of first part of third duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+        t_31 : int[0,1440], optional
+            Duration (minutes) of first part of third duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
-        p_22 : int, float, optional
+        p_32 : int, float, optional
             Power rating for second part of third duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
-        t_22 : int[0,1440], optional
-            Duration (minutes) of second part of third duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+        t_32 : int[0,1440], optional
+            Duration (minutes) of second part of third duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
-        r_c2 : Percentage [0,1], optional
+        r_c3 : Percentage [0,1], optional
             randomization of the duty cycle parts duration. There will be a uniform random variation around t_i1 and t_i2. If this parameter is set to 0.1, then t_i1 and t_i2 will be randomly reassigned between 90% and 110% of their initial value; 0 means no randomisation, by default 0
 
-        cw21 : Iterable, optional
+        cw31 : Iterable, optional
             Window time range for the first part of third duty cycle number (not neccessarily linked to the overall time window), by default None
 
-        cw22 : Iterable, optional
+        cw32 : Iterable, optional
             Window time range for the first part of third duty cycle number (not neccessarily linked to the overall time window), by default None, by default None
         """
         self.p_31 = p_31
