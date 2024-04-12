@@ -1138,7 +1138,7 @@ class Appliance:
                 )
             else:
                 raise ValueError(
-                    f"Wrong number of values for appliance '{self.name}''s power of user {self.user.user_name}: {len(self.power)}. Number of values should be at least match the total number of days: {num_days}. Alternatively the power of the appliance can be set to a constant value."
+                    f"Wrong number of values for appliance '{self.name}''s power of user {self.user.user_name}: {len(self.power)}. Number of values should at least match the total number of days: {num_days}. Alternatively the power of the appliance can be set to a constant value."
                 )
 
     def save(self) -> pd.DataFrame:
