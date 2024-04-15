@@ -39,6 +39,7 @@ setup(
     entry_points={
         "console_scripts": [
             "ramp=ramp.cli:main",
+            "ramp_convert=ramp.ramp_convert_old_input_files:cli",
         ],
     },
 )

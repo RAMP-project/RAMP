@@ -8,7 +8,7 @@ from ramp.core.core import UseCase
 
 parser = argparse.ArgumentParser(
     prog="python ramp_convert_old_input_files.py",
-    description="Convert old python input files to xlsx ones",
+    description="Convert RAMP python input files to xlsx ones",
 )
 parser.add_argument(
     "-i",
@@ -88,7 +88,7 @@ def convert_old_user_input_file(
     UseCase(users=user_list).save(output_fname)
 
 
-if __name__ == "__main__":
+def cli():
     args = vars(parser.parse_args())
     fname = args["fname_path"]
     output_path = args.get("output_path")
@@ -105,3 +105,6 @@ if __name__ == "__main__":
                 )
         else:
             convert_old_user_input_file(fname, output_path=output_path, suffix=suffix)
+
+if __name__ == "__main__":
+    cli()
