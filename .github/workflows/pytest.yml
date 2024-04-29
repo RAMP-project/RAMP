@@ -37,4 +37,15 @@ jobs:
         pip install -r tests/requirements.txt
     - name: Test with pytest
       run: |
-        pytest tests/
+        coverage run -m pytest tests/
+
+    - name: Check test coverage
+      run: |
+        coverage report -m
+
+    - name: Report to coveralls
+      run: |
+        coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALL_TOKEN }}
+        COVERALLS_SERVICE_NAME: github
