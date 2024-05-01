@@ -1,4 +1,6 @@
-
+******************
+RAMP Documentation
+******************
 .. image:: https://github.com/RAMP-project/RAMP/blob/main/docs/figures/RAMP_logo_basic.png?raw=true
    :width: 300
 
