@@ -182,15 +182,19 @@ def main():
                 month_end = datetime.date(
                     year, i + 1, pd.Period(month_start, freq="D").days_in_month
                 )
-                run_usecase(
+                month_profiles = run_usecase(
                     fname=fname,
-                    ofname=ofnames[i],
+                    ofname=None,
                     num_days=num_days[i],
                     date_start=month_start,
                     date_end=month_end,
                     plot=False,
                     parallel=parallel_processing,
                 )
+                month_profiles = month_profiles.reshape(
+                    1, 1440 * month_profiles.shape[0]
+                ).squeeze()
+                year_profile.append(month_profiles)
 
             # Create a dataFrame to save the year profile with timestamps every minutes
             series_frame = pd.DataFrame(
@@ -200,10 +204,19 @@ def main():
                 ),
             )
             # Save to minute and hour resolution
-            # TODO let the user choose where to save the files/file_name, make sure the user wants to overwrite the file
-            # if it already exists
+            if len(ofnames) == 1:
+                ofname = ofnames[0]
+            else:
+                ofname = None
+
+            if ofname is None:
+                ofname = os.path.abspath(os.path.curdir)
+
+            if not os.path.exists(ofname):
+                os.mkdir(ofname)
+
             series_frame.to_csv(
-                os.path.join(BASE_PATH, "yearly_profile_min_resolution.csv")
+                os.path.join(ofname, "yearly_profile_min_resolution.csv")
             )
             resampled = pd.DataFrame()
 
@@ -212,7 +225,10 @@ def main():
             resampled["min"] = series_frame.resample("H").min()
             # TODO add more columns with other resampled functions (do this in Jupyter)
             resampled.to_csv(
-                os.path.join(BASE_PATH, "yearly_profile_hourly_resolution.csv")
+                os.path.join(ofname, "yearly_profile_hourly_resolution.csv")
+            )
+            print(
+                f"Results of the yearly RAMP simulation with seasonality are located in the folder {ofname}"
             )
 
 
