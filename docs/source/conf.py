@@ -12,7 +12,7 @@
 #
 import os
 import sys
-import sphinx_pdj_theme
+
 
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath(".."))
@@ -62,7 +62,7 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-extensions.append("sphinxjp.themes.basicstrap")
+
 
 html_theme = 'sphinx_wagtail_theme'
 # html_theme_path = [sphinx_pdj_theme.get_html_theme_path()]
