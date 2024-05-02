@@ -13,6 +13,16 @@ Some of the resources to look at if you're interested in contributing:
 
 By contributing to RAMP, e.g. through opening a pull request or submitting a patch, you represent that your contributions are your own original work and that you have the right to license them, and you agree that your contributions are licensed under the EUROPEAN UNION PUBLIC LICENCE v. 1.2.
 
+## Open an issue
+
+[Open an issue](https://github.com/RAMP-project/RAMP/issues) to report a bug or for a feature request, please try to provide the information summarized below
+
+- OS: *your_operating_system*, *your_distribution*
+- RAMP version or Branch: *RAMP version* or *branch_name*, updated on *update_date*
+- If applicable: Attach full error message
+- If applicable: Share screenshots/images of your problem
+- If applicable: Share used input data
+
 ## Submitting changes
 
 To contribute changes:
