@@ -22,6 +22,24 @@ sys.path.insert(0, os.path.abspath("../../.."))
 from notebooks_convert import update_notebooks_rst_files
 
 update_notebooks_rst_files()
+
+
+def copy_readme():
+    with open("../../README.rst", "r", encoding="utf8") as fp:
+        data = fp.readlines()
+
+    # Replace the reference to contributing guidelines with an internal link
+    idx = data.index(
+        "To contribute changes please consult our `Contribution guidelines <https://github.com/RAMP-project/RAMP/blob/main/CONTRIBUTING.md>`_\n"
+    )
+    data[
+        idx
+    ] = "To contribute changes please consult our `Contribution guidelines <contributing.html>`_\n"
+    with open("readme.rst", "w") as fp:
+        fp.writelines(data)
+
+
+copy_readme()
 # -- Project information -----------------------------------------------------
 
 project = "RAMP"
