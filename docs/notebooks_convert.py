@@ -1,13 +1,8 @@
 from nbconvert import RSTExporter
-from nbconvert.writers import FilesWriter
 import nbformat
 import os
 
-path = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__),
-    )
-)
+DOC_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 def convert_notebook_to_rst(input_file, output_dir, file_name):
@@ -26,6 +21,9 @@ def convert_notebook_to_rst(input_file, output_dir, file_name):
 
     output_file = os.path.join(output_dir, f"{file_name}.rst")
 
+    # Add a link to the jupyter notebook file to the documentation
+    rst_content += f"\n:download:`Link to the jupyter notebook file </../notebooks/{file_name}.ipynb>`.\n"
+
     # Write RST content to the output file
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(rst_content)
@@ -33,26 +31,32 @@ def convert_notebook_to_rst(input_file, output_dir, file_name):
     print(f"Conversion successful. RST file saved to: {output_file}")
 
     # Copy images to the output folder
-    image_dir = output_dir
     for image_filename, image_data in resources["outputs"].items():
         image_path = os.path.join(output_dir, image_filename)
         with open(image_path, "wb") as img_file:
             img_file.write(image_data)
 
 
-def get_all_ipynb_files(examples_path="notebooks"):
-    all_files = os.listdir(examples_path)
-    return [
-        (os.path.join(path, examples_path, file), file.split(".ipynb")[0])
-        for file in all_files
+def get_all_ipynb_files(doc_path=DOC_PATH, examples_path="notebooks"):
+    notebooks_path = os.path.join(doc_path, examples_path)
+    notebooks = [
+        (os.path.join(notebooks_path, file), file.split(".ipynb")[0])
+        for file in os.listdir(notebooks_path)
         if file.endswith("ipynb")
     ]
+    return notebooks
 
 
-if __name__ == "__main__":
-    files = get_all_ipynb_files()
+def update_notebooks_rst_files(doc_path=DOC_PATH):
+    files = get_all_ipynb_files(doc_path)
 
     for file, folder in files:
         convert_notebook_to_rst(
-            file, os.path.join(path, "source", "examples", folder), folder
+            file,
+            output_dir=os.path.join(doc_path, "source", "examples", folder),
+            file_name=folder,
         )
+
+
+if __name__ == "__main__":
+    update_notebooks_rst_files()
