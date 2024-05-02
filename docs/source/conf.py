@@ -19,6 +19,9 @@ sys.path.insert(0, os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("../.."))
 sys.path.insert(0, os.path.abspath("../../.."))
 
+from notebooks_convert import update_notebooks_rst_files
+
+update_notebooks_rst_files()
 # -- Project information -----------------------------------------------------
 
 project = "RAMP"
