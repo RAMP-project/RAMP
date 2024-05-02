@@ -46,9 +46,8 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx_copybutton",
     "sphinx.ext.autosectionlabel",
-    "sphinx_wagtail_theme"
+    "sphinx_wagtail_theme",
 ]
-
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -67,7 +66,7 @@ exclude_patterns = []
 #
 
 
-html_theme = 'sphinx_wagtail_theme'
+html_theme = "sphinx_wagtail_theme"
 # html_theme_path = [sphinx_pdj_theme.get_html_theme_path()]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
