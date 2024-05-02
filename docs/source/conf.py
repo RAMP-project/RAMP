@@ -39,7 +39,18 @@ def copy_readme():
         fp.writelines(data)
 
 
+def copy_contributing():
+    with open("../../CONTRIBUTING.md", "r", encoding="utf8") as fp:
+        data = fp.readlines()
+
+    # Change the title of the file
+    data[0] = "# Contribute\n"
+    with open("contributing.md", "w") as fp:
+        fp.writelines(data)
+
+
 copy_readme()
+copy_contributing()
 # -- Project information -----------------------------------------------------
 
 project = "RAMP"
