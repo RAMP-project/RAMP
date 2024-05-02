@@ -67,6 +67,9 @@ exclude_patterns = []
 
 
 html_theme = "sphinx_wagtail_theme"
+html_theme_options = dict(
+    project_name="RAMP Documentation",
+)
 # html_theme_path = [sphinx_pdj_theme.get_html_theme_path()]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
