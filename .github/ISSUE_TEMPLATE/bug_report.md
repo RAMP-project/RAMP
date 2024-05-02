@@ -15,3 +15,5 @@ Checklist to make sure that the bug report ist complete:
 - [ ] If applicable: Attach full error message
 - [ ] If applicable: Share screenshots/images of your problem
 - [ ] If applicable: Share used input data
+
+<sub>*For more information on how to contribute, please check the [Contributing Guidelines](https://github.com/RAMP-project/RAMP/blob/main/CONTRIBUTING.md).*<sub>
