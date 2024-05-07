@@ -10,7 +10,7 @@ def test_user():
 
 
 @pytest.mark.usefixtures("test_user")
-def test_compare_two_appliances():
+def test_compare_two_appliances(test_user):
     appliance1 = Appliance(
         test_user,
         name="test_appliance1",
