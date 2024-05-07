@@ -44,7 +44,7 @@ Installing through pip
 
 .. code-block:: python
 
-   conda create -n ramp python=3.8
+   conda create -n ramp python=3.10
 
 
 2. If you create a new environment for RAMP, you'll need to activate it each time before using it, by writing
