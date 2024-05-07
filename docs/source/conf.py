@@ -12,13 +12,16 @@
 #
 import os
 import sys
-import sphinx_pdj_theme
+
 
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("../.."))
 sys.path.insert(0, os.path.abspath("../../.."))
 
+from notebooks_convert import update_notebooks_rst_files
+
+update_notebooks_rst_files()
 # -- Project information -----------------------------------------------------
 
 project = "RAMP"
@@ -43,7 +46,9 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx_copybutton",
     "sphinx.ext.autosectionlabel",
+    "sphinx_wagtail_theme",
 ]
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -59,8 +64,12 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-extensions.append("sphinxjp.themes.basicstrap")
-html_theme = "basicstrap"
+
+
+html_theme = "sphinx_wagtail_theme"
+html_theme_options = dict(
+    project_name="RAMP Documentation",
+)
 # html_theme_path = [sphinx_pdj_theme.get_html_theme_path()]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
