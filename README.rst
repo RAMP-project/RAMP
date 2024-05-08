@@ -11,6 +11,10 @@
     :target: https://rampdemand.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://coveralls.io/repos/github/RAMP-project/RAMP/badge.svg?branch=main
+:target: https://coveralls.io/github/RAMP-project/RAMP?branch=main
+
+
 .. image:: https://github.com/RAMP-project/RAMP/blob/main/docs/source/_static/RAMP_logo_basic.png?raw=true
    :width: 300
 
