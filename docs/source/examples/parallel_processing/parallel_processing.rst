@@ -154,3 +154,5 @@ You can also set the ``parallel_processing`` attribute of the
 .. image:: output_10_2.png
 
 
+
+:download:`Link to the jupyter notebook file </../notebooks/parallel_processing.ipynb>`.

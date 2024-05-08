@@ -1,20 +1,18 @@
 Thermal loads
 =============
 
-This example input file represents a single household user whose only
-load is the “shower”. The example showcases how to model thermal loads
-by: 1) using a time-varying average ``power`` attribute, pre-calculated
-as a function of the average daily groundwater temperature; and 2) using
-the ``thermal_p_var`` attribute to add further variability to the actual
-power absorbed by the appliance in each usage event, which reflects the
-randomness of user behaviour in preferring a slightly warmer or colder
-shower temperature.
+Some of the energy requirements of users are drived my technologies that
+have time variant power consumption. Hot water boilers are an example of
+technologies that can have variant powers throughout time. To show case
+how loads as such can be modelled in RAMP, we take the example of a
+household thermal load for generating shower hot water.
 
 .. code:: ipython3
 
     # importing functions
-    from ramp import User, UseCase, load_data, get_day_type
+    from ramp import User, UseCase, load_data
     import pandas as pd
+    import matplotlib.pyplot as plt
 
 Creating a user category and appliances
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -23,18 +21,16 @@ Creating a user category and appliances
 
     household = User()
 
-When the power varies across days of the year, for instance, as a
-function of the average daily groundwater temperature, the “power”
-parameter can be passed as a ``pd.DataFrame`` or ``np.array`` with a
-daily profile (365 rows of data). For this exercise, data can be loaded
-from the default examples in ramp:
+RAMP allows the user to give variant power profile for an appliance with
+a daily resolution. In this case,the power property in an appliance
+should be given as a timeseries pd.DataFrame or np.array with daily
+profile (365 rows of data). For this exercise, we will use a built-in
+power profile for thermal load example that can be loaded using
+load_data util function:
 
 .. code:: ipython3
 
     shower_power = load_data(example="shower")
-
-.. code:: ipython3
-
     # shower power distribution
     shower_power.plot()
 
@@ -48,7 +44,7 @@ from the default examples in ramp:
 
 
 
-.. image:: output_6_1.png
+.. image:: output_5_1.png
 
 
 .. code:: ipython3
@@ -56,14 +52,12 @@ from the default examples in ramp:
     shower = household.add_appliance(
         name="Shower",
         number=1,
-        power=shower_power,
-        num_windows=2,
-        func_time=15,
-        time_fraction_random_variability=0.1,
-        func_cycle=3,
-        window_1=[390, 540],
-        window_2=[1080, 1200],
-        random_var_w=0.2,
+        power=shower_power, # pass the pd.DataFrame or np.array instead of a number
+        num_windows=2, # two possibe time window for shower
+        func_time=15, # each shower takes 15 minute
+        func_cycle=3, # every
+        window_1=[390, 540], #  morning shower from 6:30 to 9:00 AM
+        window_2=[1080, 1200], # evening shower from 18:00 to 20:00
     )
 
 Generating profiles for increasing degrees of ``thermal_p_var``
@@ -80,20 +74,39 @@ Generating profiles for increasing degrees of ``thermal_p_var``
     You will simulate 365 day(s) from 2020-01-01 00:00:00 until 2020-12-31 00:00:00
 
 
+.. parsed-literal::
+
+    c:\users\tahavorm\downloads\gitrepos\ramp\ramp\core\core.py:299: FutureWarning: 'T' is deprecated and will be removed in a future version. Please use 'min' instead of 'T'.
+      end=self.days[-1] + pd.Timedelta(1, "d") - pd.Timedelta(1, "T"),
+    c:\users\tahavorm\downloads\gitrepos\ramp\ramp\core\core.py:297: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+      self.__datetimeindex = pd.date_range(
+
+
+As everyone has a different habit in the water temperature for taking
+shower, we can also consider a variability in the thermal power through
+the thermal_p_var property. Using the ``thermal_p_var`` attribute to add
+further variability to the actual power absorbed by the appliance in
+each usage event, which reflects the randomness of user behaviour in
+preferring a slightly warmer or colder shower temperature.To better
+understand the effect of this parameters, let’s perform a sensitivity
+analysis on themal_p_var function. To do so, we use the following
+function **thermal_p_var_sensitivty**:
+
 .. code:: ipython3
 
-    def thermal_p_var_sensitivity(values):
+    def thermal_p_var_sensitivity(sensitivity_values):
         # buidling a pd.DataFrame for saving sensitivity results
         results = pd.DataFrame(
-            index=pd.date_range(start="2020-01-01", periods=1440 * 365, freq="T"),
-            columns=[f"p_var = {value}" for value in values],
+            index=range(0,1440*365),
+            columns=[f"p_var = {value}" for value in sensitivity_values],
         )
     
-        for value in values:
+        for value in sensitivity_values:
+    
             # changing the thermal_P_var
             shower.thermal_p_var = value
     
-            profiles = usecase.generate_daily_load_profiles(flat=True)
+            profiles = usecase.generate_daily_load_profiles()
     
             # assigning the yearly profile for a given sensitivity case
             results[f"p_var = {value}"] = profiles
@@ -102,177 +115,37 @@ Generating profiles for increasing degrees of ``thermal_p_var``
 
 .. code:: ipython3
 
-    sensitivity_results = thermal_p_var_sensitivity([0, 0.25, 0.5, 0.75, 1])
+    # generating 5 senstivities on thermal_p_var
+    sensitivity_results = thermal_p_var_sensitivity([0, 0.25, 0.5])
 
 .. code:: ipython3
 
-    sensitivity_results
-
-
-
-
-.. raw:: html
-
-    <div>
-    <style scoped>
-        .dataframe tbody tr th:only-of-type {
-            vertical-align: middle;
-        }
+    days_to_plot = [1,100,200] # which days of the year to plot
     
-        .dataframe tbody tr th {
-            vertical-align: top;
-        }
+    fig, axes = plt.subplots(ncols=len(days_to_plot), nrows=sensitivity_results.shape[1], figsize=(10, 10)) 
     
-        .dataframe thead th {
-            text-align: right;
-        }
-    </style>
-    <table border="1" class="dataframe">
-      <thead>
-        <tr style="text-align: right;">
-          <th></th>
-          <th>p_var = 0</th>
-          <th>p_var = 0.25</th>
-          <th>p_var = 0.5</th>
-          <th>p_var = 0.75</th>
-          <th>p_var = 1</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th>2020-01-01 00:00:00</th>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-        </tr>
-        <tr>
-          <th>2020-01-01 00:01:00</th>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-        </tr>
-        <tr>
-          <th>2020-01-01 00:02:00</th>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-        </tr>
-        <tr>
-          <th>2020-01-01 00:03:00</th>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-        </tr>
-        <tr>
-          <th>2020-01-01 00:04:00</th>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-        </tr>
-        <tr>
-          <th>...</th>
-          <td>...</td>
-          <td>...</td>
-          <td>...</td>
-          <td>...</td>
-          <td>...</td>
-        </tr>
-        <tr>
-          <th>2020-12-30 23:55:00</th>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-        </tr>
-        <tr>
-          <th>2020-12-30 23:56:00</th>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-        </tr>
-        <tr>
-          <th>2020-12-30 23:57:00</th>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-        </tr>
-        <tr>
-          <th>2020-12-30 23:58:00</th>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-        </tr>
-        <tr>
-          <th>2020-12-30 23:59:00</th>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-          <td>0.0</td>
-        </tr>
-      </tbody>
-    </table>
-    <p>525600 rows × 5 columns</p>
-    </div>
+    for j,day in enumerate(days_to_plot):
+        for i, col in enumerate(sensitivity_results):
+            sensitivity_results[col].iloc[1440*(day-1):1440*(day)].plot(ax=axes[i,j]) # just plot for the first day
+            axes[i,j].set_title(f"Day {day} - thermal_p_var = {col}",fontsize=8)
+            axes[i,j].set_ylim(0,24000)
+    
+        
+    
+    plt.tight_layout()
+    plt.show()
 
 
 
-.. code:: ipython3
-
-    # showing the daily average of the load profiles
-    average_daily_profiles = sensitivity_results.resample("1d").mean()
-
-.. code:: ipython3
-
-    average_daily_profiles.plot()
+.. image:: output_12_0.png
 
 
+As it can be observed, the power consumption of hot water supply
+technology varies across different days of the year, primarily due to
+fluctuations in the nominal power. When adjusting the parameter
+**thermal_p_var** from 0, indicating no variability in power consumption
+due to user preferences, to higher values, which signify the probability
+of changes in hot water temperature, the power consumption also varies
+accordingly.
 
-
-.. parsed-literal::
-
-    <Axes: >
-
-
-
-
-.. image:: output_14_1.png
-
-
-.. code:: ipython3
-
-    first_day = pd.date_range(
-        start="2020-01-01 00:00:00", freq="1min", periods=24 * 60  # a full day
-    )
-    sensitivity_results.loc[first_day].plot()
-
-
-
-
-.. parsed-literal::
-
-    <Axes: >
-
-
-
-
-.. image:: output_15_1.png
-
-
+:download:`Link to the jupyter notebook file </../notebooks/thermal_app.ipynb>`.

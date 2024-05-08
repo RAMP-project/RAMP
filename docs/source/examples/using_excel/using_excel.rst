@@ -315,3 +315,5 @@ Generating load profiles for the single users of the usecase
 .. image:: output_19_1.png
 
 
+
+:download:`Link to the jupyter notebook file </../notebooks/using_excel.ipynb>`.
