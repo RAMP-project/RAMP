@@ -32,9 +32,9 @@ def copy_readme():
     idx = data.index(
         "To contribute changes please consult our `Contribution guidelines <https://github.com/RAMP-project/RAMP/blob/main/CONTRIBUTING.md>`_\n"
     )
-    data[
-        idx
-    ] = "To contribute changes please consult our `Contribution guidelines <contributing.html>`_\n"
+    data[idx] = (
+        "To contribute changes please consult our `Contribution guidelines <contributing.html>`_\n"
+    )
     with open("readme.rst", "w") as fp:
         fp.writelines(data)
 
