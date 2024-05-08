@@ -5,9 +5,9 @@ name: RAMP tests
 
 on:
   push:
-    branches: [ "main", "development" ]
+    branches: [ "main", "development", "joss-paper"]
   pull_request:
-    branches: [ "main", "development" ]
+    branches: [ "main", "development", "joss-paper"]
 
 permissions:
   contents: read
