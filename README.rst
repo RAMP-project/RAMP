@@ -279,16 +279,7 @@ Contributing
 ============
 This project is open-source. Interested users are therefore invited to test, comment or contribute to the tool. Submitting issues is the best way to get in touch with the development team, which will address your comment, question, or development request in the best possible way. We are also looking for contributors to the main code, willing to contribute to its capabilities, computational-efficiency, formulation, etc.
 
-To contribute changes:
-
-#. Fork the project on GitHub
-#. Create a feature branch (e.g. named "add-this-new-feature") to work on in your fork
-#. Add your name to the `AUTHORS <https://github.com/RAMP-project/RAMP/blob/development/AUTHORS>`_ file
-#. Commit your changes to the feature branch
-#. Push the branch to GitHub
-#. On GitHub, create a new pull request from the feature branch
-
-When committing new changes, please also take care of checking code stability by means of the `qualitative testing <https://github.com/RAMP-project/RAMP/blob/development/CONTRIBUTING.md>`_ functionality.
+To contribute changes please consult our `Contribution guidelines <https://github.com/RAMP-project/RAMP/blob/main/CONTRIBUTING.md>`_
 
 
 How to cite

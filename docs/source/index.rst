@@ -13,6 +13,7 @@ User Guide:
    algorithm
    examples
    input_parameters
+   contributing
    api_references
 
 
