@@ -1,0 +1,2 @@
+There are two RAMP GUI. One is Stand-alone RAMP GUI. which do not depends on .ui file of Qt. However you can still modify it manually without Qt designer studio.
+Secondly it is also available with .ui file. This can help you if you wish to modify GUI using Qt designer studio.
