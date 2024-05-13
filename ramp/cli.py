@@ -9,7 +9,9 @@ from ramp.ramp_run import run_usecase
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 parser = argparse.ArgumentParser(
-    prog="python ramp_run.py", description="Execute RAMP code"
+    prog="ramp",
+    description="Execute RAMP code",
+    epilog="To convert '.py' input files into '.xlsx' input files use the command 'ramp_convert'"
 )
 parser.add_argument(
     "-i",
