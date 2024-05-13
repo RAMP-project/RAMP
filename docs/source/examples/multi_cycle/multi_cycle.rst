@@ -53,7 +53,7 @@ Creating the user and appliance
 .. code:: ipython3
 
     # creating the appliance
-    fridge = household.Appliance(
+    fridge = household.add_appliance(
         name="Fridge",
         number=1,
         power=200,
