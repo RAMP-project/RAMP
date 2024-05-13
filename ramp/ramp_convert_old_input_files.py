@@ -82,7 +82,7 @@ def convert_old_user_input_file(
     output_fname = os.path.join(output_path, output_fname)
 
     if os.name != "posix":
-        sys.path.insert(0, os.path.abspath(fname_path))
+        sys.path.insert(0, os.path.dirname(os.path.abspath(fname_path)))
     file_module = importlib.import_module(fname)
 
     user_list = file_module.User_list
