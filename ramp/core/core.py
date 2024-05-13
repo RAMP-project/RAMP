@@ -53,6 +53,7 @@ class UseCase:
         date_end: str = None,
         parallel_processing: bool = False,
         peak_enlarge: float = 0.15,
+        random_seed: int = None,
     ):
         """Creates a UseCase instance for gathering a list of User instances which own Appliance instances
 
@@ -70,6 +71,8 @@ class UseCase:
             if set True, the profiles will be generated in parallel rather than sequencially
         peak_enlarge: float, optional
             percentage random enlargement or reduction of peak time range length, used in UseCase.calc_peak_time_range
+        random_seed: int, optional
+            specify seed for the random number generator to exactly reproduce results
 
         """
         self.name = name
@@ -90,6 +93,8 @@ class UseCase:
         self.__num_days = None
         self.__datetimeindex = None
         self.daily_profiles = None
+        self.random_seed = random_seed
+
 
         self.appliances = []
         self.users = []
@@ -100,6 +105,10 @@ class UseCase:
         self.collect_appliances_from_users()
         if self.date_start is not None and self.date_end is not None:
             self.initialize()
+
+        # Set global random seed if it is specified
+        if self.random_seed:
+            random.seed(self.random_seed)
 
     @property
     def date_start(self):
