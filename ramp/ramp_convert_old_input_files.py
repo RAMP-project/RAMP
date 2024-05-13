@@ -7,7 +7,7 @@ import argparse
 from ramp.core.core import UseCase
 
 parser = argparse.ArgumentParser(
-    prog="python ramp_convert_old_input_files.py",
+    prog="ramp_convert",
     description="Convert RAMP python input files to xlsx ones",
 )
 parser.add_argument(
