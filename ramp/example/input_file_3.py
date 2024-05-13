@@ -17,7 +17,7 @@ the Prefence Index and User Preference attributes.
 """
 
 # Create new user classes
-HH = User("generic household", 1, 3)
+HH = User(user_name="generic household", num_users=1, user_preference=3)
 User_list.append(HH)
 
 # Create new appliances
@@ -25,11 +25,11 @@ User_list.append(HH)
 # Create Cooking appliances
 
 HH_lunch1_soup = HH.add_appliance(
-    1, 1800, 2, 70, 0.15, 60, thermal_p_var=0.2, pref_index=1, fixed_cycle=1
+    number=1, power=1800, num_windows=2, func_time=70, time_fraction_random_variability=0.15, func_cycle=60, thermal_p_var=0.2, pref_index=1, fixed_cycle=1
 )
-HH_lunch1_soup.windows([12 * 60, 15 * 60], [0, 0], 0.15)
-HH_lunch1_soup.specific_cycle_1(1800, 10, 750, 60, 0.15)
-HH_lunch1_soup.cycle_behaviour([12 * 60, 15 * 60], [0, 0])
+HH_lunch1_soup.windows(window_1=[12 * 60, 15 * 60], window_2=[0, 0], random_var_w=0.15)
+HH_lunch1_soup.specific_cycle_1(p_11=1800, t_11=10, p_12=750, t_12=60, r_c1=0.15)
+HH_lunch1_soup.cycle_behaviour(cw11=[12 * 60, 15 * 60], cw12=[0, 0])
 
 HH_lunch2_rice = HH.add_appliance(
     1, 1800, 2, 25, 0.15, 20, thermal_p_var=0.2, pref_index=2, fixed_cycle=1
