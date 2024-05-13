@@ -19,7 +19,7 @@ For examples related to "thermal loads", see the "input_file_2".
 """
 
 # Create new user classes
-HI = User("high income", 11, 3)
+HI = User(user_name="high income", num_users=11, user_preference=3)
 User_list.append(HI)
 
 HMI = User("higher middle income", 38, 3)
@@ -46,8 +46,8 @@ User_list.append(Church)
 # Create new appliances
 
 # Church
-Ch_indoor_bulb = Church.add_appliance(10, 26, 1, 210, 0.2, 60, "yes", flat="yes")
-Ch_indoor_bulb.windows([1200, 1440], [0, 0], 0.1)
+Ch_indoor_bulb = Church.add_appliance(number=10, power=26, num_windows=1, func_time=210, time_fraction_random_variability=0.2, func_cycle=60, fixed="yes", flat="yes")
+Ch_indoor_bulb.windows(window_1=[1200, 1440], window_2=[0, 0], random_var_w=0.1)
 
 Ch_outdoor_bulb = Church.add_appliance(7, 26, 1, 150, 0.2, 60, "yes", flat="yes")
 Ch_outdoor_bulb.windows([1200, 1440], [0, 0], 0.1)

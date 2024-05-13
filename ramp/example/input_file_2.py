@@ -18,14 +18,12 @@ the thermal_P_var attribute.
 """
 
 # Create new user classes
-HH = User("generic households", 1)
+HH = User(user_name="generic households", num_users=1)
 User_list.append(HH)
 
 HH_shower_P = pd.read_csv("ramp/example/shower_P.csv")
-
-# High-Income
-HH_shower = HH.add_appliance(1, HH_shower_P, 2, 15, 0.1, 3, thermal_p_var=0.2)
-HH_shower.windows([390, 540], [1080, 1200], 0.2)
+HH_shower = HH.add_appliance(number=1, power=HH_shower_P, num_windows=2, func_time=15, time_fraction_random_variability=0.1, func_cycle=3, thermal_p_var=0.2)
+HH_shower.windows(window_1=[390, 540], window_2=[1080, 1200], random_var_w=0.2)
 
 
 if __name__ == "__main__":
