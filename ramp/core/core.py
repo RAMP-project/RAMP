@@ -694,7 +694,7 @@ appliances: no appliances assigned to the user.
                 self.App_list.append(app)
 
     def add_appliance(self, *args, **kwargs):
-        """"adds an appliance to the user category with all the appliance characteristics in a single function
+        """Adds an appliance to the user category with all the appliance characteristics in a single function
 
         Parameters
         ----------

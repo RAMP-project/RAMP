@@ -22,7 +22,15 @@ HH = User(user_name="generic households", num_users=1)
 User_list.append(HH)
 
 HH_shower_P = pd.read_csv("ramp/example/shower_P.csv")
-HH_shower = HH.add_appliance(number=1, power=HH_shower_P, num_windows=2, func_time=15, time_fraction_random_variability=0.1, func_cycle=3, thermal_p_var=0.2)
+HH_shower = HH.add_appliance(
+    number=1,
+    power=HH_shower_P,
+    num_windows=2,
+    func_time=15,
+    time_fraction_random_variability=0.1,
+    func_cycle=3,
+    thermal_p_var=0.2,
+)
 HH_shower.windows(window_1=[390, 540], window_2=[1080, 1200], random_var_w=0.2)
 
 
