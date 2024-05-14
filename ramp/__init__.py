@@ -18,7 +18,9 @@ from ramp.core.core import UseCase, User, Appliance
 from ramp.core.utils import yearly_pattern, get_day_type
 from ramp.example.examples import load_data, download_example
 from ramp.post_process.post_process import Plot
-from ramp.ramp_convert_old_input_files import convert_old_user_input_file as ramp_py2xlsx
+from ramp.ramp_convert_old_input_files import (
+    convert_old_user_input_file as ramp_py2xlsx,
+)
 
 __authors__ = "Listed in AUTHORS"
 __copyright__ = (

@@ -11,7 +11,7 @@ BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 parser = argparse.ArgumentParser(
     prog="ramp",
     description="Execute RAMP code",
-    epilog="To convert '.py' input files into '.xlsx' input files use the command 'ramp_convert'"
+    epilog="To convert '.py' input files into '.xlsx' input files use the command 'ramp_convert'",
 )
 parser.add_argument(
     "-i",

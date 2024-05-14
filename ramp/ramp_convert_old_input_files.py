@@ -108,5 +108,6 @@ def cli():
         else:
             convert_old_user_input_file(fname, output_path=output_path, suffix=suffix)
 
+
 if __name__ == "__main__":
     cli()
