@@ -39,10 +39,10 @@ Creating user categories and appliances
         number=1,
         power=50,
         num_windows=1,
-        func_time=210, # 3.5 hours
-        func_cycle=210,  
+        func_time=210,  # 3.5 hours
+        func_cycle=210,
         occasional_use=0.5,  # 50% chance of occasional use,
-        window_1=[480, 750], # start from 8AM
+        window_1=[480, 750],  # start from 8AM
     )
 
 .. code:: ipython3
@@ -52,10 +52,10 @@ Creating user categories and appliances
         number=1,
         power=50,
         num_windows=1,
-        func_time=210, # 3.5 hours
-        func_cycle=210,  
+        func_time=210,  # 3.5 hours
+        func_cycle=210,
         occasional_use=1,  # always present in the mix of appliances,
-        window_1=[480, 750], # start from 8AM
+        window_1=[480, 750],  # start from 8AM
     )
 
 Generating profiles
@@ -70,14 +70,10 @@ the User object profile genertor methods for 5 consecutive days:
     household_profiles = []
     school_profiles = []
     
-    for day in range(1,number_of_days+1):
-        household_profiles.extend(
-            household.generate_single_load_profile(prof_i=day)
-        )
+    for day in range(1, number_of_days + 1):
+        household_profiles.extend(household.generate_single_load_profile(prof_i=day))
     
-        school_profiles.extend(
-            school.generate_single_load_profile(prof_i=day)
-        )
+        school_profiles.extend(school.generate_single_load_profile(prof_i=day))
 
 
 .. parsed-literal::
@@ -88,21 +84,20 @@ the User object profile genertor methods for 5 consecutive days:
 
 .. code:: ipython3
 
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(8, 4)) 
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(8, 4))
     
     
     i = 0
     for name, df in dict(
         household_profiles=pd.DataFrame(household_profiles),
-        school_profiles=pd.DataFrame(school_profiles)
-        ).items():
-        df.plot(ax=axes[i],legend=False)
+        school_profiles=pd.DataFrame(school_profiles),
+    ).items():
+        df.plot(ax=axes[i], legend=False)
         axes[i].set_title(name)
-        i+=1
+        i += 1
     
     plt.tight_layout()
     plt.show()
-
 
 
 

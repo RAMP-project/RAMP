@@ -53,7 +53,7 @@ Creating the user and appliance
 .. code:: ipython3
 
     # creating the appliance
-    fridge = household.Appliance(
+    fridge = household.add_appliance(
         name="Fridge",
         number=1,
         power=200,
@@ -85,30 +85,18 @@ example, we do not apply such variability.
     # assiging the specific cycles
     # first cycle: standard cycle
     fridge.specific_cycle_1(
-        p_11=200, # power level for the first operation segment
+        p_11=200,  # power level for the first operation segment
         t_11=10,  # duration of the first operation segment
-        p_12=5,   # power level for the second operation segment
+        p_12=5,  # power level for the second operation segment
         t_12=20,  # duration of the second operation segment
-        r_c1=0    # random variability assigned to the duration of each segment
+        r_c1=0,  # random variability assigned to the duration of each segment
     )
     
     # second cycle: intermediate cycle
-    fridge.specific_cycle_2(
-        p_21=200,
-        t_21=15,
-        p_22=5,
-        t_22=15,
-        r_c2=0
-    )
+    fridge.specific_cycle_2(p_21=200, t_21=15, p_22=5, t_22=15, r_c2=0)
     
     # third cycle: intensive cycle
-    fridge.specific_cycle_3(
-        p_31=200,
-        t_31=20,
-        p_32=5,
-        t_32=10,
-        r_c3=0
-    )
+    fridge.specific_cycle_3(p_31=200, t_31=20, p_32=5, t_32=10, r_c3=0)
 
 After defining the cycle power and duration parameters, the time windows
 within a day at which the cycles occur should be specified by means of
@@ -123,7 +111,7 @@ across all cycles should not overlap.
 
     # defining cycle behaviour
     fridge.cycle_behaviour(
-         cw11=[0, 299], cw12=[1201, 1440], cw21=[300, 479], cw31=[480, 1200]
+        cw11=[0, 299], cw12=[1201, 1440], cw21=[300, 479], cw31=[480, 1200]
     )
 
 Building the profiles
@@ -138,7 +126,7 @@ Building the profiles
 
     # days to build the profiles
     days = [
-        "2020-12-16", # a day in the 'Hot' season, assuming a location in the Southern hemisphere
+        "2020-12-16",  # a day in the 'Hot' season, assuming a location in the Southern hemisphere
     ]
     
     profiles = pd.DataFrame(index=range(0, 1440), columns=days)

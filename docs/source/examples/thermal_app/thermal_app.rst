@@ -52,12 +52,12 @@ load_data util function:
     shower = household.add_appliance(
         name="Shower",
         number=1,
-        power=shower_power, # pass the pd.DataFrame or np.array instead of a number
-        num_windows=2, # two possibe time window for shower
-        func_time=15, # each shower takes 15 minute
-        func_cycle=3, # every
-        window_1=[390, 540], #  morning shower from 6:30 to 9:00 AM
-        window_2=[1080, 1200], # evening shower from 18:00 to 20:00
+        power=shower_power,  # pass the pd.DataFrame or np.array instead of a number
+        num_windows=2,  # two possibe time window for shower
+        func_time=15,  # each shower takes 15 minute
+        func_cycle=3,  # every
+        window_1=[390, 540],  #  morning shower from 6:30 to 9:00 AM
+        window_2=[1080, 1200],  # evening shower from 18:00 to 20:00
     )
 
 Generating profiles for increasing degrees of ``thermal_p_var``
@@ -97,7 +97,7 @@ function **thermal_p_var_sensitivty**:
     def thermal_p_var_sensitivity(sensitivity_values):
         # buidling a pd.DataFrame for saving sensitivity results
         results = pd.DataFrame(
-            index=range(0,1440*365),
+            index=range(0, 1440 * 365),
             columns=[f"p_var = {value}" for value in sensitivity_values],
         )
     
@@ -120,17 +120,20 @@ function **thermal_p_var_sensitivty**:
 
 .. code:: ipython3
 
-    days_to_plot = [1,100,200] # which days of the year to plot
+    days_to_plot = [1, 100, 200]  # which days of the year to plot
     
-    fig, axes = plt.subplots(ncols=len(days_to_plot), nrows=sensitivity_results.shape[1], figsize=(10, 10)) 
+    fig, axes = plt.subplots(
+        ncols=len(days_to_plot), nrows=sensitivity_results.shape[1], figsize=(10, 10)
+    )
     
-    for j,day in enumerate(days_to_plot):
+    for j, day in enumerate(days_to_plot):
         for i, col in enumerate(sensitivity_results):
-            sensitivity_results[col].iloc[1440*(day-1):1440*(day)].plot(ax=axes[i,j]) # just plot for the first day
-            axes[i,j].set_title(f"Day {day} - thermal_p_var = {col}",fontsize=8)
-            axes[i,j].set_ylim(0,24000)
+            sensitivity_results[col].iloc[1440 * (day - 1) : 1440 * (day)].plot(
+                ax=axes[i, j]
+            )  # just plot for the first day
+            axes[i, j].set_title(f"Day {day} - thermal_p_var = {col}", fontsize=8)
+            axes[i, j].set_ylim(0, 24000)
     
-        
     
     plt.tight_layout()
     plt.show()

@@ -694,7 +694,51 @@ appliances: no appliances assigned to the user.
                 self.App_list.append(app)
 
     def add_appliance(self, *args, **kwargs):
-        """adds an appliance to the user category with all the appliance characteristics in a single function
+        """Adds an appliance to the user category with all the appliance characteristics in a single function
+
+        Parameters
+        ----------
+        number : int, optional
+            number of appliances of the specified kind, by default 1
+
+        power : Union[float.pd.DataFrame], optional
+            Power rating of appliance (average). If the appliance has variant daily power, a series (with the size of 366) can be passed., by default 0
+
+        num_windows : int [1,2,3], optional
+            Number of distinct time windows, by default 1
+
+        func_time : int[0,1440], optional
+            total time (minutes) the appliance is on during the day (not dependant on windows). Acceptable values are in range 0 to 1440, by default 0
+
+        time_fraction_random_variability : Percentage, optional
+            percentage of total time of use that is subject to random variability. For time (not for windows), randomizes the total time the appliance is on, by default 0
+
+        func_cycle : int[0,1440], optional
+            minimum time(minutes) the appliance is kept on after switch-on event, by default 1
+
+        fixed : str, optional
+            if 'yes', all the 'n' appliances of this kind are always switched-on together, by default "no"
+
+        fixed_cycle : int{0,1,2,3,4}, optional
+            Number of duty cycle, 0 means continuous power, if not 0 you have to fill the cw (cycle window) parameter (you may define up to 3 cws), by default 0
+
+        occasional_use : Percentage, optional
+            Defines how often the appliance is used, e.g. every second day will be 0.5, by default 1
+
+        flat : str{'yes','no'}, optional
+            allows to model appliances that are not subject to any kind of random variability, such as public lighting, by default "no"
+
+        thermal_p_var : Percentage, optional
+            Range of change of the power of the appliance (e.g. shower not taken at same temparature) or for the power of duty cycles (e.g. for a cooker, AC, heater if external temperature is different…), by default 0
+
+        pref_index : int{0,1,2,3}, optional
+            defines preference index for association with random User daily preference behaviour.This number must be smaller or equal to the value input in user_preference, by default 0
+
+        wd_we_type : int{0,1,2}, optional
+            Specify whether the appliance is used only on weekdays (0), weekend (1) or the whole week (2), by default 2
+
+        name : str, optional
+            the name of the appliance, by default ""
 
 
         Returns

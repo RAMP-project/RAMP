@@ -56,16 +56,16 @@ using the **add_appliance** method of the User object:
 
     # add_appliance is meth
     indoor_bulb = household.add_appliance(
-        name="Indoor Light Bulb", # the name of the appliance
-        number=6, # how many of this appliance each user has in this user category
-        power=7, # the power (in Watt) of each single appliance. RAMP does not deal with units of measures, you should check the consistency of the unit of measures throughout your model
-        num_windows=2, # how many usage time windows throughout the day?
-        func_time=120, # the total usage time of appliances
-        func_cycle=10, # the minimum usage time after a switch on event
+        name="Indoor Light Bulb",  # the name of the appliance
+        number=6,  # how many of this appliance each user has in this user category
+        power=7,  # the power (in Watt) of each single appliance. RAMP does not deal with units of measures, you should check the consistency of the unit of measures throughout your model
+        num_windows=2,  # how many usage time windows throughout the day?
+        func_time=120,  # the total usage time of appliances
+        func_cycle=10,  # the minimum usage time after a switch on event
         window_1=[0, 30],  # from 24 to 00:30
         window_2=[1170, 1440],  # from 19:30 to 24:00
-        random_var_w=0.35, # Variability of the windows in percentage
-        time_fraction_random_variability=0.2, # randomizes the total time the appliance is on (between 0 and 1)
+        random_var_w=0.35,  # Variability of the windows in percentage
+        time_fraction_random_variability=0.2,  # randomizes the total time the appliance is on (between 0 and 1)
     )
 
 .. code:: ipython3
@@ -127,11 +127,12 @@ comprehensive profile spanning the entire year:
 .. code:: ipython3
 
     use_case = UseCase(
-        users=[household], # A list of all the user categories to be included in the simulation. In this case, we only have household user category
-        date_start="2020-01-01", # starting date of the simulation
-        date_end="2020-12-31", # end date of the simulation
-        )
-
+        users=[
+            household
+        ],  # A list of all the user categories to be included in the simulation. In this case, we only have household user category
+        date_start="2020-01-01",  # starting date of the simulation
+        date_end="2020-12-31",  # end date of the simulation
+    )
 
 
 .. parsed-literal::
@@ -200,9 +201,7 @@ within the household category:
 
 .. code:: ipython3
 
-    single_profile = household.generate_single_load_profile(
-        day_type=0
-        )
+    single_profile = household.generate_single_load_profile(day_type=0)
 
 
 .. parsed-literal::
@@ -238,9 +237,7 @@ can use the similar method of User class, named
 
 .. code:: ipython3
 
-    aggregated_profile = household.generate_aggregated_load_profile(
-        day_type=0
-    )
+    aggregated_profile = household.generate_aggregated_load_profile(day_type=0)
 
 .. code:: ipython3
 

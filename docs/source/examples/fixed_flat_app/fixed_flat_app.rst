@@ -43,9 +43,8 @@ Adding an appliance with flat and fixed consumption
         func_cycle=60,
         fixed="yes",  # This means all the 'n' appliances of this kind are always switched-on together
         flat="yes",  # This means the appliance is not subject to random variability in terms of total usage time
-        window_1 = [1200, 1440],  # from 20:00 to 24:00
+        window_1=[1200, 1440],  # from 20:00 to 24:00
     )
-
 
 Generating the profiles using UseCase class
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -58,14 +57,12 @@ number of days for generating the profiles:
 .. code:: ipython3
 
     school_case = UseCase(
-        users=[school], # users of the usecase
-        date_start="2023-01-01", # start date
-        )
+        users=[school],  # users of the usecase
+        date_start="2023-01-01",  # start date
+    )
     
     # when both date_start and date_end are not given, you need to initialize the usecase by this method and by passing the number of days as num_days
-    school_case.initialize(
-        num_days=7
-        )
+    school_case.initialize(num_days=7)
 
 
 .. parsed-literal::
@@ -144,12 +141,11 @@ overall energy consumption and demand patterns within simulation.
 
 .. code:: ipython3
 
+    fig, axes = plt.subplots(nrows=1, ncols=4, figsize=(12, 4))
     
-    fig, axes = plt.subplots(nrows=1, ncols=4, figsize=(12, 4))  
     
-    
-    for i, df in enumerate([no_fix_no_flat,fix_no_flat,fixed_flat,no_fixed_flat]):
-        df.plot(ax=axes[i],legend=False)
+    for i, df in enumerate([no_fix_no_flat, fix_no_flat, fixed_flat, no_fixed_flat]):
+        df.plot(ax=axes[i], legend=False)
         axes[i].set_title(df.columns[0])
     
     
