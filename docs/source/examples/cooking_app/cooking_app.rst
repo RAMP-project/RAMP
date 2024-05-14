@@ -72,20 +72,20 @@ Cooking rice  600   10
 .. code:: ipython3
 
     # soup for lunch
-    lunch_window = [12 * 60, 12 * 60+26]
+    lunch_window = [12 * 60, 12 * 60 + 26]
     
     soup_1 = user_1.add_appliance(
         name="soup for lunch",
-        power=1200, # nominal power of appliance
-        func_time=25, # the cooking time
-        func_cycle=25, # we always need  25 minute for cooking
-        fixed_cycle=1, # the cookstove is not a continus power usage appliance, it has cycles as mentioned earlier 
-        window_1=lunch_window, # lunch is always prepared from 12
+        power=1200,  # nominal power of appliance
+        func_time=25,  # the cooking time
+        func_cycle=25,  # we always need  25 minute for cooking
+        fixed_cycle=1,  # the cookstove is not a continus power usage appliance, it has cycles as mentioned earlier
+        window_1=lunch_window,  # lunch is always prepared from 12
         p_11=1200,  # power of the first cycle
         t_11=5,  # time needed for the first cycle
         p_12=750,  # power of the second cycle
         t_12=20,  # time needed for the second cycle
-        cw11=lunch_window, # the time window of the working cycle 
+        cw11=lunch_window,  # the time window of the working cycle
     )
 
 The second user has two different preferences for lunch. Accordingly, we
@@ -142,10 +142,9 @@ rice is the second one (pref_index = 2).
     number_of_days = 5
     user_1_profiles = {}
     user_2_profiles = {}
-    for day in range(1,number_of_days+1):
+    for day in range(1, number_of_days + 1):
         user_1_profiles[f"day {day}"] = pd.Series(user_1.generate_single_load_profile())
         user_2_profiles[f"day {day}"] = pd.Series(user_2.generate_single_load_profile())
-        
 
 
 .. parsed-literal::
@@ -156,17 +155,21 @@ rice is the second one (pref_index = 2).
 
 .. code:: ipython3
 
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(8, 4)) 
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(8, 4))
     
     
     i = 0
     for name, df in dict(
-        user_1_profiles=pd.concat(user_1_profiles,axis=1).iloc[lunch_window[0]-5:lunch_window[1]+5], # take only the lunch window
-        user_2_profiles=pd.concat(user_2_profiles,axis=1).iloc[lunch_window[0]-5:lunch_window[1]+5]# take only the lunch window
-        ).items():
-        df.plot(ax=axes[i],legend=True)
+        user_1_profiles=pd.concat(user_1_profiles, axis=1).iloc[
+            lunch_window[0] - 5 : lunch_window[1] + 5
+        ],  # take only the lunch window
+        user_2_profiles=pd.concat(user_2_profiles, axis=1).iloc[
+            lunch_window[0] - 5 : lunch_window[1] + 5
+        ],  # take only the lunch window
+    ).items():
+        df.plot(ax=axes[i], legend=True)
         axes[i].set_title(name)
-        i+=1
+        i += 1
     
     plt.tight_layout()
     plt.show()
