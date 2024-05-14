@@ -42,7 +42,9 @@ def single_appliance_daily_load_profile(args):
 
     return args[0], app.daily_use
 
-warnings.simplefilter('always', DeprecationWarning)
+
+warnings.simplefilter("always", DeprecationWarning)
+
 
 class UseCase:
     def __init__(
@@ -94,7 +96,6 @@ class UseCase:
         self.__datetimeindex = None
         self.daily_profiles = None
         self.random_seed = random_seed
-
 
         self.appliances = []
         self.users = []
@@ -891,7 +892,10 @@ appliances: no appliances assigned to the user.
         refer to Appliance class docs
         """
 
-        warnings.warn("This function is deprecated and not supported since version v0.4.0. Instead use the add_appliance method.", DeprecationWarning)
+        warnings.warn(
+            "This function is deprecated and not supported since version v0.4.0. Instead use the add_appliance method.",
+            DeprecationWarning,
+        )
 
         return self.add_appliance(
             number=number,
