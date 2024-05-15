@@ -7,8 +7,7 @@ import argparse
 from ramp.core.core import UseCase
 
 parser = argparse.ArgumentParser(
-    prog="python ramp_convert_old_input_files.py",
-    description="Convert old python input files to xlsx ones",
+    prog="ramp_convert", description="Convert RAMP python input files to xlsx ones"
 )
 parser.add_argument(
     "-i",
@@ -18,10 +17,7 @@ parser.add_argument(
     help="path to the input file (including filename)",
 )
 parser.add_argument(
-    "-o",
-    dest="output_path",
-    type=str,
-    help="path where to save the converted filename",
+    "-o", dest="output_path", type=str, help="path where to save the converted filename"
 )
 parser.add_argument(
     "--suffix",
@@ -44,8 +40,25 @@ for i, a in local_var_names:
 def convert_old_user_input_file(
     fname_path, output_path=None, suffix="", keep_names=True
 ):
-    """
-    Imports an input file from a path and returns a processed User_list
+    """Convert old RAMP python input files to xlsx ones
+
+    The old (RAMP version < 0.5) .py input files defined all users and gathered them in a variable named User_list,
+    this variable must be defined in the .py file to be converted to .xlsx.
+
+    To convert a .py input file to an .xlsx using the UseCase objects, please refer to
+    https://rampdemand.readthedocs.io/en/latest/examples/using_excel/using_excel.html#exporting-the-database
+
+    Parameters
+    ----------
+    fname_path: path
+        path to a .py ramp input file containing a variable named User_list
+    output_path: path, optional
+        path to the converted .xlsx ramp input file, by default the same folder as the .py file
+    suffix: str, optional
+        suffix to be added to the converted .xlsx ramp input file name, default ''
+    keep_names: bool, optional
+        keep the variable names of the Appliance instances as their 'name' attribute, default True
+
     """
 
     line_to_change = -1
@@ -81,6 +94,8 @@ def convert_old_user_input_file(
     output_fname = fname_path.split(os.path.sep)[-1].replace(".py", suffix)
     output_fname = os.path.join(output_path, output_fname)
 
+    if os.name != "posix":
+        sys.path.insert(0, os.path.dirname(os.path.abspath(fname_path)))
     file_module = importlib.import_module(fname)
 
     user_list = file_module.User_list
@@ -88,7 +103,7 @@ def convert_old_user_input_file(
     UseCase(users=user_list).save(output_fname)
 
 
-if __name__ == "__main__":
+def cli():
     args = vars(parser.parse_args())
     fname = args["fname_path"]
     output_path = args.get("output_path")
@@ -105,3 +120,7 @@ if __name__ == "__main__":
                 )
         else:
             convert_old_user_input_file(fname, output_path=output_path, suffix=suffix)
+
+
+if __name__ == "__main__":
+    cli()

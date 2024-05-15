@@ -9,7 +9,9 @@ from ramp.ramp_run import run_usecase
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 parser = argparse.ArgumentParser(
-    prog="python ramp_run.py", description="Execute RAMP code"
+    prog="ramp",
+    description="Execute RAMP code",
+    epilog="To convert '.py' input files into '.xlsx' input files use the command 'ramp_convert'",
 )
 parser.add_argument(
     "-i",
@@ -200,7 +202,7 @@ def main():
             series_frame = pd.DataFrame(
                 np.hstack(year_profile),
                 index=pd.date_range(
-                    start=f"{year}-1-1", end=f"{year}-12-31 23:59", freq="T"
+                    start=f"{year}-1-1", end=f"{year}-12-31 23:59", freq="min"
                 ),
             )
             # Save to minute and hour resolution
@@ -220,9 +222,9 @@ def main():
             )
             resampled = pd.DataFrame()
 
-            resampled["mean"] = series_frame.resample("H").mean()
-            resampled["max"] = series_frame.resample("H").max()
-            resampled["min"] = series_frame.resample("H").min()
+            resampled["mean"] = series_frame.resample("h").mean()
+            resampled["max"] = series_frame.resample("h").max()
+            resampled["min"] = series_frame.resample("h").min()
             # TODO add more columns with other resampled functions (do this in Jupyter)
             resampled.to_csv(
                 os.path.join(ofname, "yearly_profile_hourly_resolution.csv")

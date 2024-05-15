@@ -193,12 +193,15 @@ Other options are documented in the help of `ramp`, which you access with the ``
    ramp -h
 
 
-If you have existing python input files, you can convert them to
-spreadsheet. To do so, go to the ``\ramp`` folder and run
+If you have existing python input files from RAMP version prior to 0.5, you can convert them to
+spreadsheets input files. Simply run
 
 .. code-block:: bash
 
-   python ramp_convert_old_input_files.py -i <path to the input file you wish to convert>
+   ramp_convert -i <path to the .py input file you wish to convert>
+
+If you want to save a RAMP model you created with a .py file into a spreadsheet refer to
+this `example <https://rampdemand.readthedocs.io/en/latest/examples/using_excel/using_excel.html#exporting-the-database>`_
 
 For other examples of command lines options, such as setting date ranges, please visit `the dedicated section  <https://rampdemand.readthedocs.io/en/latest/examples/year_simulation/year_simulation.html#setting-date-range>`_ of the documentation.
 

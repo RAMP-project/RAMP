@@ -69,6 +69,19 @@ class TestConversion:
                 if old_user != new_user:
                     pytest.fail()
 
+    def test_convert_py_to_xlsx_command_line(self):
+        """Convert the 3 example .py input files to xlsx and compare each appliance of each user"""
+        for i, j in enumerate(self.input_files_to_run):
+            old_user_list = load_py_usecase(j=j)
+            output_path = os.path.join("ramp", "test")
+            os.system(
+                f"ramp_convert -i {self.py_fnames[i]} -o {output_path} --suffix {self.file_suffix}"
+            )
+            new_user_list = load_xlsx_usecase(fname=self.xlsx_fnames[i])
+            for old_user, new_user in zip(old_user_list, new_user_list):
+                if old_user != new_user:
+                    pytest.fail()
+
 
 def test_define_appliance_window_directly_equivalent_to_use_windows_method():
     user = User("test user", 1)
