@@ -312,8 +312,8 @@ class UseCase:
             # format datetimeindex in minutes
             self.__datetimeindex = pd.date_range(
                 start=self.days[0],
-                end=self.days[-1] + pd.Timedelta(1, "d") - pd.Timedelta(1, "T"),
-                freq="T",
+                end=self.days[-1] + pd.Timedelta(1, "d") - pd.Timedelta(1, "min"),
+                freq="min",
             )
 
     @property
@@ -1399,10 +1399,14 @@ class Appliance:
         )  # same as above for window3
 
         self.random_var_1 = int(
-            random_var_w * np.diff(self.window_1)
+            random_var_w * np.diff(self.window_1)[0]
         )  # calculate the random variability of window1, i.e. the maximum range of time they can be enlarged or shortened
-        self.random_var_2 = int(random_var_w * np.diff(self.window_2))  # same as above
-        self.random_var_3 = int(random_var_w * np.diff(self.window_3))  # same as above
+        self.random_var_2 = int(
+            random_var_w * np.diff(self.window_2)[0]
+        )  # same as above
+        self.random_var_3 = int(
+            random_var_w * np.diff(self.window_3)[0]
+        )  # same as above
 
         # automatically appends the appliance to the user's appliance list
         self.user._add_appliance_instance(self)
