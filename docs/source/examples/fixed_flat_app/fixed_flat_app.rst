@@ -70,14 +70,6 @@ number of days for generating the profiles:
     You will simulate 7 day(s) from 2023-01-01 00:00:00 until 2023-01-08 00:00:00
 
 
-.. parsed-literal::
-
-    c:\users\tahavorm\downloads\gitrepos\ramp\ramp\core\core.py:299: FutureWarning: 'T' is deprecated and will be removed in a future version. Please use 'min' instead of 'T'.
-      end=self.days[-1] + pd.Timedelta(1, "d") - pd.Timedelta(1, "T"),
-    c:\users\tahavorm\downloads\gitrepos\ramp\ramp\core\core.py:297: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
-      self.__datetimeindex = pd.date_range(
-
-
 .. code:: ipython3
 
     fixed_flat = school_case.generate_daily_load_profiles()
