@@ -1426,8 +1426,12 @@ class Appliance:
         self.random_var_1 = int(
             random_var_w * np.diff(self.window_1)[0]
         )  # calculate the random variability of window1, i.e. the maximum range of time they can be enlarged or shortened
-        self.random_var_2 = int(random_var_w * np.diff(self.window_2)[0])  # same as above
-        self.random_var_3 = int(random_var_w * np.diff(self.window_3)[0])  # same as above
+        self.random_var_2 = int(
+            random_var_w * np.diff(self.window_2)[0]
+        )  # same as above
+        self.random_var_3 = int(
+            random_var_w * np.diff(self.window_3)[0]
+        )  # same as above
 
         # automatically appends the appliance to the user's appliance list
         self.user._add_appliance_instance(self)
