@@ -27,11 +27,25 @@ By contributing to RAMP, e.g. through opening a pull request or submitting a pat
 
 To contribute changes:
 - Fork the project on GitHub
+- Follow the "Setup" steps below
 - Create a feature branch (e.g. named "add-this-new-feature") to work on in your fork
 - Add your name to the [AUTHORS](AUTHORS) file
 - Commit your changes to the feature branch
 - Push the branch to GitHub
 - On GitHub, create a new pull request from the feature branch
+
+### Setup
+
+1. Create a virtual environment and install the dev dependencies with
+
+        pip install -r dev_requirements.txt
+
+2. Install the pre-commit hooks with
+
+        pre-commit install
+
+   This will mainly make sure you can't commit if your code is not linted with black.
+   The pre-commit hook will check if your code is linted and if it is not it will simply lint it for you, you then only need to stage the changes made by the linter and commit again, as simple as that :)
 
 ### Pull requests
 
@@ -54,7 +68,7 @@ Please try to write clear commit messages. One-line messages are fine for small 
 
 ## Testing
 
-Testing is used by RAMP developers to make sure their new feature/bug fix is not breaking existing code. As RAMP is stochastic some tests are only qualitative, other unit tests are ran by GitHub Actions. 
+Testing is used by RAMP developers to make sure their new feature/bug fix is not breaking existing code. As RAMP is stochastic some tests are only qualitative, other unit tests are ran by GitHub Actions.
 
 Before running the tests locally, you need to install the testing dependencies
 
@@ -73,7 +87,7 @@ To run the qualitative test, you'll have to run
 from the root level of this repository.
 
 If you already ran this script, you will be asked if you want to overwrite the results files (if you decide not to, the results are not going to be regenerated from your latest code version). You should compare the results of your code and those saved from the latest stable version thanks to the image which is displayed after the script ran.
-   
+
 Ideally, the difference between reference and new results should be minimal and just due to the stochastic nature of the code. If more pronounced, it should be fully explainable based on the changes made to the code and aligned to the expectations of the developers (i.e. it should reflect a change in the output *wanted* and precisely *sought* with the commit in question).
 
 ### Unit tests

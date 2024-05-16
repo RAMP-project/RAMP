@@ -23,6 +23,7 @@ setup(
         "openpyxl >= 3.0.6",
         "tqdm",
         "plotly",
+        "multiprocess",
     ],
     # classifiers=[
     #     "Programming Language :: Python :: 3.7",
