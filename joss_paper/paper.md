@@ -35,6 +35,12 @@ authors:
   - name: Sergio Balderrama
     orcid: 
     affiliation: 7
+  - name: Johann Kraft
+    orcid: 
+    affiliation: 2
+  - name: Gokarna Dhungel
+    orcid: 
+    affiliation: 2
   - name: Sylvain Quoilin
     orcid: 
     affiliation: 4
