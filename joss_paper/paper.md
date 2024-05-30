@@ -12,7 +12,7 @@ authors:
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
   - name: Pierre-François Duc
-    orcid: 
+    orcid:
     affiliation: 2
   - name: Mohammad Amin Tahavori
     orcid: 0000-0002-7753-0523
@@ -22,27 +22,27 @@ authors:
     affiliation: "4,7"
   - name: Sarah Eckhoff
     orcid: 0000-0002-6168-4835
-    affiliation: 5  
+    affiliation: 5
   - name: Maria C.G. Hart
     orcid: 0000-0002-1031-9782
-    affiliation: 5  
+    affiliation: 5
   - name: Francesco Sanvito
     orcid: 0000-0002-9152-9684
     affiliation: 1
   - name: Gregory Ireland
-    orcid: 
+    orcid:
     affiliation: "2,6"
   - name: Sergio Balderrama
-    orcid: 
+    orcid:
     affiliation: 7
   - name: Johann Kraft
-    orcid: 
+    orcid:
     affiliation: 2
   - name: Gokarna Dhungel
-    orcid: 
+    orcid:
     affiliation: 2
   - name: Sylvain Quoilin
-    orcid: 
+    orcid:
     affiliation: 4
 affiliations:
  - name: TU Delft, Faculty of Technology, Policy and Management, Delft, The Netherlands
@@ -70,9 +70,9 @@ The urgency of the energy transition is leading to a rapid evolution of energy s
 
 # Statement of need
 
-RAMP is an open-source, Python-based software suite that enables the stochastic simulation of any user-driven energy demand time series based on few simple inputs. In fact, the software is designed to require only a basic understanding of the expected user activity patterns and owned appliances as inputs, to be provided in tabular (`.xlsx`) format. For instance, a minimal definition of a user type (e.g., a certain category of households) requires only information about which energy-consuming devices they own, when, on a typical day, they tend to use them, and for how long in total. Then, the software leverages stochasticity (using the `random` package) to make up for the lack of more detailed information and to account for the unpredictability of human behaviour (see Figure \ref{fig:example}). This way, RAMP allows generating and visualising synthetic data wherever detailed metered data does not exist, such as when designing systems in remote areas [@lombardi_generating:2019] or when looking at future electric-vehicle fleets [@mangipinto_impact:2022]. 
+RAMP is an open-source, Python-based software suite that enables the stochastic simulation of any user-driven energy demand time series based on few simple inputs. In fact, the software is designed to require only a basic understanding of the expected user activity patterns and owned appliances as inputs, to be provided in tabular (`.xlsx`) format. For instance, a minimal definition of a user type (e.g., a certain category of households) requires only information about which energy-consuming devices they own, when, on a typical day, they tend to use them, and for how long in total. Then, the software leverages stochasticity (using the `random` package) to make up for the lack of more detailed information and to account for the unpredictability of human behaviour (see Figure \ref{fig:example}). This way, RAMP allows generating and visualising synthetic data wherever detailed metered data does not exist, such as when designing systems in remote areas [@lombardi_generating:2019] or when looking at future electric-vehicle fleets [@mangipinto_impact:2022].
 
-This reliance on simple inputs distinguishes RAMP from comparable tools. For instance, other popular open-source demand simulation tools, such as CREST [crest_model:2015] and demod [barsanti_demod:2021], are based on extensive and context-specific input datasets from the UK and Germany, respectively, which populate the occupancy model at the core of their approach. Similarly, the Load Profile Generator model [pflugradt_loadprofilegenerator:2022], also openly available, implements a desire-driven behavioural simulation grounded on a psychological model based on German household data. Due to their data-driven nature, these models are not readily applicable to other similar contexts, such as different European countries, and are arguably inapplicable to cases, such as remote areas, with unique characteristics. Moreover, the heavy reliance on historical data serves poorly the need to accommodate the modelling of future, entirely new behaviours or devices. RAMP trades off the capability of providing detailed information about users' occupancy and activity, typical of the above data-driven models, for substantially greater modelling flexibility and context adaptability. Previous attempts at generating demand time series based on a similar approach as RAMP exist [mandelli_lpg:2016], but they are neither open-source nor capable of simulating non-electric or more sophisticated energy uses.
+This reliance on simple inputs distinguishes RAMP from comparable tools. For instance, other popular open-source demand simulation tools, such as CREST [@crest_model:2015] and demod [@barsanti_demod:2021], are based on extensive and context-specific input datasets from the UK and Germany, respectively, which populate the occupancy model at the core of their approach. Similarly, the Load Profile Generator model [@pflugradt_loadprofilegenerator:2022], also openly available, implements a desire-driven behavioural simulation grounded on a psychological model based on German household data. Due to their data-driven nature, these models are not readily applicable to other similar contexts, such as different European countries, and are arguably inapplicable to cases, such as remote areas, with unique characteristics. Moreover, the heavy reliance on historical data serves poorly the need to accommodate the modelling of future, entirely new behaviours or devices. RAMP trades off the capability of providing detailed information about users' occupancy and activity, typical of the above data-driven models, for substantially greater modelling flexibility and context adaptability. Previous attempts at generating demand time series based on a similar approach as RAMP exist [@mandelli_lpg:2016], but they are neither open-source nor capable of simulating non-electric or more sophisticated energy uses.
 
 In fact, RAMP features several degrees of customisation, enabling modellers to switch on or off features tailored to the needs of specific energy uses. For example, to represent the highly variable load profile of cooking appliances, which changes completely depending on which meal is cooked, the software allows defining many possible meal types with an associated cooking cycle; then, it leverages stochasticity to diversity which meals are cooked when. For heat-related energy uses that may be influenced by weather parameters, such as outdoor or groundwater temperature, it is possible to provide a time series of such parameters and define how they affect the default energy consumption. These and many other customisation options allow users to explicitly simulate radically different but equally plausible behaviour scenarios, including behaviours that may happen in the future and that have no relationship with past data, as a key ingredient to robust system design.
 
