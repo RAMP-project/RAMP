@@ -12,7 +12,7 @@ authors:
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
   - name: Pierre-François Duc
-    orcid:
+    orcid: 0000-0001-8698-8854
     affiliation: 2
   - name: Mohammad Amin Tahavori
     orcid: 0000-0002-7753-0523
