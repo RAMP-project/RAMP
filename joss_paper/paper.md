@@ -40,7 +40,7 @@ authors:
     affiliation: 2
   - name: Gokarna Dhungel
     orcid:
-    affiliation: 2
+    affiliation: "2,8"
   - name: Sylvain Quoilin
     orcid:
     affiliation: 4
@@ -59,6 +59,8 @@ affiliations:
    index: 6
  - name: Universidad Mayor de San Simon, Centro Universitario de Investigacion en Energias, Cochabamba, Bolivia
    index: 7
+ - name: University of Applied Sciences Nordhausen, Nordhausen, Germany
+   index: 8
 date: 6 December 2023
 bibliography: paper.bib
 
