@@ -373,11 +373,15 @@ class UseCase:
             )
         )
         # Rand_peak_enlarge is rounded to be at least 1 -> if rounded to 0 peak_time_range would be empty
-        rand_peak_enlarge = max(round(
-            math.fabs(
-                peak_time - random.gauss(mu=peak_time, sigma=peak_enlarge * peak_time)
-            )
-        ), 1)
+        rand_peak_enlarge = max(
+            round(
+                math.fabs(
+                    peak_time
+                    - random.gauss(mu=peak_time, sigma=peak_enlarge * peak_time)
+                )
+            ),
+            1,
+        )
         # The peak_time is randomly enlarged based on the calibration parameter peak_enlarge
         return np.arange(peak_time - rand_peak_enlarge, peak_time + rand_peak_enlarge)
 
