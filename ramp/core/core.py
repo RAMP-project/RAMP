@@ -1184,7 +1184,7 @@ class Appliance:
         self.random_var_1 = 0
         self.random_var_2 = 0
         self.random_var_3 = 0
-        self.daily_use = None
+        self.daily_use = np.zeros(1440)
         self.free_spots = None
 
         # attributes used for specific fixed and random cycles
