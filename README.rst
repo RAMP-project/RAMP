@@ -12,8 +12,7 @@
     :alt: Documentation Status
 
 .. image:: https://coveralls.io/repos/github/RAMP-project/RAMP/badge.svg?branch=main
-:target: https://coveralls.io/github/RAMP-project/RAMP?branch=main
-
+   :target: https://coveralls.io/github/RAMP-project/RAMP?branch=main
 
 .. image:: https://github.com/RAMP-project/RAMP/blob/main/docs/source/_static/RAMP_logo_basic.png?raw=true
    :width: 300
@@ -110,7 +109,7 @@ To have a look to the python files, you can download them using the `download_ex
 
    download_example("the specfic folder directory to save the files")
 
--  ``input_file_1.py``: represents the most basic electric appliances; it is 
+-  ``input_file_1.py``: represents the most basic electric appliances; it is
    an example of how to model lightbulbs, radios, TVs, fridges, and
    other electric appliances. This input file is based on the ones used
    for `the first RAMP publication <https://doi.org/10.1016/j.energy.2019.04.097>`__.
@@ -267,7 +266,7 @@ we use a more compact formulation:
     random_var_w=0.35 # 35% randomness assigned to the size of the functioning windows
     )
 
-At this point, we can group our different users into a "use case" and run the simulation, 
+At this point, we can group our different users into a "use case" and run the simulation,
 for instance for a whole year.
 
 .. code-block:: python
@@ -276,10 +275,10 @@ for instance for a whole year.
    whole_year_profile = use_case.generate_daily_load_profiles()
 
 Here is your first load for a community including two types of housholds,
-for a total of 23 individual users. Of course, more variations and many more 
-features are possible! For instance, you can simulate loads even for 
-an individual appliance or user. In addition, you can use in-built plotting 
-functionalities to explore your results. Check out the documentation 
+for a total of 23 individual users. Of course, more variations and many more
+features are possible! For instance, you can simulate loads even for
+an individual appliance or user. In addition, you can use in-built plotting
+functionalities to explore your results. Check out the documentation
 for all the possibilities.
 
 Contributing
