@@ -51,7 +51,7 @@ def run_usecase(
         )
         usecase.initialize(num_days=num_days)
         usecase.load(fname)
-        Profiles_list = usecase.generate_daily_load_profiles()
+        Profiles_list = usecase.generate_daily_load_profiles(flat=False)
 
         if plot is True:
             # TODO use new plotting

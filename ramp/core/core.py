@@ -43,6 +43,9 @@ def single_appliance_daily_load_profile(args):
     return args[0], app.daily_use
 
 
+warnings.simplefilter("always", DeprecationWarning)
+
+
 class UseCase:
     def __init__(
         self,
@@ -52,6 +55,7 @@ class UseCase:
         date_end: str = None,
         parallel_processing: bool = False,
         peak_enlarge: float = 0.15,
+        random_seed: int = None,
     ):
         """Creates a UseCase instance for gathering a list of User instances which own Appliance instances
 
@@ -69,6 +73,8 @@ class UseCase:
             if set True, the profiles will be generated in parallel rather than sequencially
         peak_enlarge: float, optional
             percentage random enlargement or reduction of peak time range length, used in UseCase.calc_peak_time_range
+        random_seed: int, optional
+            specify seed for the random number generator to exactly reproduce results
 
         """
         self.name = name
@@ -89,6 +95,7 @@ class UseCase:
         self.__num_days = None
         self.__datetimeindex = None
         self.daily_profiles = None
+        self.random_seed = random_seed
 
         self.appliances = []
         self.users = []
@@ -99,6 +106,10 @@ class UseCase:
         self.collect_appliances_from_users()
         if self.date_start is not None and self.date_end is not None:
             self.initialize()
+
+        # Set global random seed if it is specified
+        if self.random_seed:
+            random.seed(self.random_seed)
 
     @property
     def date_start(self):
@@ -289,6 +300,11 @@ class UseCase:
                 print(
                     f"You will simulate {self.__num_days} day(s) from {self.days[0]} until {self.days[-1]+datetime.timedelta(days=1)}"
                 )
+
+            # Verify that each appliance has long enough power data for the simulated time
+            for app in self.appliances:
+                app.check_power_values(self.__num_days)
+
             if peak_enlarge is not None:
                 self.peak_enlarge = peak_enlarge
             else:
@@ -296,8 +312,8 @@ class UseCase:
             # format datetimeindex in minutes
             self.__datetimeindex = pd.date_range(
                 start=self.days[0],
-                end=self.days[-1] + pd.Timedelta(1, "d") - pd.Timedelta(1, "T"),
-                freq="T",
+                end=self.days[-1] + pd.Timedelta(1, "d") - pd.Timedelta(1, "min"),
+                freq="min",
             )
 
     @property
@@ -357,11 +373,15 @@ class UseCase:
             )
         )
         # Rand_peak_enlarge is rounded to be at least 1 -> if rounded to 0 peak_time_range would be empty
-        rand_peak_enlarge = max(round(
-            math.fabs(
-                peak_time - random.gauss(mu=peak_time, sigma=peak_enlarge * peak_time)
-            )
-        ), 1)
+        rand_peak_enlarge = max(
+            round(
+                math.fabs(
+                    peak_time
+                    - random.gauss(mu=peak_time, sigma=peak_enlarge * peak_time)
+                )
+            ),
+            1,
+        )
         # The peak_time is randomly enlarged based on the calibration parameter peak_enlarge
         return np.arange(peak_time - rand_peak_enlarge, peak_time + rand_peak_enlarge)
 
@@ -654,13 +674,79 @@ class User:
             []
         )  # each instance of User (i.e. each user class) has its own list of Appliances
 
+    def __str__(self):
+        try:
+            return self.save()[
+                ["user_name", "num_users", "name", "number", "power"]
+            ].to_string()
+
+        except Exception:
+            return f"""
+user_name: {self.user_name} \n
+num_users: {self.num_users} \n
+appliances: no appliances assigned to the user.
+                    """
+
     def __repr__(self):
-        return self.save()[
-            ["user_name", "num_users", "name", "number", "power"]
-        ].to_string()
+        return self.__str__()
+
+    def _add_appliance_instance(self, appliances):
+        if isinstance(appliances, Appliance):
+            appliances = [appliances]
+        for app in appliances:
+            if not isinstance(app, Appliance):
+                raise TypeError(
+                    f"You are trying to add an object of type {type(app)} as an appliance to the user {self.user_name}"
+                )
+            if app not in self.App_list:
+                self.App_list.append(app)
 
     def add_appliance(self, *args, **kwargs):
-        """adds an appliance to the user category with all the appliance characteristics in a single function
+        """Adds an appliance to the user category with all the appliance characteristics in a single function
+
+        Parameters
+        ----------
+        number : int, optional
+            number of appliances of the specified kind, by default 1
+
+        power : Union[float.pd.DataFrame], optional
+            Power rating of appliance (average). If the appliance has variant daily power, a series (with the size of 366) can be passed., by default 0
+
+        num_windows : int [1,2,3], optional
+            Number of distinct time windows, by default 1
+
+        func_time : int[0,1440], optional
+            total time (minutes) the appliance is on during the day (not dependant on windows). Acceptable values are in range 0 to 1440, by default 0
+
+        time_fraction_random_variability : Percentage, optional
+            percentage of total time of use that is subject to random variability. For time (not for windows), randomizes the total time the appliance is on, by default 0
+
+        func_cycle : int[0,1440], optional
+            minimum time(minutes) the appliance is kept on after switch-on event, by default 1
+
+        fixed : str, optional
+            if 'yes', all the 'n' appliances of this kind are always switched-on together, by default "no"
+
+        fixed_cycle : int{0,1,2,3,4}, optional
+            Number of duty cycle, 0 means continuous power, if not 0 you have to fill the cw (cycle window) parameter (you may define up to 3 cws), by default 0
+
+        occasional_use : Percentage, optional
+            Defines how often the appliance is used, e.g. every second day will be 0.5, by default 1
+
+        flat : str{'yes','no'}, optional
+            allows to model appliances that are not subject to any kind of random variability, such as public lighting, by default "no"
+
+        thermal_p_var : Percentage, optional
+            Range of change of the power of the appliance (e.g. shower not taken at same temparature) or for the power of duty cycles (e.g. for a cooker, AC, heater if external temperature is different…), by default 0
+
+        pref_index : int{0,1,2,3}, optional
+            defines preference index for association with random User daily preference behaviour.This number must be smaller or equal to the value input in user_preference, by default 0
+
+        wd_we_type : int{0,1,2}, optional
+            Specify whether the appliance is used only on weekdays (0), weekend (1) or the whole week (2), by default 2
+
+        name : str, optional
+            the name of the appliance, by default ""
 
 
         Returns
@@ -671,7 +757,13 @@ class User:
 
         # parse the args into the kwargs
         if len(args) > 0:
+            if isinstance(args[0], Appliance):
+                # if the first argument is an Appliance instance, it is assumed all arguments are
+                # if this is not the case, error will be thrown by _add_appliance_instance method
+                self._add_appliance_instance(args)
+                return
             for a_name, a_val in zip(APPLIANCE_ARGS, args):
+                # TODO here we could do validation of the arguments
                 kwargs[a_name] = a_val
 
         # collects windows arguments
@@ -696,6 +788,8 @@ class User:
             app.windows(**windows_args)
         for i in duty_cycle_parameters:
             app.specific_cycle(i, **duty_cycle_parameters[i])
+
+        self._add_appliance_instance(app)
 
         return app
 
@@ -727,7 +821,7 @@ class User:
         return answer
 
     def save(self, filename: str = None) -> Union[pd.DataFrame, None]:
-        """Saves/returns the model databas including allappliances as a single pd.DataFrame or excel file.
+        """Saves/returns the model database including all appliances as a single pd.DataFrame or excel file.
 
         Parameters
         ----------
@@ -849,6 +943,12 @@ class User:
         ------
         refer to Appliance class docs
         """
+
+        warnings.warn(
+            "This function is deprecated and not supported since version v0.4.0. Instead use the add_appliance method.",
+            DeprecationWarning,
+        )
+
         return self.add_appliance(
             number=number,
             power=power,
@@ -887,9 +987,6 @@ class User:
         np.array
             load profile for the requested day
         """
-
-        if prof_i not in range(366):
-            raise ValueError(f"prof_i should be an integer in range of 0 to 364")
 
         if peak_time_range is None:
             if self.usecase is None:
@@ -944,9 +1041,6 @@ class User:
         ------
         Each single load profile has its own separate randomisation
         """
-
-        if prof_i not in range(366):
-            raise ValueError(f"prof_i should be an integer in range of 0 to 364")
 
         self.load = np.zeros(1440)  # initialise empty load for User instance
         for _ in range(self.num_users):
@@ -1065,19 +1159,17 @@ class Appliance:
         self.pref_index = pref_index
         self.wd_we_type = wd_we_type
 
+        self.__constant_power = False
+
         if isinstance(power, pd.DataFrame):
-            if len(power) >= self.user.num_days:
-                power = power.values[:, 0]
-            else:
-                raise ValueError(
-                    f"Wrong number of power values for appliance '{self.name}'. Number should be at least {self.user.num_days} values or a constant value."
-                )
+            power = power.values[:, 0]
 
         elif isinstance(power, str):
             power = pd.read_json(power).values[:, 0]
 
         elif isinstance(power, (float, int)):
             power = power * np.ones(self.user.num_days + 1)
+            self.__constant_power = True
 
         else:
             raise ValueError(f"Wrong data type for power of appliance '{self.name}'.")
@@ -1092,7 +1184,7 @@ class Appliance:
         self.random_var_1 = 0
         self.random_var_2 = 0
         self.random_var_3 = 0
-        self.daily_use = None
+        self.daily_use = np.zeros(1440)
         self.free_spots = None
 
         # attributes used for specific fixed and random cycles
@@ -1127,6 +1219,18 @@ class Appliance:
         # attribute used to know if a switch on event falls within a given duty cycle window
         # if it is 0, then no switch on events happen within any duty cycle windows
         self.current_duty_cycle_id = 0
+
+    def check_power_values(self, num_days):
+        if len(self.power) < num_days:
+            if self.__constant_power is True:
+                self.power = self.power[0] * np.ones(num_days + 1)
+                warnings.warn(
+                    f"Appliance {self.name} of user {self.user.user_name} of constant power had its power timeseries updated to match total number of days of the usecase {self.user.usecase.name}"
+                )
+            else:
+                raise ValueError(
+                    f"Wrong number of values for appliance '{self.name}''s power of user {self.user.user_name}: {len(self.power)}. Number of values should at least match the total number of days: {num_days}. Alternatively the power of the appliance can be set to a constant value."
+                )
 
     def save(self) -> pd.DataFrame:
         """returns a pd.DataFrame containing the appliance data
@@ -1210,7 +1314,7 @@ class Appliance:
         answer = np.array([])
         for attribute in APPLIANCE_ATTRIBUTES:
             if hasattr(self, attribute) and hasattr(other_appliance, attribute):
-                np.append(
+                answer = np.append(
                     answer,
                     [getattr(self, attribute) == getattr(other_appliance, attribute)],
                 )
@@ -1218,7 +1322,7 @@ class Appliance:
                 hasattr(self, attribute) is False
                 and hasattr(other_appliance, attribute) is False
             ):
-                np.append(answer, True)
+                answer = np.append(answer, [True])
             else:
                 if hasattr(self, attribute) is False:
                     print(f"{attribute} of appliance {self.name} is not assigned")
@@ -1226,7 +1330,7 @@ class Appliance:
                     print(
                         f"{attribute} of appliance {other_appliance.name} is not assigned"
                     )
-                np.append(answer, False)
+                answer = np.append(answer, [False])
         return answer.all()
 
     def windows(
@@ -1324,13 +1428,17 @@ class Appliance:
         )  # same as above for window3
 
         self.random_var_1 = int(
-            random_var_w * np.diff(self.window_1)
+            random_var_w * np.diff(self.window_1)[0]
         )  # calculate the random variability of window1, i.e. the maximum range of time they can be enlarged or shortened
-        self.random_var_2 = int(random_var_w * np.diff(self.window_2))  # same as above
-        self.random_var_3 = int(random_var_w * np.diff(self.window_3))  # same as above
-        self.user.App_list.append(
-            self
-        )  # automatically appends the appliance to the user's appliance list
+        self.random_var_2 = int(
+            random_var_w * np.diff(self.window_2)[0]
+        )  # same as above
+        self.random_var_3 = int(
+            random_var_w * np.diff(self.window_3)[0]
+        )  # same as above
+
+        # automatically appends the appliance to the user's appliance list
+        self.user._add_appliance_instance(self)
 
         if self.fixed_cycle == 1:
             self.cw11 = self.window_1
@@ -1522,13 +1630,13 @@ class Appliance:
             Power rating for first part of first duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         t_11 : int[0,1440], optional
-            Duration (minutes) of first part of first duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+            Duration (minutes) of first part of first duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         p_12 : int, float, optional
             Power rating for second part of first duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         t_12 : int[0,1440], optional
-            Duration (minutes) of second part of first duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+            Duration (minutes) of second part of first duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         r_c1 : Percentage [0,1], optional
             randomization of the duty cycle parts duration. There will be a uniform random variation around t_i1 and t_i2. If this parameter is set to 0.1, then t_i1 and t_i2 will be randomly reassigned between 90% and 110% of their initial value; 0 means no randomisation, by default 0
@@ -1564,13 +1672,13 @@ class Appliance:
             Power rating for first part of second duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         t_21 : int[0,1440], optional
-            Duration (minutes) of first part of second duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+            Duration (minutes) of first part of second duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         p_22 : int, float, optional
             Power rating for second part of second duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         t_22 : int[0,1440], optional
-            Duration (minutes) of second part of second duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+            Duration (minutes) of second part of second duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
         r_c2 : Percentage [0,1], optional
             randomization of the duty cycle parts duration. There will be a uniform random variation around t_i1 and t_i2. If this parameter is set to 0.1, then t_i1 and t_i2 will be randomly reassigned between 90% and 110% of their initial value; 0 means no randomisation, by default 0
@@ -1602,25 +1710,25 @@ class Appliance:
 
         Parameters
         ----------
-        p_21 : float, optional
+        p_31 : float, optional
             Power rating for first part of third duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
-        t_21 : int[0,1440], optional
-            Duration (minutes) of first part of third duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+        t_31 : int[0,1440], optional
+            Duration (minutes) of first part of third duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
-        p_22 : int, float, optional
+        p_32 : int, float, optional
             Power rating for second part of third duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
-        t_22 : int[0,1440], optional
-            Duration (minutes) of second part of third duty cycle. Only necessary if fixed_cycle is set to I or greater, by default 0
+        t_32 : int[0,1440], optional
+            Duration (minutes) of second part of third duty cycle. Only necessary if fixed_cycle is set to 1 or greater, by default 0
 
-        r_c2 : Percentage [0,1], optional
+        r_c3 : Percentage [0,1], optional
             randomization of the duty cycle parts duration. There will be a uniform random variation around t_i1 and t_i2. If this parameter is set to 0.1, then t_i1 and t_i2 will be randomly reassigned between 90% and 110% of their initial value; 0 means no randomisation, by default 0
 
-        cw21 : Iterable, optional
+        cw31 : Iterable, optional
             Window time range for the first part of third duty cycle number (not neccessarily linked to the overall time window), by default None
 
-        cw22 : Iterable, optional
+        cw32 : Iterable, optional
             Window time range for the first part of third duty cycle number (not neccessarily linked to the overall time window), by default None, by default None
         """
         self.p_31 = p_31
@@ -1820,7 +1928,7 @@ class Appliance:
                     1,
                     math.ceil(
                         random.gauss(
-                            mu=(self.number * mu_peak + 0.5),
+                            mu=(self.number * mu_peak),
                             sigma=(s_peak * self.number * mu_peak),
                         )
                     ),

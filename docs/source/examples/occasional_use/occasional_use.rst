@@ -8,8 +8,8 @@ iron, a stereo, printers, etc.
 Within RAMP, the user may specify the probability of using an appliance
 on the daily mix with a parameter called **occasional_use**.
 
-When ``occasional_use = 0``, the appliance is always present in the mix,
-and when ``occasional_use = 1``, the appliance is never present. Any
+When ``occasional_use = 1``, the appliance is always present in the mix,
+and when ``occasional_use = 0``, the appliance is never present. Any
 in-between values will lead to a probabilistic calculation to decide
 whether the appliance is used or not on a given day.
 
@@ -20,7 +20,8 @@ occasionally \* A school that uses the computer every day
 .. code:: ipython3
 
     # importing functions
-    from ramp import User, UseCase, get_day_type
+    from ramp import User, UseCase
+    import matplotlib.pyplot as plt
     import pandas as pd
 
 Creating user categories and appliances
@@ -38,9 +39,10 @@ Creating user categories and appliances
         number=1,
         power=50,
         num_windows=1,
-        func_time=210,
+        func_time=210,  # 3.5 hours
+        func_cycle=210,
         occasional_use=0.5,  # 50% chance of occasional use,
-        window_1=[510, 750],
+        window_1=[480, 750],  # start from 8AM
     )
 
 .. code:: ipython3
@@ -50,92 +52,62 @@ Creating user categories and appliances
         number=1,
         power=50,
         num_windows=1,
-        func_time=210,
-        time_fraction_random_variability=0.2,
-        func_cycle=10,
+        func_time=210,  # 3.5 hours
+        func_cycle=210,
         occasional_use=1,  # always present in the mix of appliances,
-        window_1=[510, 750],
+        window_1=[480, 750],  # start from 8AM
     )
-
-.. code:: ipython3
-
-    # Checking the maximum profile of the two appliances
-    
-    max_profile_c1 = pd.DataFrame(computer_0.maximum_profile, columns=[computer_0.name])
-    max_profile_c2 = pd.DataFrame(computer_1.maximum_profile, columns=[computer_1.name])
-    
-    max_profile_c1.plot()
-    max_profile_c2.plot()
-
-
-
-
-.. parsed-literal::
-
-    <Axes: >
-
-
-
-
-.. image:: output_6_1.png
-
-
-
-.. image:: output_6_2.png
-
 
 Generating profiles
 ~~~~~~~~~~~~~~~~~~~
 
+As the profiles of each specific User category is important, we will use
+the User object profile genertor methods for 5 consecutive days:
+
 .. code:: ipython3
 
-    use_case = UseCase(users=[household, school])
-    use_case.initialize(5)
+    number_of_days = 5
+    household_profiles = []
+    school_profiles = []
+    
+    for day in range(1, number_of_days + 1):
+        household_profiles.extend(household.generate_single_load_profile(prof_i=day))
+    
+        school_profiles.extend(school.generate_single_load_profile(prof_i=day))
 
 
 .. parsed-literal::
 
-    You will simulate 5 day(s) from 2023-12-01 00:00:00 until 2023-12-06 00:00:00
+    You are generating ramp demand from a User not bounded to a UseCase instance, a default one has been created for you 
+    You are generating ramp demand from a User not bounded to a UseCase instance, a default one has been created for you 
 
 
 .. code:: ipython3
 
-    for day_idx, day in enumerate(use_case.days):
-        household_profile = household.generate_single_load_profile(
-            prof_i=day_idx, day_type=get_day_type(day)
-        )
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(8, 4))
     
-        school_profile = school.generate_single_load_profile(
-            prof_i=day_idx, day_type=get_day_type(day)
-        )
     
-        pd.DataFrame(
-            data=[household_profile, school_profile],
-            columns=range(1440),
-            index=[household.user_name, school.user_name],
-        ).T.plot(title=f"day - {day}")
+    i = 0
+    for name, df in dict(
+        household_profiles=pd.DataFrame(household_profiles),
+        school_profiles=pd.DataFrame(school_profiles),
+    ).items():
+        df.plot(ax=axes[i], legend=False)
+        axes[i].set_title(name)
+        i += 1
+    
+    plt.tight_layout()
+    plt.show()
 
 
 
-.. image:: output_9_0.png
-
-
-
-.. image:: output_9_1.png
-
-
-
-.. image:: output_9_2.png
-
-
-
-.. image:: output_9_3.png
-
-
-
-.. image:: output_9_4.png
+.. image:: output_8_0.png
 
 
 As it can be seen from the figures, the computer is always present in
 the school’s appliance mix while, for the household, it is only
 occasionally present.
+
+
+
+:download:`Link to the jupyter notebook file </../notebooks/occasional_use.ipynb>`.

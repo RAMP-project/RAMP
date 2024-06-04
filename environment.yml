@@ -1,6 +1,6 @@
 name: ramp
 dependencies:
-- python=3.8
+- python=3.10
 - pip=21.0.1
 - pip:
    - -r requirements.txt

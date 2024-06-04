@@ -1,7 +1,7 @@
 
-*******************
+*****************
 RAMP Introduction
-*******************
+*****************
 
-.. include:: ../../README.rst
+.. include:: readme.rst
 

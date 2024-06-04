@@ -5,9 +5,9 @@ name: RAMP tests
 
 on:
   push:
-    branches: [ "main", "development" ]
+    branches: [ "main", "development", "joss-paper"]
   pull_request:
-    branches: [ "main", "development" ]
+    branches: [ "main", "development", "joss-paper"]
 
 permissions:
   contents: read
@@ -26,7 +26,7 @@ jobs:
     - name: Install black
       run: |
         python -m pip install --upgrade pip
-        pip install black
+        pip install black[jupyter]==24.4.2
     - name: Lint with black
       run: |
         black . --check
@@ -37,4 +37,15 @@ jobs:
         pip install -r tests/requirements.txt
     - name: Test with pytest
       run: |
-        pytest tests/
+        coverage run -m pytest tests/
+
+    - name: Check test coverage
+      run: |
+        coverage report -m
+
+    - name: Report to coveralls
+      run: |
+        coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALL_TOKEN }}
+        COVERALLS_SERVICE_NAME: github

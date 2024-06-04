@@ -13,7 +13,7 @@ setup(
     version=__version__,
     packages=find_packages(),
     license="European Union Public License 1.2",
-    python_requires=">=3.6.0",
+    python_requires="<=3.11",
     package_data={"": ["*.txt", "*.dat", "*.doc", "*.rst", "*.xlsx", "*.csv"]},
     install_requires=[
         "pandas >= 1.3.3",
@@ -23,6 +23,7 @@ setup(
         "openpyxl >= 3.0.6",
         "tqdm",
         "plotly",
+        "multiprocess",
     ],
     # classifiers=[
     #     "Programming Language :: Python :: 3.7",
@@ -39,6 +40,7 @@ setup(
     entry_points={
         "console_scripts": [
             "ramp=ramp.cli:main",
+            "ramp_convert=ramp.ramp_convert_old_input_files:cli",
         ],
     },
 )
