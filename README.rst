@@ -310,5 +310,4 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 
 .. note::
-
-   This project is under active development!
+   This project is actively maintained and developed. This means that while we provide stable and reliable software releases, we keep developing new features and improvements for upcoming, upgraded versions    of the software.
