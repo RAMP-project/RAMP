@@ -1888,14 +1888,28 @@ class Appliance:
                     self.current_duty_cycle_id = 3
                     duty_cycle_duration = len(self.random_cycle3)
                 else:
-                    print(
-                        f"The app {self.name} has duty cycle option on, however the switch on event fell outside the provided duty cycle windows"
+                    # previously duty_cycle3 was always considered as default if neither duty_cycle1 nor duty_cycle2
+                    # got selected. If the switch on window does not fall within any duty cycle we do not assign it
+                    # to duty_cycle3 by default, rather we pick another switch on event and we notify the user we
+                    # did so. That way, in case this warning is shown too often, it can indicate to the user there
+                    # is some peculiar behavior for this appliance
+                    warnings.warn(
+                        f"The app {self.name} has duty cycle option on (with {self.fixed_cycle} cycle(s)). However, the switch on window [{switch_on}, {switch_on + len(indexes)}] fell outside the provided duty cycle windows: "
+                        + "cw11 "
+                        + str(self.cw11)
+                        + ", cw12 "
+                        + str(self.cw12)
+                        + ", cw21 "
+                        + str(self.cw21)
+                        + ", cw22 "
+                        + str(self.cw22)
+                        + ", cw31 "
+                        + str(self.cw31)
+                        + ", cw32 "
+                        + str(self.cw32)
+                        + ". Picking another random switch on event. You probably see this warning because your window of use is the same as the duty cycle window and the random variability of the windows of use is greater than zero. If you see this warning only once, no need to worry, this is inherent to stochasticity."
                     )
-                    # TODO previously duty_cycle3 was always considered as default if the evaluate proxy did neither
-                    #  get selected by duty_cycle1 nor duty_cycle2, for default is kept but not silently anymore in
-                    #  order to see wheather this is an issue or not
-                    self.current_duty_cycle_id = 3
-                    duty_cycle_duration = len(self.random_cycle3)
+                    return self.rand_switch_on_window(rand_time)
 
                 if (
                     indexes.size > duty_cycle_duration
