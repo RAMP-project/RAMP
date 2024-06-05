@@ -1870,20 +1870,20 @@ class Appliance:
                 evaluate = np.round(np.mean(indexes)) if indexes.size > 0 else 0
                 # selects the proper duty cycle
                 if (
-                    self.cw11[0] <= evaluate < self.cw11[1]
-                    or self.cw12[0] <= evaluate < self.cw12[1]
+                    self.cw11[0] <= evaluate <= self.cw11[1]
+                    or self.cw12[0] <= evaluate <= self.cw12[1]
                 ):
                     self.current_duty_cycle_id = 1
                     duty_cycle_duration = len(self.random_cycle1)
                 elif (
-                    self.cw21[0] <= evaluate < self.cw21[1]
-                    or self.cw22[0] <= evaluate < self.cw22[1]
+                    self.cw21[0] <= evaluate <= self.cw21[1]
+                    or self.cw22[0] <= evaluate <= self.cw22[1]
                 ):
                     self.current_duty_cycle_id = 2
                     duty_cycle_duration = len(self.random_cycle2)
                 elif (
-                    self.cw31[0] <= evaluate < self.cw31[1]
-                    or self.cw32[0] <= evaluate < self.cw32[1]
+                    self.cw31[0] <= evaluate <= self.cw31[1]
+                    or self.cw32[0] <= evaluate <= self.cw32[1]
                 ):
                     self.current_duty_cycle_id = 3
                     duty_cycle_duration = len(self.random_cycle3)
