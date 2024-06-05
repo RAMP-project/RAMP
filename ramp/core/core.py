@@ -28,6 +28,7 @@ from ramp.core.utils import (
     random_choice,
     read_input_file,
     within_peak_time_window,
+    range_within_window,
 )
 from ramp.post_process.post_process import Plot
 
@@ -1867,24 +1868,22 @@ class Appliance:
             if (
                 self.fixed_cycle > 0
             ):  # evaluates if the app has some duty cycles to be considered
-                evaluate = np.round(np.mean(indexes)) if indexes.size > 0 else 0
+                indexes_low = indexes[0]
+                indexes_high = indexes[-1]
                 # selects the proper duty cycle
-                if (
-                    self.cw11[0] <= evaluate <= self.cw11[1]
-                    or self.cw12[0] <= evaluate <= self.cw12[1]
-                ):
+                if range_within_window(
+                    indexes_low, indexes_high, self.cw11
+                ) or range_within_window(indexes_low, indexes_high, self.cw12):
                     self.current_duty_cycle_id = 1
                     duty_cycle_duration = len(self.random_cycle1)
-                elif (
-                    self.cw21[0] <= evaluate <= self.cw21[1]
-                    or self.cw22[0] <= evaluate <= self.cw22[1]
-                ):
+                elif range_within_window(
+                    indexes_low, indexes_high, self.cw21
+                ) or range_within_window(indexes_low, indexes_high, self.cw22):
                     self.current_duty_cycle_id = 2
                     duty_cycle_duration = len(self.random_cycle2)
-                elif (
-                    self.cw31[0] <= evaluate <= self.cw31[1]
-                    or self.cw32[0] <= evaluate <= self.cw32[1]
-                ):
+                elif range_within_window(
+                    indexes_low, indexes_high, self.cw31
+                ) or range_within_window(indexes_low, indexes_high, self.cw32):
                     self.current_duty_cycle_id = 3
                     duty_cycle_duration = len(self.random_cycle3)
                 else:
