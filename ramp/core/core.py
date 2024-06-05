@@ -699,6 +699,8 @@ appliances: no appliances assigned to the user.
                     f"You are trying to add an object of type {type(app)} as an appliance to the user {self.user_name}"
                 )
             if app not in self.App_list:
+                if app.name == "":
+                    app.name = f"appliance_{len(self.App_list) + 1}"
                 self.App_list.append(app)
 
     def add_appliance(self, *args, **kwargs):
