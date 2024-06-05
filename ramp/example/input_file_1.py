@@ -219,7 +219,7 @@ Ho_Fridge2.specific_cycle_1(150, 20, 5, 10)
 Ho_Fridge2.specific_cycle_2(150, 15, 5, 15)
 Ho_Fridge2.specific_cycle_3(150, 10, 5, 20)
 Ho_Fridge2.cycle_behaviour(
-    [580, 1200], [0, 0], [420, 579], [0, 0], [0, 299], [1201, 1440]
+    [580, 1200], [0, 0], [420, 579], [0, 0], [0, 419], [1201, 1440]
 )
 
 Ho_Fridge3 = Hospital.add_appliance(1, 150, 1, 1440, 0.1, 30, "yes", 3, name="fridge3")
@@ -228,7 +228,7 @@ Ho_Fridge3.specific_cycle_1(150, 20, 5, 10)
 Ho_Fridge3.specific_cycle_2(150, 15, 5, 15)
 Ho_Fridge3.specific_cycle_3(150, 10, 5, 20)
 Ho_Fridge3.cycle_behaviour(
-    [580, 1200], [0, 0], [420, 479], [0, 0], [0, 419], [1201, 1440]
+    [580, 1200], [0, 0], [420, 579], [0, 0], [0, 419], [1201, 1440]
 )
 
 Ho_PC = Hospital.add_appliance(2, 50, 2, 300, 0.1, 10, name="PC")
