@@ -91,7 +91,7 @@ from ramp.example.input_file_1 import User_list as User_list1
 from ramp.example.input_file_2 import User_list as User_list2
 from ramp.example.input_file_3 import User_list as User_list3
 
-TEST_OUTPUT_PATH = os.path.join(pp.BASE_PATH, "test", "results")
+TEST_OUTPUT_PATH = os.path.join(".", "ramp/test", "results")
 
 remove_old_tests = False
 for file in os.listdir(TEST_OUTPUT_PATH):
@@ -108,11 +108,12 @@ for file in os.listdir(TEST_OUTPUT_PATH):
             os.remove(os.path.join(TEST_OUTPUT_PATH, file))
 
 for i, ul in enumerate([User_list1, User_list2, User_list3]):
-    of_path = os.path.join(pp.BASE_PATH, "test", "results", f"output_file_{i + 1}.csv")
+    of_path = os.path.join(".", "ramp/test", "results", f"output_file_{i + 1}.csv")
     if os.path.exists(of_path) is False:
         uc = UseCase(
             users=ul,
             parallel_processing=False,
+            random_seed=True
         )
         uc.initialize(peak_enlarge=0.15, num_days=30)
 
@@ -121,7 +122,7 @@ for i, ul in enumerate([User_list1, User_list2, User_list3]):
         pp.export_series(Profiles_list, ofname=of_path)
 
 test_output(
-    os.path.join(pp.BASE_PATH, "test", "results"),
-    os.path.join(pp.BASE_PATH, "test"),
+    os.path.join(".", "ramp/test", "results"),
+    os.path.join(".", "ramp/test"),
     num_input_files=3,
 )
