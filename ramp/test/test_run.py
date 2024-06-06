@@ -72,7 +72,6 @@ def test_output(results_folder, test_folder, num_input_files=3, num_days=30):
             axes[n].set_xmargin(0)
             axes[n].set_ymargin(0)
 
-    axes[n].get_shared_x_axes().join(axes[n], axes[n - 1], axes[n - 2])
     axes[n - 1].legend()
     axes[n - 1].set_xticklabels([])
     axes[n - 2].set_xticklabels([])
