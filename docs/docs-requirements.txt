@@ -13,5 +13,6 @@ ipykernel
 sphinx-autobuild
 sphinx-copybutton
 sphinx_wagtail_theme
+myst_parser
 nbformat
 nbconvert

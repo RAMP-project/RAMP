@@ -57,7 +57,6 @@ project = "RAMP"
 copyright = "2022, Author List"
 author = "Author List"
 
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -76,8 +75,15 @@ extensions = [
     "sphinx_copybutton",
     "sphinx.ext.autosectionlabel",
     "sphinx_wagtail_theme",
+    "sphinx_copybutton",
+    "myst_parser",
 ]
 
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
