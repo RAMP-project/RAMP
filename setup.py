@@ -13,7 +13,7 @@ setup(
     version=__version__,
     packages=find_packages(),
     license="European Union Public License 1.2",
-    python_requires="<=3.11",
+    python_requires="<3.12",
     package_data={"": ["*.txt", "*.dat", "*.doc", "*.rst", "*.xlsx", "*.csv"]},
     install_requires=[
         "pandas >= 1.3.3",
