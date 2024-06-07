@@ -12,19 +12,50 @@
 #
 import os
 import sys
-import sphinx_pdj_theme
+
 
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath(".."))
 sys.path.insert(0, os.path.abspath("../.."))
 sys.path.insert(0, os.path.abspath("../../.."))
 
+from notebooks_convert import update_notebooks_rst_files
+
+update_notebooks_rst_files()
+
+
+def copy_readme():
+    with open("../../README.rst", "r", encoding="utf8") as fp:
+        data = fp.readlines()
+
+    # Replace the reference to contributing guidelines with an internal link
+    idx = data.index(
+        "To contribute changes please consult our `Contribution guidelines <https://github.com/RAMP-project/RAMP/blob/main/CONTRIBUTING.md>`_\n"
+    )
+    data[idx] = (
+        "To contribute changes please consult our `Contribution guidelines <contributing.html>`_\n"
+    )
+    with open("readme.rst", "w") as fp:
+        fp.writelines(data)
+
+
+def copy_contributing():
+    with open("../../CONTRIBUTING.md", "r", encoding="utf8") as fp:
+        data = fp.readlines()
+
+    # Change the title of the file
+    data[0] = "# Contribute\n"
+    with open("contributing.md", "w") as fp:
+        fp.writelines(data)
+
+
+copy_readme()
+copy_contributing()
 # -- Project information -----------------------------------------------------
 
 project = "RAMP"
 copyright = "2022, Author List"
 author = "Author List"
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -43,7 +74,16 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx_copybutton",
     "sphinx.ext.autosectionlabel",
+    "sphinx_wagtail_theme",
+    "sphinx_copybutton",
+    "myst_parser",
 ]
+
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -59,8 +99,12 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-extensions.append("sphinxjp.themes.basicstrap")
-html_theme = "basicstrap"
+
+
+html_theme = "sphinx_wagtail_theme"
+html_theme_options = dict(
+    project_name="RAMP Documentation",
+)
 # html_theme_path = [sphinx_pdj_theme.get_html_theme_path()]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

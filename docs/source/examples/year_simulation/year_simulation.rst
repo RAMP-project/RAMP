@@ -34,7 +34,7 @@ will generate a daily profile for 10 days of starting on 3rd January 2022
 
 .. code-block:: bash
 
-   ramp -i path-to-input-file --end-date 2022-02-09 -n
+   ramp -i path-to-input-file --end-date 2022-02-09 -n 10
 
 will generate a daily profile for 10 days ending on 9th Febuary 2022
 

@@ -11,9 +11,8 @@ sphinx >= 1.6.4
 nbsphinx
 ipykernel
 sphinx-autobuild
-sphinx-pdj-theme # TODO to comment
 sphinx-copybutton
-sphinxjp.themes.sphinxjp
-sphinxjp.themes.basicstrap
+sphinx_wagtail_theme
+myst_parser
 nbformat
 nbconvert

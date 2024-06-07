@@ -69,11 +69,26 @@ class TestConversion:
                 if old_user != new_user:
                     pytest.fail()
 
+    def test_convert_py_to_xlsx_command_line(self):
+        """Convert the 3 example .py input files to xlsx and compare each appliance of each user"""
+        for i, j in enumerate(self.input_files_to_run):
+            old_user_list = load_py_usecase(j=j)
+            output_path = os.path.join("ramp", "test")
+            os.system(
+                f"ramp_convert -i {self.py_fnames[i]} -o {output_path} --suffix {self.file_suffix}"
+            )
+            new_user_list = load_xlsx_usecase(fname=self.xlsx_fnames[i])
+            for old_user, new_user in zip(old_user_list, new_user_list):
+                if old_user != new_user:
+                    pytest.fail()
+
 
 def test_define_appliance_window_directly_equivalent_to_use_windows_method():
     user = User("test user", 1)
 
-    params = dict(number=1, power=200, num_windows=1, func_time=0)
+    params = dict(
+        number=1, power=200, num_windows=1, func_time=0, name="test_appliance"
+    )
     win_start = 390
     win_stop = 540
     appliance1 = user.add_appliance(**params)
@@ -95,6 +110,7 @@ def test_define_appliance_duty_cycle_directly_equivalent_to_use_specific_cycle_m
         func_time=0,
         window_1=[390, 540],
         fixed_cycle=1,
+        name="test_appliance",
     )
 
     appliance1 = user.add_appliance(**params)
@@ -136,7 +152,7 @@ def test_provide_no_appliance_window_when_declaring_one():
 def test_A():
     user = User("test user", 1)
 
-    old_params = dict(power=200, num_windows=1, func_time=0)
+    old_params = dict(power=200, num_windows=1, func_time=0, name="test_appliance")
     win_start = 390
     win_stop = 540
     appliance1 = user.Appliance(user, **old_params)
@@ -148,6 +164,7 @@ def test_A():
         num_windows=1,
         func_time=0,
         window_1=np.array([win_start, win_stop]),
+        name="test_appliance",
     )
     appliance2 = user.add_appliance(**params)
 
@@ -164,6 +181,7 @@ def test_B():
         func_time=0,
         window_1=[390, 540],
         fixed_cycle=1,
+        name="test_appliance",
     )
 
     appliance1 = user.add_appliance(**params)

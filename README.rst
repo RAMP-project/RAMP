@@ -11,6 +11,9 @@
     :target: https://rampdemand.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://coveralls.io/repos/github/RAMP-project/RAMP/badge.svg?branch=main
+   :target: https://coveralls.io/github/RAMP-project/RAMP?branch=main
+
 .. image:: https://github.com/RAMP-project/RAMP/blob/main/docs/source/_static/RAMP_logo_basic.png?raw=true
    :width: 300
 
@@ -44,7 +47,7 @@ Installing through pip
 
 .. code-block:: python
 
-   conda create -n ramp python=3.8
+   conda create -n ramp python=3.10
 
 
 2. If you create a new environment for RAMP, you'll need to activate it each time before using it, by writing
@@ -106,7 +109,7 @@ To have a look to the python files, you can download them using the `download_ex
 
    download_example("the specfic folder directory to save the files")
 
--  ``input_file_1.py``: represents the most basic electric appliances; it is 
+-  ``input_file_1.py``: represents the most basic electric appliances; it is
    an example of how to model lightbulbs, radios, TVs, fridges, and
    other electric appliances. This input file is based on the ones used
    for `the first RAMP publication <https://doi.org/10.1016/j.energy.2019.04.097>`__.
@@ -189,12 +192,15 @@ Other options are documented in the help of `ramp`, which you access with the ``
    ramp -h
 
 
-If you have existing python input files, you can convert them to
-spreadsheet. To do so, go to the ``\ramp`` folder and run
+If you have existing python input files from RAMP version prior to 0.5, you can convert them to
+spreadsheets input files. Simply run
 
 .. code-block:: bash
 
-   python ramp_convert_old_input_files.py -i <path to the input file you wish to convert>
+   ramp_convert -i <path to the .py input file you wish to convert>
+
+If you want to save a RAMP model you created with a .py file into a spreadsheet refer to
+this `example <https://rampdemand.readthedocs.io/en/latest/examples/using_excel/using_excel.html#exporting-the-database>`_
 
 For other examples of command lines options, such as setting date ranges, please visit `the dedicated section  <https://rampdemand.readthedocs.io/en/latest/examples/year_simulation/year_simulation.html#setting-date-range>`_ of the documentation.
 
@@ -260,7 +266,7 @@ we use a more compact formulation:
     random_var_w=0.35 # 35% randomness assigned to the size of the functioning windows
     )
 
-At this point, we can group our different users into a "use case" and run the simulation, 
+At this point, we can group our different users into a "use case" and run the simulation,
 for instance for a whole year.
 
 .. code-block:: python
@@ -269,26 +275,17 @@ for instance for a whole year.
    whole_year_profile = use_case.generate_daily_load_profiles()
 
 Here is your first load for a community including two types of housholds,
-for a total of 23 individual users. Of course, more variations and many more 
-features are possible! For instance, you can simulate loads even for 
-an individual appliance or user. In addition, you can use in-built plotting 
-functionalities to explore your results. Check out the documentation 
+for a total of 23 individual users. Of course, more variations and many more
+features are possible! For instance, you can simulate loads even for
+an individual appliance or user. In addition, you can use in-built plotting
+functionalities to explore your results. Check out the documentation
 for all the possibilities.
 
 Contributing
 ============
 This project is open-source. Interested users are therefore invited to test, comment or contribute to the tool. Submitting issues is the best way to get in touch with the development team, which will address your comment, question, or development request in the best possible way. We are also looking for contributors to the main code, willing to contribute to its capabilities, computational-efficiency, formulation, etc.
 
-To contribute changes:
-
-#. Fork the project on GitHub
-#. Create a feature branch (e.g. named "add-this-new-feature") to work on in your fork
-#. Add your name to the `AUTHORS <https://github.com/RAMP-project/RAMP/blob/development/AUTHORS>`_ file
-#. Commit your changes to the feature branch
-#. Push the branch to GitHub
-#. On GitHub, create a new pull request from the feature branch
-
-When committing new changes, please also take care of checking code stability by means of the `qualitative testing <https://github.com/RAMP-project/RAMP/blob/development/CONTRIBUTING.md>`_ functionality.
+To contribute changes please consult our `Contribution guidelines <https://github.com/RAMP-project/RAMP/blob/main/CONTRIBUTING.md>`_
 
 
 How to cite
@@ -312,5 +309,4 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 
 .. note::
-
-   This project is under active development!
+   This project is actively maintained and developed. This means that while we provide stable and reliable software releases, we keep developing new features and improvements for upcoming, upgraded versions    of the software.

@@ -138,6 +138,20 @@ def duty_cycle(var, t1, p1, t2, p2):
     )
 
 
+def range_within_window(range_low, range_high, window):
+    """Compare a range with a window to see if there is an overlap
+
+    The two cases where there is no overlap between two windows are when the
+    range boundaries are both lower than the lowest window value or both
+    higher than the highest window value
+
+    """
+    return not (
+        (range_low < window[0] and range_high < window[0])
+        or (range_low > window[1] and range_high > window[1])
+    )
+
+
 def random_choice(var, t1, p1, t2, p2):
     """Chooses one of two duty cycles randomly
 

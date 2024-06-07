@@ -1,5 +1,8 @@
 pytest
-scipy
+mock
+scipy==1.12.0
 nbconvert
 ipykernel
+coverage==7.4.4
+coveralls==4.0.0
 -e .

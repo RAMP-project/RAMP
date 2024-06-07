@@ -4,8 +4,45 @@ Release History
 0.5.2 (dev)
 -----------
 
+**|new|**       Addition of the 'coveralls' badge to the README
+
+**|new|**       Addition of a random-seed functionality to ensure reproducible results if needed
+
+**|new|**       If a `User` instance doesn't have any appliance, its `repr` method prints the user name, and number of users with a message to mention no appliances are assigned to the instance yet. Before it raised a `ValueError`.
+
+**|new|**       Documentation template was changed to sphinx wagtail theme to improve the navigation through the documentation sections
+
+**|new|**       Add issue templates for issue creation on github
+
+**|new|**       Automatic testing of the jupyter notebooks of the documentation, to make sure the examples are always running through
+
+**|new|**       Adding depreciation warning to back-compatibility `Appliance` method in `User` class to let users know they should use the `add_appliance` method instead.
+
+**|new|**       Introduction of an Appliance parameter to model productive use duty cycles: `continuous_use_duty_cycle`
+
+**|changed|**   Expanded and revised documentation, with a particular focus on more and clearer usage examples
+
+**|changed|**   Updated requirements for contributing, including pip dependencies specific to developers
+
+**|changed|**   Expanded test coverage
+
+**|changed|**   Updated .py example input files to match the latest formalism of the RAMP code
+
+**|changed|**   Python version was bumped from 3.8 to 3.10
+
+**|changed|**   Improved the way to run the quantitative tests and the instructions to do so
+
+**|fixed|**     Windows compatibility of path to convert .py to .xlsx
+
+**|fixed|**     `rand_peak_enlarge` is rounded to be at least 1 so that the `peak_time_range` is never empty
+
+**|fixed|**     Running .xlsx files form the command line
+
+**|fixed|**     Ignore profile of appliances if any of their functional time or randomly allocated time of use are 0
+
 0.5.1 (2024-02-08)
------------
+------------------
+
 **|fixed|**     Plotting a cloud of profiles from the command line is fixed
 
 0.5.0 (2023-12-06)
@@ -38,7 +75,7 @@ Release History
 0.4.1 (2023-10-XX)
 ------------------
 
-**|hotfix|**    added option `-o` to the terminal command line interface to enable the user to provide output path to save ramp results. This option is also accessible to python users using `ofname` argument of the `ramp/ramp_run.py::run_usecase` or the `ramp/post_process/post_process.py::export_series` functions. 
+**|hotfix|**    added option `-o` to the terminal command line interface to enable the user to provide output path to save ramp results. This option is also accessible to python users using `ofname` argument of the `ramp/ramp_run.py::run_usecase` or the `ramp/post_process/post_process.py::export_series` functions.
 
 0.4.0 (2023-02-17)
 ------------------
@@ -57,7 +94,7 @@ Release History
 
 **|fixed|**     the way in which the random switch-on time is computed in the `stochastic_process` has been changed so that it is sampled with uniform probability from a concatenated set of functioning windows, rather than for each window separately (which led to short windows having higher concentration of switch-on events and demand peaks)
 
-**|fixed|**     the default value for the `peak_enlarg` parameter has been changed from the mistyped value of 0 to the intended value of 0.15 
+**|fixed|**     the default value for the `peak_enlarg` parameter has been changed from the mistyped value of 0 to the intended value of 0.15
 
 **|new|**       added a paragraph describing the algorithm of RAMP
 
@@ -93,4 +130,3 @@ Release History
 **|changed|**   changed the way in which the probability of coincident switch-on of several identical appliances owned by a single user is computed. Now, it penalisse less the probability of maximum coincidence for off-peak events
 
 **|fixed|**     `s_peak` value is now set by default to 0.5, rather than 1. This fixes an unwanted behaviour in how the `random.gauss` function worked
-

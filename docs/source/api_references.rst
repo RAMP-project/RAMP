@@ -76,6 +76,7 @@ Utilities
 
     load_data
     download_example
+    ramp_py2xlsx
 
 
 *************
