@@ -30,6 +30,7 @@ HH_shower = HH.add_appliance(
     time_fraction_random_variability=0.1,
     func_cycle=3,
     thermal_p_var=0.2,
+    name="shower",
 )
 HH_shower.windows(window_1=[390, 540], window_2=[1080, 1200], random_var_w=0.2)
 

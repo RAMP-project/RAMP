@@ -28,6 +28,7 @@ from ramp.core.utils import (
     random_choice,
     read_input_file,
     within_peak_time_window,
+    range_within_window,
 )
 from ramp.post_process.post_process import Plot
 
@@ -699,6 +700,8 @@ appliances: no appliances assigned to the user.
                     f"You are trying to add an object of type {type(app)} as an appliance to the user {self.user_name}"
                 )
             if app not in self.App_list:
+                if app.name == "":
+                    app.name = f"appliance_{len(self.App_list) + 1}"
                 self.App_list.append(app)
 
     def add_appliance(self, *args, **kwargs):
@@ -1865,35 +1868,47 @@ class Appliance:
             if (
                 self.fixed_cycle > 0
             ):  # evaluates if the app has some duty cycles to be considered
-                evaluate = np.round(np.mean(indexes)) if indexes.size > 0 else 0
+                indexes_low = indexes[0]
+                indexes_high = indexes[-1]
                 # selects the proper duty cycle
-                if (
-                    self.cw11[0] <= evaluate < self.cw11[1]
-                    or self.cw12[0] <= evaluate < self.cw12[1]
-                ):
+                if range_within_window(
+                    indexes_low, indexes_high, self.cw11
+                ) or range_within_window(indexes_low, indexes_high, self.cw12):
                     self.current_duty_cycle_id = 1
                     duty_cycle_duration = len(self.random_cycle1)
-                elif (
-                    self.cw21[0] <= evaluate < self.cw21[1]
-                    or self.cw22[0] <= evaluate < self.cw22[1]
-                ):
+                elif range_within_window(
+                    indexes_low, indexes_high, self.cw21
+                ) or range_within_window(indexes_low, indexes_high, self.cw22):
                     self.current_duty_cycle_id = 2
                     duty_cycle_duration = len(self.random_cycle2)
-                elif (
-                    self.cw31[0] <= evaluate < self.cw31[1]
-                    or self.cw32[0] <= evaluate < self.cw32[1]
-                ):
+                elif range_within_window(
+                    indexes_low, indexes_high, self.cw31
+                ) or range_within_window(indexes_low, indexes_high, self.cw32):
                     self.current_duty_cycle_id = 3
                     duty_cycle_duration = len(self.random_cycle3)
                 else:
-                    print(
-                        f"The app {self.name} has duty cycle option on, however the switch on event fell outside the provided duty cycle windows"
+                    # previously duty_cycle3 was always considered as default if neither duty_cycle1 nor duty_cycle2
+                    # got selected. If the switch on window does not fall within any duty cycle we do not assign it
+                    # to duty_cycle3 by default, rather we pick another switch on event and we notify the user we
+                    # did so. That way, in case this warning is shown too often, it can indicate to the user there
+                    # is some peculiar behavior for this appliance
+                    warnings.warn(
+                        f"The app {self.name} has duty cycle option on (with {self.fixed_cycle} cycle(s)). However, the switch on window [{switch_on}, {switch_on + len(indexes)}] fell outside the provided duty cycle windows: "
+                        + "cw11 "
+                        + str(self.cw11)
+                        + ", cw12 "
+                        + str(self.cw12)
+                        + ", cw21 "
+                        + str(self.cw21)
+                        + ", cw22 "
+                        + str(self.cw22)
+                        + ", cw31 "
+                        + str(self.cw31)
+                        + ", cw32 "
+                        + str(self.cw32)
+                        + ". Picking another random switch on event. You probably see this warning because your window of use is the same as the duty cycle window and the random variability of the windows of use is greater than zero. If you see this warning only once, no need to worry, this is inherent to stochasticity."
                     )
-                    # TODO previously duty_cycle3 was always considered as default if the evaluate proxy did neither
-                    #  get selected by duty_cycle1 nor duty_cycle2, for default is kept but not silently anymore in
-                    #  order to see wheather this is an issue or not
-                    self.current_duty_cycle_id = 3
-                    duty_cycle_duration = len(self.random_cycle3)
+                    return self.rand_switch_on_window(rand_time)
 
                 if (
                     indexes.size > duty_cycle_duration

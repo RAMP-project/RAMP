@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Minimal qualitative test functionality. Compares outputs of the code to default outputs,
+Minimal qualitative test functionality. Compares the outputs of the code to default outputs,
 for the 3 reference input files. The judgement about whether the resulting changes are
-as expected or not is left to the developers
+as expected or not is left to the developer making the commit
 """
 
 # %% Import required modules
@@ -72,7 +72,6 @@ def test_output(results_folder, test_folder, num_input_files=3, num_days=30):
             axes[n].set_xmargin(0)
             axes[n].set_ymargin(0)
 
-    axes[n].get_shared_x_axes().join(axes[n], axes[n - 1], axes[n - 2])
     axes[n - 1].legend()
     axes[n - 1].set_xticklabels([])
     axes[n - 2].set_xticklabels([])
@@ -84,14 +83,14 @@ def test_output(results_folder, test_folder, num_input_files=3, num_days=30):
 Here the visual comparison between default and new/current results occurs.
 Besides the difference naturally occurring due to different realisations of stochastic
 parameters, the developers should check whether any other differences are brought by
-by the tested code changes. If any differences are there, the developers should 
+by the tested code changes. If any differences are there, the developers should
 evaluate whether these are as expected/designed or not
 """
 from ramp.example.input_file_1 import User_list as User_list1
 from ramp.example.input_file_2 import User_list as User_list2
 from ramp.example.input_file_3 import User_list as User_list3
 
-TEST_OUTPUT_PATH = os.path.join(pp.BASE_PATH, "test", "results")
+TEST_OUTPUT_PATH = os.path.join(".", "ramp/test", "results")
 
 remove_old_tests = False
 for file in os.listdir(TEST_OUTPUT_PATH):
@@ -108,12 +107,9 @@ for file in os.listdir(TEST_OUTPUT_PATH):
             os.remove(os.path.join(TEST_OUTPUT_PATH, file))
 
 for i, ul in enumerate([User_list1, User_list2, User_list3]):
-    of_path = os.path.join(pp.BASE_PATH, "test", "results", f"output_file_{i + 1}.csv")
+    of_path = os.path.join(".", "ramp/test", "results", f"output_file_{i + 1}.csv")
     if os.path.exists(of_path) is False:
-        uc = UseCase(
-            users=ul,
-            parallel_processing=False,
-        )
+        uc = UseCase(users=ul, parallel_processing=False, random_seed=True)
         uc.initialize(peak_enlarge=0.15, num_days=30)
 
         Profiles_list = uc.generate_daily_load_profiles(flat=True)
@@ -121,7 +117,7 @@ for i, ul in enumerate([User_list1, User_list2, User_list3]):
         pp.export_series(Profiles_list, ofname=of_path)
 
 test_output(
-    os.path.join(pp.BASE_PATH, "test", "results"),
-    os.path.join(pp.BASE_PATH, "test"),
+    os.path.join(".", "ramp/test", "results"),
+    os.path.join(".", "ramp/test"),
     num_input_files=3,
 )
