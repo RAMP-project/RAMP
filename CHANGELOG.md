@@ -1,8 +1,11 @@
 Release History
 ===============
 
-0.5.2 (dev)
+0.5.3 (dev)
 -----------
+
+0.5.2 (2024-06-07)
+------------------
 
 **|new|**       Addition of the 'coveralls' badge to the README
 
