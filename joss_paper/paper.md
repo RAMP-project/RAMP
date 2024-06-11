@@ -80,7 +80,7 @@ In fact, RAMP features several degrees of customisation, enabling modellers to s
 
 RAMP has already been used in many scientific publications, for instance, for the simulation of electricity [@dimovski_holistic:2023], heating [@stevanato_modeling:2020], cooking [@stevanato_long-term:2020] and electric mobility [@secchi_smart:2023] demand time series at scales ranging from districts [@pasqui_new:2023] or villages [@villarroel-schneider_open-source:2023] to continents [@pickering_diversity:2022]. It has dozens of users globally and has recently become a multi-institution software development effort, actively developed by TU Delft, VITO, Sympheny, the Reiner Lemoine Institut, the University of Liège and the Leibniz University Hannover. The joint development process has brought major improvements to the code structure, syntax and efficiency, more extensive documentation, and a web-based graphical user interface for users with no Python experience [@hart_gui:2023].
 
-RAMP is developed openly on GitHub [@ramp_github] and each new release is archived on Zenodo [@ramp_zenodo:2023].
+RAMP is developed openly on GitHub ([github.com/RAMP-project](https://github.com/RAMP-project)) and each new release is archived on Zenodo [@ramp_zenodo:2023].
 
 ![Example output (normalised by peak demand) for the simulation of the electricity load of three households in a small village over five days. The thick blue line represents the five-day average, while individual days are plotted in a lighter colour. \label{fig:example}](example_output.png)
 
