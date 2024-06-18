@@ -1,0 +1,4 @@
+There are two RAMP GUI. One is Stand-alone RAMP GUI. which do not depends on .ui file of Qt. However you can still modify it manually without Qt designer studio.
+Secondly it is also available with .ui file. This can help you if you wish to modify GUI using Qt designer studio.
+
+To make a RAMP.exe executable file you may use pyinstaller to bundle the package and use it as a stand-alone executable file without any needs to install Python. It can be helpful for a student or researcher who do not have knowledge of Python but wants to use this tool for their work.
