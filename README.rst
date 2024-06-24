@@ -17,6 +17,8 @@
 .. image:: https://github.com/RAMP-project/RAMP/blob/main/docs/source/_static/RAMP_logo_basic.png?raw=true
    :width: 300
 
+.. image:: https://joss.theoj.org/papers/10.21105/joss.06418/status.svg
+   :target: https://doi.org/10.21105/joss.06418
 
 *An open-source bottom-up stochastic model for generating multi-energy load profiles* (`RAMP Website <https://rampdemand.org>`_ , `RAMP Documentation <https://rampdemand.readthedocs.io/en/latest/?badge=latest>`_)
 
