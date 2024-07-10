@@ -4,6 +4,9 @@ Release History
 0.5.3 (dev)
 -----------
 
+**|fixed|**     Random seed behavior if both date_start and date_end are provided to UseCase instance (issue #156)
+
+
 0.5.2 (2024-06-07)
 ------------------
 
