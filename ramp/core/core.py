@@ -105,12 +105,13 @@ class UseCase:
         self.add_user(users)
 
         self.collect_appliances_from_users()
-        if self.date_start is not None and self.date_end is not None:
-            self.initialize()
 
         # Set global random seed if it is specified
         if self.random_seed:
             random.seed(self.random_seed)
+
+        if self.date_start is not None and self.date_end is not None:
+            self.initialize()
 
     @property
     def date_start(self):
