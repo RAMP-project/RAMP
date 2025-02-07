@@ -412,6 +412,10 @@ class UseCase:
             for case in cases:
                 profiles = self.generate_daily_load_profiles(days=days, flat=True)
                 results[f"case {case}"] = pd.Series(
+                            app_increase = int(np.heaviside(y,0)*round(random.uniform(0,3)))
+                            if app.number + app_increase > num_app_lim[app.name]:
+                                app_increase = num_app_lim[app.name] - app.number
+                            app.number = random.choice([app.number,app.number+app_increase])
                     index=self.datetimeindex, data=profiles
                 )
             answer = Plot(pd.concat(results, axis=1))
