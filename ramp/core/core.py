@@ -580,8 +580,24 @@ class UseCase:
 
             usecase.save("new_folder/ramp_database.xlsx")
         """
+        self.load_dataframe(usecase_df=read_input_file(filename=filename))
 
-        df = read_input_file(filename=filename)
+    def load_dataframe(self, usecase_df: pd.DataFrame) -> None:
+        """Open a dataframe and create instances of Users and Appliances
+
+        Parameters
+        ----------
+        usecase_df : pd.DataFrame
+            The Pandas DataFrame instance
+
+        Raises
+        ---------
+        ValueError
+            #. if the 'num_users' is not the same for a given user profile
+            #. if the 'user_preference' is not the same for a given user profile
+
+        """
+        df = usecase_df
         for user_name in df.user_name.unique():
             user_df = df.loc[df.user_name == user_name]
             num_users = user_df.num_users.unique()
