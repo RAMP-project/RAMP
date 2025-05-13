@@ -631,14 +631,14 @@ class UseCase:
                 # assign windows arguments
                 for k in WINDOWS_PARAMETERS:
                     if "window" in k:
-                        w_start = row.get(k + "_start", np.NaN)
-                        w_end = row.get(k + "_end", np.NaN)
+                        w_start = row.get(k + "_start", np.nan)
+                        w_end = row.get(k + "_end", np.nan)
                         if not np.isnan(w_start) and not np.isnan(w_end):
                             appliance_parameters[k] = np.array(
                                 [w_start, w_end], dtype=np.intc
                             )
                     else:
-                        val = row.get(k, np.NaN)
+                        val = row.get(k, np.nan)
                         if not np.isnan(val):
                             appliance_parameters[k] = val
 
@@ -646,14 +646,14 @@ class UseCase:
                 for duty_cycle_params in DUTY_CYCLE_PARAMETERS:
                     for k in duty_cycle_params:
                         if "cw" in k:
-                            cw_start = row.get(k + "_start", np.NaN)
-                            cw_end = row.get(k + "_end", np.NaN)
+                            cw_start = row.get(k + "_start", np.nan)
+                            cw_end = row.get(k + "_end", np.nan)
                             if not np.isnan(cw_start) and not np.isnan(cw_end):
                                 appliance_parameters[k] = np.array(
                                     [cw_start, cw_end], dtype=np.intc
                                 )
                         else:
-                            val = row.get(k, np.NaN)
+                            val = row.get(k, np.nan)
                             if not np.isnan(val):
                                 appliance_parameters[k] = val
 
