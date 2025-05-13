@@ -2007,6 +2007,8 @@ class Appliance:
             or self.wd_we_type not in [day_type, 2]
             # skip if the app has a func_time of 0
             or self.func_time == 0
+            # skip if the appliance number is 0
+            or self.number == 0
         ):
             return
 
