@@ -580,8 +580,24 @@ class UseCase:
 
             usecase.save("new_folder/ramp_database.xlsx")
         """
+        self.load_dataframe(usecase_df=read_input_file(filename=filename))
 
-        df = read_input_file(filename=filename)
+    def load_dataframe(self, usecase_df: pd.DataFrame) -> None:
+        """Open a dataframe and create instances of Users and Appliances
+
+        Parameters
+        ----------
+        usecase_df : pd.DataFrame
+            The Pandas DataFrame instance
+
+        Raises
+        ---------
+        ValueError
+            #. if the 'num_users' is not the same for a given user profile
+            #. if the 'user_preference' is not the same for a given user profile
+
+        """
+        df = usecase_df
         for user_name in df.user_name.unique():
             user_df = df.loc[df.user_name == user_name]
             num_users = user_df.num_users.unique()
@@ -615,14 +631,14 @@ class UseCase:
                 # assign windows arguments
                 for k in WINDOWS_PARAMETERS:
                     if "window" in k:
-                        w_start = row.get(k + "_start", np.NaN)
-                        w_end = row.get(k + "_end", np.NaN)
+                        w_start = row.get(k + "_start", np.nan)
+                        w_end = row.get(k + "_end", np.nan)
                         if not np.isnan(w_start) and not np.isnan(w_end):
                             appliance_parameters[k] = np.array(
                                 [w_start, w_end], dtype=np.intc
                             )
                     else:
-                        val = row.get(k, np.NaN)
+                        val = row.get(k, np.nan)
                         if not np.isnan(val):
                             appliance_parameters[k] = val
 
@@ -630,14 +646,14 @@ class UseCase:
                 for duty_cycle_params in DUTY_CYCLE_PARAMETERS:
                     for k in duty_cycle_params:
                         if "cw" in k:
-                            cw_start = row.get(k + "_start", np.NaN)
-                            cw_end = row.get(k + "_end", np.NaN)
+                            cw_start = row.get(k + "_start", np.nan)
+                            cw_end = row.get(k + "_end", np.nan)
                             if not np.isnan(cw_start) and not np.isnan(cw_end):
                                 appliance_parameters[k] = np.array(
                                     [cw_start, cw_end], dtype=np.intc
                                 )
                         else:
-                            val = row.get(k, np.NaN)
+                            val = row.get(k, np.nan)
                             if not np.isnan(val):
                                 appliance_parameters[k] = val
 
@@ -1991,6 +2007,8 @@ class Appliance:
             or self.wd_we_type not in [day_type, 2]
             # skip if the app has a func_time of 0
             or self.func_time == 0
+            # skip if the appliance number is 0
+            or self.number == 0
         ):
             return
 
