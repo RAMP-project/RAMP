@@ -4,6 +4,8 @@ Release History
 0.5.2 (dev)
 -----------
 
+**|new|**       Addition of .ods and .csv filetypes as inputs to CLI
+
 **|new|**       Addition of the 'coveralls' badge to the README
 
 **|new|**       Addition of a random-seed functionality to ensure reproducible results if needed
