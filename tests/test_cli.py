@@ -47,7 +47,45 @@ class TestProcessUserArguments:
             ]
         ),
     )
-    def test_multiple_year_is_possible(self, m_args, monkeypatch):
+    def test_multiple_year_is_possible_xlsx_file(self, m_args, monkeypatch):
+        monkeypatch.setattr(
+            plt, "show", lambda: None
+        )  # prevents the test to output figure
+        ramp_main()
+
+    @mock.patch(
+        "argparse.ArgumentParser.parse_args",
+        return_value=ramp_parser.parse_args(
+            [
+                "-i",
+                os.path.join(TEST_PATH, "test_inputs", "example_ods_usecase.ods"),
+                "-y",
+                "2022",
+                "-o",
+                os.path.join(TEST_OUTPUT_PATH, "example_ods.csv"),
+            ]
+        ),
+    )
+    def test_read_year_power_input_ods_file(self, m_args, monkeypatch):
+        monkeypatch.setattr(
+            plt, "show", lambda: None
+        )  # prevents the test to output figure
+        ramp_main()
+
+    @mock.patch(
+        "argparse.ArgumentParser.parse_args",
+        return_value=ramp_parser.parse_args(
+            [
+                "-i",
+                os.path.join(TEST_PATH, "test_inputs", "example_csv_usecase.csv"),
+                "-y",
+                "2022",
+                "-o",
+                os.path.join(TEST_OUTPUT_PATH, "example_csv.csv"),
+            ]
+        ),
+    )
+    def test_read_year_power_input_csv_file(self, m_args, monkeypatch):
         monkeypatch.setattr(
             plt, "show", lambda: None
         )  # prevents the test to output figure

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Apr 19 14:35:00 2019
-This is the code for the open-source stochastic model for the generation of 
+This is the code for the open-source stochastic model for the generation of
 multi-energy load profiles in off-grid areas, called RAMP, v0.3.0.
 
 @authors:
@@ -45,7 +45,7 @@ def run_usecase(
     plot=True,
     parallel=False,
 ):
-    if fname.endswith(".xlsx"):
+    if fname.endswith(".xlsx") or fname.endswith(".ods") or fname.endswith(".csv"):
         usecase = UseCase(
             date_start=date_start, date_end=date_end, parallel_processing=parallel
         )
@@ -66,5 +66,5 @@ def run_usecase(
             raise FileNotFoundError(f"{fname} is not an existing file")
     else:
         raise TypeError(
-            "Only the .py and .xlsx file format are supported for ramp command line"
+            "Only the .py | .xlsx | .ods | .csv file format are supported for ramp command line"
         )
