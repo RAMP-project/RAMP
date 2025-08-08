@@ -557,7 +557,7 @@ class UseCase:
         return self.save()
 
     def load(self, filename: str) -> None:
-        """Open an .xlsx file which was produced via the save method and create instances of Users and Appliances
+        """Open an (.xlsx | .ods | .csv) file which was produced via the save method and create instances of Users and Appliances
 
         Parameters
         ----------
