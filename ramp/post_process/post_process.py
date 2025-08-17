@@ -14,21 +14,39 @@ Just some additional code lines to calculate useful indicators and generate plot
 """
 
 
-def Profile_formatting(stoch_profiles):
-    Profile_avg = np.zeros(1440)
-    for pr in stoch_profiles:
-        Profile_avg = Profile_avg + pr
-    Profile_avg = Profile_avg / len(stoch_profiles)
+def Profile_formatting(stoch_profiles, return_kw_list=True):
+    """
+    Some post processing data manipulation.
 
-    Profile_kW = []
-    for kW in stoch_profiles:
-        Profile_kW.append(kW / 1000)
+    Parameters
+    -----------
+    stoch_profiles: numpy 2D array
+        An array of days with 1440 values for each day
+    return_kw_list: boolean, optional
+        if True return a list of np.arrays for Profile_kw else a 2d np.array
 
-    Profile_series = np.array([])
-    for iii in stoch_profiles:
-        Profile_series = np.append(Profile_series, iii)
+    Returns
+    -------
+    profile_avg: numpy array
+        The average of each minute (1440 values) between days
+    profile_kw: list if return_kw_list is True, else numpy array
+        The power expressed in Kilowatts.
+        Use of return_kw_list in True is DEPRECATED because is inefficient, kept for backward compatibility.
+    profile_series: numpy array
+        The flatten version of stoch_profiles
 
-    return (Profile_avg, Profile_kW, Profile_series)
+    """
+    profile_avg = np.mean(stoch_profiles, axis=0)
+
+    if return_kw_list:
+        profile_kw = [profile / 1000 for profile in stoch_profiles]
+    else:
+        # more efficient
+        profile_kw = stoch_profiles / 1000
+
+    profile_series = stoch_profiles.flatten()
+
+    return profile_avg, profile_kw, profile_series
 
 
 def Profile_cloud_plot(stoch_profiles, stoch_profiles_avg):
