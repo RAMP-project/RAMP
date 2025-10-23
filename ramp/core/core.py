@@ -1393,11 +1393,6 @@ class Appliance:
         answer = np.array([])
         for attribute in APPLIANCE_ATTRIBUTES:
             if hasattr(self, attribute) and hasattr(other_appliance, attribute):
-                #nice_attr = getattr(self, attribute)
-                #print(nice_attr)
-                #nice_other_attr = getattr(other_appliance, attribute)
-                #print(nice_other_attr)
-                #print("attribute is:", attribute)
                 answer = np.append(
                     answer,
                     [getattr(self, attribute) == getattr(other_appliance, attribute)],
