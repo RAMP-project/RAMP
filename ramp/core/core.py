@@ -363,9 +363,11 @@ class UseCase:
         for user in self.users:
             tot_max_profile = tot_max_profile + user.maximum_profile
         # Find the peak window within the theoretical max profile
-        peak_window = np.squeeze(
-            np.argwhere(tot_max_profile == np.amax(tot_max_profile))
-        )
+        peak_window = np.argwhere(tot_max_profile == np.amax(tot_max_profile)).flatten()
+        
+        # Guard against single-value array to avoid shape exception during gaussian sigma
+        if len(peak_window) == 1:
+            peak_window = np.array([max(0, peak_window[0]-1), min(1439, peak_window[0]+1)])
         # Within the peak_window, randomly calculate the peak_time using a gaussian distribution
         peak_time = round(
             random.normalvariate(
@@ -387,7 +389,7 @@ class UseCase:
         return np.arange(peak_time - rand_peak_enlarge, peak_time + rand_peak_enlarge)
 
     def generate_daily_load_profiles(
-        self, days=None, flat=True, cases=None, verbose=False
+        self, days=None, flat=True, cases=None, verbose=False, continuous=False
     ):
         """
         Iterate over the days and generate a daily profile for each of the days
@@ -402,6 +404,9 @@ class UseCase:
             a list of label of the different cases. This is used if one would like to compare several independent runs
             of a ramp UseCase instance, in that case the method returns a ramp.Plot object
         verbose: boolean, optional
+        continuous: boolean, optional
+            if True, generates profiles on a single continuous timeline allowing
+            switch-on events to cross midnight boundaries. Default is False.
 
         Returns
         -------
@@ -410,7 +415,9 @@ class UseCase:
         if cases is not None:
             results = {}
             for case in cases:
-                profiles = self.generate_daily_load_profiles(days=days, flat=True)
+                profiles = self.generate_daily_load_profiles(
+                    days=days, flat=True, continuous=continuous
+                )
                 results[f"case {case}"] = pd.Series(
                     index=self.datetimeindex, data=profiles
                 )
@@ -423,7 +430,10 @@ class UseCase:
                     raise ValueError(
                         "You must provide days either with start and end date and run initialize() method of UseCase instance or as an argument of 'generate_daily_load_profiles'"
                     )
-            if self.parallel_processing is True:
+
+            if continuous:
+                daily_profiles = self._generate_continuous_profiles(verbose=verbose)
+            elif self.parallel_processing is True:
                 daily_profiles = self.generate_daily_load_profiles_parallel(flat=False)
             else:
                 daily_profiles = np.zeros((self.num_days, 1440))
@@ -450,6 +460,81 @@ class UseCase:
             else:
                 answer = daily_profiles
         return answer
+
+    def _generate_continuous_profiles(self, verbose=False):
+        """Generate load profiles on a single continuous timeline.
+
+        Creates a global array with 1-day padding on each side to eliminate edge
+        effects. Each appliance processes days independently but writes into a
+        shared continuous array, with spillover allowing events to naturally cross
+        midnight boundaries. The padding ensures the first and last real days
+        receive spillover from both directions.
+
+        Parameters
+        ----------
+        verbose : bool, optional
+            Print progress updates, by default False.
+
+        Returns
+        -------
+        daily_profiles : np.array
+            Shape (num_days, 1440), the continuous profile reshaped into daily blocks.
+        """
+        # Pad with 1 extra day at start and end to avoid edge effects.
+        # The padding days replicate the first/last real days so that
+        # appliances with midnight-crossing windows get proper spillover.
+        pad_days = pd.DatetimeIndex(
+            [self.days[0] - pd.Timedelta(days=1)]
+        ).append(self.days).append(
+            pd.DatetimeIndex([self.days[-1] + pd.Timedelta(days=1)])
+        )
+        num_padded_days = len(pad_days)
+        total_minutes = num_padded_days * 1440
+        global_array = np.zeros(total_minutes)
+
+        for user in self.users:
+            for _ in range(user.num_users):
+                # pre-compute daily preferences for this user instance
+                daily_prefs = [
+                    0
+                    if user.user_preference == 0
+                    else random.randint(1, user.user_preference)
+                    for _ in range(num_padded_days)
+                ]
+
+                for app in user.App_list:
+                    # extend power array for padding days if needed
+                    orig_power = app.power
+                    if len(orig_power) < num_padded_days:
+                        padded_power = np.concatenate([
+                            [orig_power[0]],   # pad day before
+                            orig_power,
+                            [orig_power[-1]],  # pad day after
+                        ])
+                        app.power = padded_power
+
+                    app.generate_continuous_load_profile(
+                        days=pad_days,
+                        daily_prefs=daily_prefs,
+                        peak_time_range=self.peak_time_range,
+                        total_minutes=total_minutes,
+                        global_array=global_array,
+                    )
+
+                    # restore original power array
+                    app.power = orig_power
+
+        if verbose:
+            print("Continuous profile generation completed")
+
+        # trim the 1-day padding from each side
+        real_start = 1440       # skip first padding day
+        real_end = real_start + self.num_days * 1440
+        real_array = global_array[real_start:real_end]
+
+        # reshape into (num_days, 1440) to match the expected output format
+        daily_profiles = real_array.reshape(self.num_days, 1440)
+        return daily_profiles
 
     def generate_daily_load_profiles_parallel(self, days=None, flat=True):
         """
@@ -1583,6 +1668,13 @@ class Appliance:
         if rand_window[1] > window_range_limits[1]:
             rand_window[1] = window_range_limits[1]
 
+        # Don't shift boundary-touching endpoints: 0 and 1440 are day
+        # boundaries, not real appliance start/stop times
+        if _window[0] == window_range_limits[0]:
+            rand_window[0] = window_range_limits[0]
+        if _window[1] == window_range_limits[1]:
+            rand_window[1] = window_range_limits[1]
+
         return rand_window
 
     @property
@@ -1812,9 +1904,8 @@ class Appliance:
             rand_time = int(0.99 * total_time)
 
         if rand_time < self.func_cycle:
-            raise ValueError(
-                f"The func_cycle you choose for appliance {self.name} might be too large to fit in the available time for appliance usage, please either reduce func_cycle or increase the windows of use of the appliance"
-            )
+            # print(f"WARNING: {self.name} func_cycle {self.func_cycle} > rand_time {rand_time} (total_time {total_time})")
+            rand_time = self.func_cycle
         return rand_time
 
     def rand_switch_on_window(self, rand_time: int):
@@ -1870,20 +1961,24 @@ class Appliance:
             ):  # evaluates if the app has some duty cycles to be considered
                 indexes_low = indexes[0]
                 indexes_high = indexes[-1]
+                # convert to daily-local minutes for duty cycle matching
+                # (duty cycle windows are defined in daily-relative minutes [0, 1440])
+                indexes_low_local = indexes_low % 1440
+                indexes_high_local = indexes_high % 1440
                 # selects the proper duty cycle
                 if range_within_window(
-                    indexes_low, indexes_high, self.cw11
-                ) or range_within_window(indexes_low, indexes_high, self.cw12):
+                    indexes_low_local, indexes_high_local, self.cw11
+                ) or range_within_window(indexes_low_local, indexes_high_local, self.cw12):
                     self.current_duty_cycle_id = 1
                     duty_cycle_duration = len(self.random_cycle1)
                 elif range_within_window(
-                    indexes_low, indexes_high, self.cw21
-                ) or range_within_window(indexes_low, indexes_high, self.cw22):
+                    indexes_low_local, indexes_high_local, self.cw21
+                ) or range_within_window(indexes_low_local, indexes_high_local, self.cw22):
                     self.current_duty_cycle_id = 2
                     duty_cycle_duration = len(self.random_cycle2)
                 elif range_within_window(
-                    indexes_low, indexes_high, self.cw31
-                ) or range_within_window(indexes_low, indexes_high, self.cw32):
+                    indexes_low_local, indexes_high_local, self.cw31
+                ) or range_within_window(indexes_low_local, indexes_high_local, self.cw32):
                     self.current_duty_cycle_id = 3
                     duty_cycle_duration = len(self.random_cycle3)
                 else:
@@ -2072,3 +2167,207 @@ class Appliance:
                 coincidence = self.calc_coincident_switch_on(inside_peak_window)
                 # Update the daily use depending on existence of duty cycles of the Appliance instance
                 self.update_daily_use(coincidence, power=power, indexes=indexes)
+
+    def _merge_midnight_crossing_windows(self, rand_windows):
+        """Auto-merge windows that cross midnight in split form.
+
+        Detects the legacy pattern where a midnight-crossing window is split into
+        two windows: one ending at 1440 and another starting at 0, and merges them
+        into a single continuous window.
+
+        For example: [1080, 1440] + [0, 360] -> [1080, 1800]
+
+        Parameters
+        ----------
+        rand_windows : list of [int, int]
+            The randomised windows (already in day-relative minutes)
+
+        Returns
+        -------
+        list of [int, int]
+            Windows with midnight-crossing splits merged
+        """
+        # find a window ending at (or very near) 1440 and one starting at (or very near) 0
+        end_at_midnight_idx = None
+        start_at_midnight_idx = None
+
+        for i, w in enumerate(rand_windows):
+            if w[0] == w[1]:
+                continue  # skip empty windows
+            if w[1] >= 1438:  # ends at or very near midnight (allow small random_var)
+                end_at_midnight_idx = i
+            if w[0] <= 2:  # starts at or very near midnight
+                start_at_midnight_idx = i
+
+        if (
+            end_at_midnight_idx is not None
+            and start_at_midnight_idx is not None
+            and end_at_midnight_idx != start_at_midnight_idx
+        ):
+            # merge: the combined window starts at the evening window start
+            # and extends past 1440 by the morning window's duration
+            merged_start = rand_windows[end_at_midnight_idx][0]
+            merged_end = 1440 + rand_windows[start_at_midnight_idx][1]
+            merged_windows = list(rand_windows)
+            merged_windows[end_at_midnight_idx] = [merged_start, merged_end]
+            merged_windows[start_at_midnight_idx] = [0, 0]  # nullify the morning part
+            return merged_windows
+
+        return rand_windows
+
+    def generate_continuous_load_profile(
+        self, days, daily_prefs, peak_time_range, total_minutes, global_array
+    ):
+        """Generate load profile into a global continuous array across ALL days.
+
+        Processes each day independently but writes into a shared global array.
+        Each day's projected windows are extended by func_cycle into the next day,
+        allowing switch-on events to naturally cross midnight boundaries. This
+        eliminates day-boundary bias while keeping per-day logic (duty cycles,
+        daily power, occasional_use) intact.
+
+        Parameters
+        ----------
+        days : pd.DatetimeIndex
+            All simulation days.
+        daily_prefs : list of int
+            Pre-computed daily preference values for this user instance.
+        peak_time_range : np.array
+            Peak time range for coincident switch-on calculation.
+        total_minutes : int
+            Total length of the global array (num_days * 1440).
+        global_array : np.array
+            The shared continuous array to write into.
+        """
+        if self.func_time == 0:
+            return
+
+        # spillover buffer: allow events to extend past midnight by one func_cycle
+        spillover = self.func_cycle
+
+        for day_idx, day in enumerate(days):
+            day_type = get_day_type(day)
+            day_offset = day_idx * 1440
+
+            # per-day skip checks
+            if (
+                random.uniform(0, 1) > self.occasional_use
+                or (self.pref_index != 0 and daily_prefs[day_idx] != self.pref_index)
+                or self.wd_we_type not in [day_type, 2]
+            ):
+                continue
+
+            power = self.power[day_idx]
+
+            # randomize windows for this day (day-relative)
+            rw1 = self.calc_rand_window(window_idx=1)
+            rw2 = self.calc_rand_window(window_idx=2)
+            rw3 = self.calc_rand_window(window_idx=3)
+
+            # ── Handle flat appliances ──
+            # Flat appliances fill constant power in each window independently.
+            # Do NOT merge midnight-crossing windows: keep [0, 360] and [1110, 1440]
+            # as separate fills so each day self-contains its own morning/evening.
+            if self.flat == "yes":
+                total_power_value = power * self.number
+                for rw in [rw1, rw2, rw3]:
+                    if rw[0] != rw[1]:
+                        # clamp to [0, 1440] to stay within the day
+                        w_start = max(0, rw[0])
+                        w_end = min(rw[1], 1440)
+                        ps = w_start + day_offset
+                        pe = min(w_end + day_offset, total_minutes)
+                        if ps < pe:
+                            global_array[ps:pe] += total_power_value
+                continue
+
+            # For non-flat appliances, merge midnight-crossing windows so events
+            # can span across midnight via spillover
+            rand_windows = self._merge_midnight_crossing_windows([rw1, rw2, rw3])
+
+            # compute this day's rand_time
+            rand_time = self.rand_total_time_of_use(
+                rand_windows[0], rand_windows[1], rand_windows[2]
+            )
+
+            # ── Project windows onto global timeline with spillover ──
+            projected_windows = []
+            for rw in rand_windows:
+                if rw[0] != rw[1]:
+                    ps = max(0, rw[0] + day_offset)
+                    # extend window end by spillover to allow events to cross midnight
+                    pe = min(rw[1] + day_offset + spillover, total_minutes)
+                    if ps < pe:
+                        projected_windows.append([ps, pe])
+
+            if not projected_windows:
+                continue
+
+            # build free_spots from projected windows
+            self.free_spots = [slice(pw[0], pw[1]) for pw in projected_windows]
+
+            # randomise duty cycles
+            self.assign_random_cycles()
+
+            # ── Switch-on loop for this day ──
+            tot_time = 0
+            while tot_time <= rand_time and rand_time != 0:
+                indexes = self.rand_switch_on_window(rand_time=rand_time)
+                if indexes is None:
+                    break
+
+                tot_time = tot_time + indexes.size
+
+                if tot_time > rand_time:
+                    indexes = indexes[:-(tot_time - rand_time)]
+                    if len(indexes) == 0:
+                        break
+
+                # peak window check using daily-local minutes
+                local_start = indexes[0] % 1440
+                local_end = indexes[-1] % 1440
+                inside_peak_window = within_peak_time_window(
+                    local_start, local_end, peak_time_range[0], peak_time_range[-1]
+                )
+
+                coincidence = self.calc_coincident_switch_on(inside_peak_window)
+                self._update_continuous_use(coincidence, power, indexes, global_array)
+
+    def _update_continuous_use(self, coincidence, power, indexes, global_array):
+        """Write switch-on event values into the global continuous array.
+
+        Mirrors update_daily_use but writes to global_array instead of self.daily_use.
+
+        Parameters
+        ----------
+        coincidence : int
+            Number of appliances switched on simultaneously.
+        power : float
+            Power rating for this day.
+        indexes : np.array
+            Minute indexes on the global timeline.
+        global_array : np.array
+            The shared continuous array to write into.
+        """
+        if self.fixed_cycle > 0:
+            if self.current_duty_cycle_id == 1:
+                cycle_values = self.random_cycle1 * coincidence
+            elif self.current_duty_cycle_id == 2:
+                cycle_values = self.random_cycle2 * coincidence
+            elif self.current_duty_cycle_id == 3:
+                cycle_values = self.random_cycle3 * coincidence
+            else:
+                print(
+                    f"The app {self.name} has duty cycle option on, however the switch on event fell outside the provided duty cycle windows"
+                )
+                self.update_available_time_for_switch_on_events(indexes)
+                return
+
+            # duty cycle values may be shorter or longer than indexes
+            n = min(len(indexes), len(cycle_values))
+            np.add.at(global_array, indexes[:n], cycle_values[:n])
+        else:
+            power_value = random_variation(var=self.thermal_p_var, norm=coincidence * power)
+            np.add.at(global_array, indexes, power_value)
+
+        self.update_available_time_for_switch_on_events(indexes)
